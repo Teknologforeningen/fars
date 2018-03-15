@@ -12,27 +12,22 @@ $(document).ready(function() {
           titleFormat: 'MMMM YYYY'
         }
       },
+      firstDay: 1,
       locale: 'fi',
-
-      events: [
-        // all day event
-        {
-          title  : 'Meeting',
-          start  : '2018-03-12'
-        },
-        // long-term event
-        {
-          title  : 'Conference',
-          start  : '2018-03-13',
-          end    : '2018-03-15'
-        },
-        // short term event
-        {
-          title  : 'Dentist',
-          start  : '2018-03-09T11:30:00',
-          end  : '2018-03-09T012:30:00',
-          allDay : false // will make the time show
-        }
-      ]
+      timeFormat: 'H:mm',
+      displayEventEnd: true,
+      // If a day is clicked it opens the day-view at that date
+      dayClick: function(date, jsEvent, view) {
+        $('#calendar').fullCalendar('changeView', 'agendaDay');
+        $('#calendar').fullCalendar('gotoDate', date);
+      },
+  });
+  $.ajax({
+    url: "/bookings/2018/03",
+    success: function(data) {
+      for(i=0;i<data.length;i++) {
+        $('#calendar').fullCalendar('renderEvent', data[i], true);
+      }
+    }
   });
 });
