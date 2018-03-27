@@ -22,5 +22,4 @@ $(document).ready(function() {
       // dayClick: function(date, jsEvent, view) {
       // },
   });
-  console.log($('#calendar').data('date'));
 });
