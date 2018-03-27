@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block javascript %}
+  <script src="{% static 'js/day.js' %}"></script>
+{% endblock %}
+
+{% block calendar %}
+  <div id="calendar"></div>
+{% endblock %}

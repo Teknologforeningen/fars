@@ -18,16 +18,7 @@ $(document).ready(function() {
       displayEventEnd: true,
       // If a day is clicked it opens the day-view at that date
       dayClick: function(date, jsEvent, view) {
-        $('#calendar').fullCalendar('changeView', 'agendaDay');
-        $('#calendar').fullCalendar('gotoDate', date);
+        window.location.href = '/' + date.toISOString();
       },
-  });
-  $.ajax({
-    url: "/bookings/2018/03",
-    success: function(data) {
-      for(i=0;i<data.length;i++) {
-        $('#calendar').fullCalendar('renderEvent', data[i], true);
-      }
-    }
   });
 });

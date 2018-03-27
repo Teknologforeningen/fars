@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block javascript %}
+  <script src="{% static 'js/month.js' %}"></script>
+{% endblock %}
+
+{% block calendar %}
+  <button type="button" id="addbookable">Add Bookable</button>
+  <div id="calendar" style="max-width: 80vw;padding-left: 10vw;padding-top:50px;"></div>
+{% endblock %}

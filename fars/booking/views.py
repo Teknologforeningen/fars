@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from booking.models import Booking
 
 def home(request):
-   return render(request, 'home.html')
+   return render(request, 'month.html')
 
 
 def bookings_month(request, year, month):
@@ -23,4 +23,4 @@ def bookings_day(request, year, month, day):
         start = "{}T{}".format(b.date, b.timeslot.start)
         end = "{}T{}".format(b.date, b.timeslot.end)
         events.append({'title': b.name, 'start': start, 'end': end})
-    return JsonResponse(events, safe=False)
+    return render(request, 'day.html')
