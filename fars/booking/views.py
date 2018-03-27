@@ -23,4 +23,7 @@ def bookings_day(request, year, month, day):
         start = "{}T{}".format(b.date, b.timeslot.start)
         end = "{}T{}".format(b.date, b.timeslot.end)
         events.append({'title': b.name, 'start': start, 'end': end})
-    return render(request, 'day.html')
+    context = {
+        'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day)
+    }
+    return render(request, 'day.html', context)

@@ -1,5 +1,7 @@
 $(document).ready(function() {
-  $('#calendar').fullCalendar({
+  var calendar = $('#calendar'),
+      date = calendar.data('date');
+  calendar.fullCalendar({
       aspectRatio: 2,
       // header
       header: {
@@ -15,8 +17,10 @@ $(document).ready(function() {
       timeFormat: 'H:mm',
       displayEventEnd: true,
       defaultView: 'agendaDay',
+      defaultDate: date,
       // If a day is clicked it opens the day-view at that date
       // dayClick: function(date, jsEvent, view) {
       // },
   });
+  console.log($('#calendar').data('date'));
 });
