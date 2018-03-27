@@ -3,9 +3,9 @@ $(document).ready(function() {
       aspectRatio: 2,
       // header
       header: {
-        left: 'prev,next today',
+        left: '',
         center: 'title',
-        right: 'month,agendaWeek,agendaDay'
+        right: ''
       },
       views: {
         month: {
