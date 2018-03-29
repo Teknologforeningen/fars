@@ -27,3 +27,8 @@ def bookings_day(request, year, month, day):
         'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day)
     }
     return render(request, 'day.html', context)
+
+
+def book(request):
+    context = {'time': request.GET['t']}
+    return render(request, 'book.html', context)
