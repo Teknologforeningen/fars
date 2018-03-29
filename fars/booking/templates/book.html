@@ -6,7 +6,10 @@
   <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 </head>
 <body>
-  <h1>Booking</h1>
+  <h1>Booking {{bookable.name}}</h1>
   <p>Booking for: {{time}}</p>
+  <table>
+    {{form.as_table}}
+  </table>
 </body>
 </html>

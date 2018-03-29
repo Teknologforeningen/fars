@@ -15,6 +15,14 @@
 </head>
 <body>
   {% block calendar %}
+    <h1>Bookables</h1>
+    <ul>
+    {% for bookable in bookables %}
+      <li>
+        <a href="/booking/{{bookable.id_str}}">{{bookable.name}}</a>
+      </li>
+    {% endfor %}
+    </ul>
   {% endblock %}
 </body>
 </html>

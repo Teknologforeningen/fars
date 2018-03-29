@@ -1,6 +1,7 @@
 $(document).ready(function() {
   var calendar = $('#calendar'),
-      date = calendar.data('date');
+      date = calendar.data('date'),
+      bookable = calendar.data('bookable');
   calendar.fullCalendar({
       aspectRatio: 2,
       // header
@@ -21,7 +22,7 @@ $(document).ready(function() {
       allDaySlot: false,
       // If a day is clicked it opens the day-view at that date
       dayClick: function(date, jsEvent, view) {
-        window.location.href = '/book?t=' + date.toISOString();
+        window.location.href = '/booking/book/' + bookable + '?t=' + date.toISOString();
       },
   });
 });
