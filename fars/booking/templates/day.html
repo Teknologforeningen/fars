@@ -6,5 +6,6 @@
 {% endblock %}
 
 {% block calendar %}
-  <div id="calendar" data-date="{{ date }}"></div>
+  <h2>{{bookable.name}}</h2>
+  <div id="calendar" data-date="{{date}}" data-bookable="{{bookable.id_str}}"></div>
 {% endblock %}

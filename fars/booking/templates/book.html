@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FARS</title>
+  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+  <h1>Booking {{bookable.name}}</h1>
+  <p>Booking for: {{time}}</p>
+  <form method="post">
+    {% csrf_token %}
+    <table>
+      {{form.as_table}}
+    </table>
+    <input type="submit" value="Submit">
+  </form>
+</body>
+</html>

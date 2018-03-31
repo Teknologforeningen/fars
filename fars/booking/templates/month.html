@@ -6,6 +6,6 @@
 {% endblock %}
 
 {% block calendar %}
-  <button type="button" id="addbookable">Add Bookable</button>
-  <div id="calendar" style="max-width: 80vw;padding-left: 10vw;padding-top:50px;"></div>
+<h1>{{bookable.name}}</h1>
+  <div id="calendar" data-bookable="{{bookable.id_str}}"></div>
 {% endblock %}
