@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm
+from datetime import datetime
 
 
 def home(request):
@@ -26,10 +27,22 @@ def bookings_day(request, bookable, year, month, day):
 
 
 def book(request, bookable):
+    booking = Booking()
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-    form = BookingForm()
+    start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S')
+    if request.method == 'GET':
+        booking.bookable = bookable_obj
+        booking.start = start
+        form = BookingForm(instance=booking)
+    elif request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            return render(request, 'booked.html')
+    else:
+        raise Http404
     context = {
-        'time': request.GET['t'],
+        'time': start,
         'bookable': bookable_obj,
         'form': form,
     }

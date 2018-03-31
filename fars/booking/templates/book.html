@@ -8,8 +8,12 @@
 <body>
   <h1>Booking {{bookable.name}}</h1>
   <p>Booking for: {{time}}</p>
-  <table>
-    {{form.as_table}}
-  </table>
+  <form method="post">
+    {% csrf_token %}
+    <table>
+      {{form.as_table}}
+    </table>
+    <input type="submit" value="Submit">
+  </form>
 </body>
 </html>
