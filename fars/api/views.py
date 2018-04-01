@@ -9,4 +9,4 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     serializer_class = BookingSerializer
     filter_backends = (DjangoFilterBackend,)
     # These filter fields allow us to filter by bookable and a date range
-    filter_fields = ('bookable__id_str')
+    filter_fields = ('bookable__id_str', )
