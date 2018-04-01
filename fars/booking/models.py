@@ -23,6 +23,6 @@ class Bookable(models.Model):
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     # user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start = models.DateField()
-    end = models.DateField()
+    start = models.DateTimeField()
+    end = models.DateTimeField()
     comment = models.CharField(max_length=128)
