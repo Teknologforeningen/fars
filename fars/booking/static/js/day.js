@@ -28,9 +28,9 @@ $(document).ready(function() {
         $.ajax({
           url: '/api/bookings',
           data: {
-            start: start.toISOString(),
-            end: end.toISOString(),
             bookable: bookable,
+            after: start.toISOString(),
+            before: end.toISOString(),
           },
           success: function(data) {
             var events = [];
