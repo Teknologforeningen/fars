@@ -22,5 +22,26 @@ $(document).ready(function() {
       dayClick: function(date, jsEvent, view) {
         window.location.href = '/booking/' + bookable + '/' + date.toISOString();
       },
+      events: function(start, end, timezone, callback) {
+          $.ajax({
+            url: '/api/bookings',
+            data: {
+              start: start.toISOString(),
+              end: end.toISOString(),
+              bookable: bookable,
+            },
+            success: function(data) {
+              var events = [];
+              $(data).each(function() {
+                events.push({
+                  title: $(this).attr('comment'),
+                  start: $(this).attr('start'),
+                  end: $(this).attr('end'),
+                });
+              });
+              callback(events);
+            }
+          });
+        }
   });
 });
