@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse, Http404
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def home(request):
@@ -37,6 +37,7 @@ def book(request, bookable):
     if request.method == 'GET':
         booking.bookable = bookable_obj
         booking.start = start
+        booking.end = start + timedelta(hours=1)
         form = BookingForm(instance=booking)
     elif request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
