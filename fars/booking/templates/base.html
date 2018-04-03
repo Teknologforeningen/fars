@@ -21,6 +21,8 @@
       <li>
         <a href="/booking/{{bookable.id_str}}">{{bookable.name}}</a>
       </li>
+    {% empty %}
+      There are no bookables, add some through the admin interface.
     {% endfor %}
     </ul>
   {% endblock %}
