@@ -30,6 +30,10 @@ def book(request, bookable):
     booking = Booking()
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S')
+    context = {
+        'time': start,
+        'bookable': bookable_obj,
+    }
     if request.method == 'GET':
         booking.bookable = bookable_obj
         booking.start = start
@@ -38,12 +42,8 @@ def book(request, bookable):
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
-            return render(request, 'booked.html')
+            return render(request, 'booked.html', context)
     else:
         raise Http404
-    context = {
-        'time': start,
-        'bookable': bookable_obj,
-        'form': form,
-    }
+    context['form'] = form
     return render(request, 'book.html', context)
