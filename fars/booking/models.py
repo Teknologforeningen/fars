@@ -26,3 +26,6 @@ class Booking(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
     comment = models.CharField(max_length=128)
+
+    def __str__(self):
+        return "{}, {} -> {}".format(self.comment, self.start, self.end)

@@ -9,3 +9,18 @@ class BookingForm(forms.ModelForm):
         widgets = {
             'bookable': forms.HiddenInput()
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        bookable = cleaned_data.get("bookable")
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("end")
+
+        if bookable and start and end:
+            overlapping = Booking.objects.filter(
+                bookable=bookable, start__lt=end, end__gt=start)
+            if overlapping:
+                warning = "Error: Requested booking is overlapping with following bookings: "
+                for booking in overlapping:
+                    warning = warning + str(booking)
+                raise forms.ValidationError(warning)
