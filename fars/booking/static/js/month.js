@@ -7,7 +7,7 @@ $(document).ready(function() {
       header: {
         left: '',
         center: 'title',
-        right: ''
+        right: 'today prev,next'
       },
       views: {
         month: {
