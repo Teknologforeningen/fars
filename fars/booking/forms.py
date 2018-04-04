@@ -7,7 +7,11 @@ class BookingForm(forms.ModelForm):
         model = Booking
         fields = '__all__'
         widgets = {
-            'bookable': forms.HiddenInput()
+            'bookable': forms.HiddenInput(),
+            'start': forms.SplitDateTimeWidget(
+                date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
+            'end': forms.SplitDateTimeWidget(
+                date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
         }
 
     def clean(self):
