@@ -46,6 +46,11 @@ class BookingForm(forms.ModelForm):
         end = cleaned_data.get("end")
 
         if bookable and start and end:
+            # Check that end is not earlier than start
+            if end <= start:
+                raise forms.ValidationError("Booking cannot end before it begins")
+
+            # Check that booking does not overlap with previous bookings
             overlapping = Booking.objects.filter(
                 bookable=bookable, start__lt=end, end__gt=start)
             if overlapping:

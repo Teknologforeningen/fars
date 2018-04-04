@@ -29,12 +29,9 @@ def bookings_day(request, bookable, year, month, day):
 def book(request, bookable):
     booking = Booking()
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-    start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S')
-    context = {
-        'time': start,
-        'bookable': bookable_obj,
-    }
+    context = {'url': request.path}
     if request.method == 'GET':
+        start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S')
         booking.bookable = bookable_obj
         booking.start = start
         booking.end = start + timedelta(hours=1)
@@ -43,7 +40,12 @@ def book(request, bookable):
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
-            return render(request, 'booked.html', context)
+            bookedtext = "Booked {} from {} to {}".format(
+                form.cleaned_data['bookable'],
+                form.cleaned_data['start'],
+                form.cleaned_data['end'],
+            )
+            return HttpResponse(bookedtext)
     else:
         raise Http404
     context['form'] = form

@@ -1,19 +1,18 @@
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <title>FARS</title>
-  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-</head>
-<body>
-  <h1>Booking {{bookable.name}}</h1>
-  <form method="post">
-    {% csrf_token %}
-    <table>
-      {{form.as_table}}
-    </table>
-    <input type="submit" value="Submit">
-  </form>
-  <a href="/booking/{{bookable.id_str}}">Tillbaka till kalendern</a>
-</body>
-</html>
+<form id="bookform">
+  {% csrf_token %}
+  <table>
+    {{form.as_table}}
+  </table>
+  <input type="submit" value="Submit">
+</form>
+<script type="text/javascript">
+  $('#bookform').submit(function(event) {
+    $.post("{{url}}", $(this).serialize())
+      .done(function(data) {
+        $('#modalBox').find('.modal-body').html(data);
+        $('#calendar').fullCalendar('refetchEvents');
+      });
+    event.preventDefault();
+  });
+</script>
