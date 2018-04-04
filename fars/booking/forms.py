@@ -1,18 +1,43 @@
 from django import forms
 from booking.models import Booking
+from datetime import datetime
+
+
+class DateTimeWidget(forms.widgets.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = [forms.TextInput(attrs={'type': 'date'}),
+                   forms.TextInput(attrs={'type': 'time'})]
+        super(DateTimeWidget, self).__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            return [value.date(), value.time()]
+        else:
+            return ['', '']
+
+
+class DateTimeField(forms.fields.MultiValueField):
+    widget = DateTimeWidget
+
+    def __init__(self, *args, **kwargs):
+        list_fields = [forms.fields.DateField(),
+                       forms.fields.TimeField()]
+        super(DateTimeField, self).__init__(list_fields, *args, **kwargs)
+
+    def compress(self, values):
+        return datetime.strptime("{}T{}".format(*values), "%Y-%m-%dT%H:%M:%S")
 
 
 class BookingForm(forms.ModelForm):
+    start = DateTimeField()
+    end = DateTimeField()
     class Meta:
         model = Booking
         fields = '__all__'
         widgets = {
             'bookable': forms.HiddenInput(),
-            'start': forms.SplitDateTimeWidget(
-                date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
-            'end': forms.SplitDateTimeWidget(
-                date_attrs={'type': 'date'}, time_attrs={'type': 'time'}),
         }
+
 
     def clean(self):
         cleaned_data = super().clean()
