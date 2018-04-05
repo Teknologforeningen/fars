@@ -31,13 +31,13 @@ class DateTimeField(forms.fields.MultiValueField):
 class BookingForm(forms.ModelForm):
     start = DateTimeField()
     end = DateTimeField()
+
     class Meta:
         model = Booking
         fields = '__all__'
         widgets = {
             'bookable': forms.HiddenInput(),
         }
-
 
     def clean(self):
         cleaned_data = super().clean()
@@ -49,6 +49,10 @@ class BookingForm(forms.ModelForm):
             # Check that end is not earlier than start
             if end <= start:
                 raise forms.ValidationError("Booking cannot end before it begins")
+
+            # Check that booking is not in the past
+            if end <= datetime.now():
+                raise forms.ValidationError("Booking may not be in the past")
 
             # Check that booking does not overlap with previous bookings
             overlapping = Booking.objects.filter(

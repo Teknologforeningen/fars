@@ -31,7 +31,8 @@ def book(request, bookable):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     context = {'url': request.path}
     if request.method == 'GET':
-        start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S')
+        start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S') \
+            if 't' in request.GET else datetime.now()
         booking.bookable = bookable_obj
         booking.start = start
         booking.end = start + timedelta(hours=1)
