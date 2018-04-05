@@ -9,9 +9,11 @@
 <script type="text/javascript">
   $('#bookform').submit(function(event) {
     $.post("{{url}}", $(this).serialize())
-      .done(function(data) {
+      .done(function() {
         $('#calendar').fullCalendar('refetchEvents');
-        $('#modalBox').modal('hide');
+        $('#modalBox').modal('hide')
+      }).fail(function(data){
+        $('#modalBox').find('.modal-body').html(data.responseText);
       });
     event.preventDefault();
   });

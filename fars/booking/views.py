@@ -36,15 +36,18 @@ def book(request, bookable):
         booking.start = start
         booking.end = start + timedelta(hours=1)
         form = BookingForm(instance=booking)
+        status = 200
     elif request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
             return HttpResponse()
+        else:
+            status = 400
     else:
         raise Http404
     context['form'] = form
-    return render(request, 'book.html', context)
+    return render(request, 'book.html', context=context, status=status)
 
 
 def unbook(request, booking_id):
