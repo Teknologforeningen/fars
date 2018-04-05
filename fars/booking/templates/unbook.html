@@ -1,0 +1,10 @@
+{% load static %}
+<button id="unbookbutton">Unbook</button>
+<script type="text/javascript">
+  $('#unbookbutton').click(function(event) {
+    $.post("{{url}}", function(data) {
+        $('#calendar').fullCalendar('refetchEvents');
+        $('#modalBox').modal('hide');
+      });
+  });
+</script>

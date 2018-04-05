@@ -10,8 +10,8 @@
   $('#bookform').submit(function(event) {
     $.post("{{url}}", $(this).serialize())
       .done(function(data) {
-        $('#modalBox').find('.modal-body').html(data);
         $('#calendar').fullCalendar('refetchEvents');
+        $('#modalBox').modal('hide');
       });
     event.preventDefault();
   });

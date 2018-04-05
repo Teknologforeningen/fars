@@ -40,13 +40,17 @@ def book(request, bookable):
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
-            bookedtext = "Booked {} from {} to {}".format(
-                form.cleaned_data['bookable'],
-                form.cleaned_data['start'],
-                form.cleaned_data['end'],
-            )
-            return HttpResponse(bookedtext)
+            return HttpResponse()
     else:
         raise Http404
     context['form'] = form
     return render(request, 'book.html', context)
+
+
+def unbook(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if request.method == 'POST':
+        booking.delete()
+        return HttpResponse()
+    context = {'url': request.path}
+    return render(request, 'unbook.html', context)

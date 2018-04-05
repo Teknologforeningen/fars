@@ -45,6 +45,7 @@ $(document).ready(function() {
             var events = [];
             $(data).each(function() {
               events.push({
+                id: $(this).attr('id'),
                 title: $(this).attr('comment'),
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
@@ -58,7 +59,7 @@ $(document).ready(function() {
         var modal = $('#modalBox');
         modal.find('.modal-title').text('Booking ' + bookable)
         $.get(
-          '/booking/unbook/' + bookable + '?t=' + date.toISOString(),
+          '/booking/unbook/' + calEvent.id,
           function(data){
             modal.find('.modal-body').html(data)
           }
