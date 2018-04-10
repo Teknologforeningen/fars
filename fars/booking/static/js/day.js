@@ -24,11 +24,10 @@ $(document).ready(function() {
       // If a day is clicked it opens the day-view at that date
       dayClick: function(date, jsEvent, view) {
         var modal = $('#modalBox');
-        modal.find('.modal-title').text('Booking ' + bookable)
         $.get(
           '/booking/book/' + bookable + '?t=' + date.toISOString(),
           function(data){
-            modal.find('.modal-body').html(data)
+            modal.find('.modal-content').html(data)
           }
         );
         modal.modal("show");
@@ -57,11 +56,10 @@ $(document).ready(function() {
       },
       eventClick: function(calEvent, jsEvent, view) {
         var modal = $('#modalBox');
-        modal.find('.modal-title').text('Booking ' + bookable)
         $.get(
           '/booking/unbook/' + calEvent.id,
           function(data){
-            modal.find('.modal-body').html(data)
+            modal.find('.modal-content').html(data)
           }
         );
         modal.modal("show");

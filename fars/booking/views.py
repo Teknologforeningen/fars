@@ -29,7 +29,7 @@ def bookings_day(request, bookable, year, month, day):
 def book(request, bookable):
     booking = Booking()
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-    context = {'url': request.path}
+    context = {'url': request.path, 'bookable': bookable_obj}
     if request.method == 'GET':
         start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S') \
             if 't' in request.GET else datetime.now()
@@ -56,5 +56,8 @@ def unbook(request, booking_id):
     if request.method == 'POST':
         booking.delete()
         return HttpResponse()
-    context = {'url': request.path}
+    context = {
+        'url': request.path,
+        'booking': booking,
+    }
     return render(request, 'unbook.html', context)
