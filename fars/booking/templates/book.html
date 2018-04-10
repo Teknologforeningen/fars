@@ -3,11 +3,14 @@
 Booking {{ bookable }}
 {% endblock %}
 {% block body %}
+{% load bootstrap4 %}
 <form id="bookform">
   {% csrf_token %}
-  <table>
-    {{form.as_table}}
-  </table>
+  {% bootstrap_form_errors form %}
+  {% bootstrap_field form.bookable %}
+  {% bootstrap_field form.start layout="horizontal" horizontal_field_class="col-md-9 form-inline" %}
+  {% bootstrap_field form.end layout="horizontal" horizontal_field_class="col-md-9 form-inline" %}
+  {% bootstrap_field form.comment layout="horizontal" %}
 </form>
 <script type="text/javascript">
   $('#bookform').submit(function(event) {
@@ -16,7 +19,7 @@ Booking {{ bookable }}
         $('#calendar').fullCalendar('refetchEvents');
         $('#modalBox').modal('hide')
       }).fail(function(data){
-        $('#modalBox').find('.modal-body').html(data.responseText);
+        $('#modalBox').find('.modal-content').html(data.responseText);
       });
     event.preventDefault();
   });

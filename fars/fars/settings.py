@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'booking',
     'rest_framework',
     'django_filters',
+    'bootstrap4',
 ]
 
 MIDDLEWARE = [
