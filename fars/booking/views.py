@@ -34,6 +34,8 @@ def bookings_day(request, bookable, year, month, day):
 
 
 def book(request, bookable):
+    if not request.user.is_authenticated:
+        return render(request, 'modals/forbidden.html')
     booking = Booking()
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     context = {
@@ -41,6 +43,7 @@ def book(request, bookable):
         'bookable': bookable_obj,
         'user': request.user,
     }
+
     if request.method == 'GET':
         start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S') \
             if 't' in request.GET else datetime.now()
@@ -63,6 +66,8 @@ def book(request, bookable):
 
 
 def unbook(request, booking_id):
+    if not request.user.is_authenticated:
+        return render(request, 'modals/forbidden.html')
     booking = get_object_or_404(Booking, id=booking_id)
     if request.method == 'POST':
         booking.delete()
