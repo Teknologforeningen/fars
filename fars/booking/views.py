@@ -67,15 +67,17 @@ def book(request, bookable):
 
 
 def unbook(request, booking_id):
-    if not request.user.is_authenticated:
-        return render(request, 'modals/forbidden.html')
     booking = get_object_or_404(Booking, id=booking_id)
-    if request.method == 'POST':
+    # TODO: is this the proper way to check if users are the same?
+    unbookable = (request.user.username == booking.user.username) \
+        or request.user.is_staff
+    if request.method == 'POST' and unbookable:
         booking.delete()
         return HttpResponse()
     context = {
         'url': request.path,
         'booking': booking,
         'user': request.user,
+        'unbookable': unbookable,
     }
     return render(request, 'unbook.html', context)

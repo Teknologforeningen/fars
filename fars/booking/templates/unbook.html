@@ -5,6 +5,16 @@ Unbooking {{ booking.bookable }}
 {% block body %}
 <table>
     <tr>
+        <th>Booked by:</th>
+        <td>
+            {% if booking.user.first_name and booking.user.last_name %}
+                {{booking.user.first_name}} {{booking.user.last_name}}
+            {% else %}
+                {{booking.user.username}}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
         <th>Start:</th>
         <td>{{booking.start}}</td>
     </tr>
@@ -16,7 +26,13 @@ Unbooking {{ booking.bookable }}
 </table>
 {% endblock %}
 {% block footer %}
-<button id="unbookbutton" class="btn btn-warning">Unbook</button>
+{% if unbookable %}
+<button id="unbookbutton" class="btn btn-warning">
+    {% if user.is_staff %}
+    Admin
+    {% endif %}
+    Unbook
+</button>
 <script type="text/javascript">
   $('#unbookbutton').click(function(event) {
     $.post("{{url}}", function(data) {
@@ -25,4 +41,7 @@ Unbooking {{ booking.bookable }}
       });
   });
 </script>
+{% else %}
+<div class="alert alert-warning">Only the user who made the booking may unbook it</div>
+{% endif %}
 {% endblock %}
