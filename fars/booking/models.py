@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import User
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
 
@@ -22,7 +23,7 @@ class Bookable(models.Model):
 
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     start = models.DateTimeField()
     end = models.DateTimeField()
     comment = models.CharField(max_length=128)
