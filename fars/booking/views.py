@@ -7,13 +7,19 @@ from datetime import datetime, timedelta
 
 def home(request):
     bookables = Bookable.objects.all()
-    context = {'bookables': bookables}
+    context = {
+        'bookables': bookables,
+        'user': request.user,
+    }
     return render(request, 'base.html', context)
 
 
 def bookings_month(request, bookable):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-    context = {'bookable': bookable_obj}
+    context = {
+        'bookable': bookable_obj,
+        'user': request.user
+    }
     return render(request, 'month.html', context)
 
 
@@ -22,6 +28,7 @@ def bookings_day(request, bookable, year, month, day):
     context = {
         'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day),
         'bookable': bookable_obj,
+        'user': request.user
     }
     return render(request, 'day.html', context)
 
@@ -29,7 +36,11 @@ def bookings_day(request, bookable, year, month, day):
 def book(request, bookable):
     booking = Booking()
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-    context = {'url': request.path, 'bookable': bookable_obj}
+    context = {
+        'url': request.path,
+        'bookable': bookable_obj,
+        'user': request.user,
+    }
     if request.method == 'GET':
         start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S') \
             if 't' in request.GET else datetime.now()
@@ -59,5 +70,6 @@ def unbook(request, booking_id):
     context = {
         'url': request.path,
         'booking': booking,
+        'user': request.user,
     }
     return render(request, 'unbook.html', context)
