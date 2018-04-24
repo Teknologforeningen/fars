@@ -20,7 +20,7 @@
         {% for bookable in bookables %}
         <div class="text-center" style="margin:1em 1em;">
           <a class="btn btn-light btn-outline-secondary" href="/booking/{{bookable.id_str}}">
-            <img src="" alt="Bookable Icon" width="150" style="margin:1em;"></img>
+            <img src="{% static "img/"|add:bookable.icon %}" alt="Bookable Icon" width="150" height="120" style="margin:1em;"></img>
             <p>{{bookable.name}}</p>
           </a>
         </div>
