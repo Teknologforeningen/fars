@@ -22,6 +22,9 @@ $(document).ready(function() {
       dayClick: function(date, jsEvent, view) {
         window.location.href = '/booking/' + bookable + '/' + date.toISOString();
       },
+      eventClick: function(event, jsEvent, view) {
+        window.location.href = '/booking/' + bookable + '/' + event.start.format('YYYY-MM-DD');
+      },
       events: function(start, end, timezone, callback) {
         $.ajax({
           url: '/api/bookings',
