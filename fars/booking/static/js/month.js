@@ -5,9 +5,9 @@ $(document).ready(function() {
       aspectRatio: 2,
       // header
       header: {
-        left: '',
-        center: 'title',
-        right: 'today prev,next'
+        left: 'today prev,next title',
+        center: '',
+        right: ''
       },
       views: {
         month: {
@@ -18,10 +18,12 @@ $(document).ready(function() {
       locale: 'fi',
       timeFormat: 'H:mm',
       displayEventEnd: true,
-      themeSystem: 'bootstrap4',
       // If a day is clicked it opens the day-view at that date
       dayClick: function(date, jsEvent, view) {
         window.location.href = '/booking/' + bookable + '/' + date.toISOString();
+      },
+      eventClick: function(event, jsEvent, view) {
+        window.location.href = '/booking/' + bookable + '/' + event.start.format('YYYY-MM-DD');
       },
       events: function(start, end, timezone, callback) {
         $.ajax({
