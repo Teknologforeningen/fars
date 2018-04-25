@@ -9,6 +9,7 @@ class Bookable(models.Model):
     id_str = models.CharField(max_length=32, unique=True, validators=[alphanumeric])
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
+    icon = models.CharField(max_length=32, default='tf.svg')
 
     def __str__(self):
         return self.name
