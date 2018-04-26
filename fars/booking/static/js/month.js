@@ -2,7 +2,7 @@ $(document).ready(function() {
   var calendar = $('#calendar'),
     bookable = calendar.data('bookable');
   calendar.fullCalendar({
-      aspectRatio: 2,
+      height: 'auto',
       // header
       header: {
         left: 'today prev,next title',
