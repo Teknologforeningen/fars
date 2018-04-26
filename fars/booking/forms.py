@@ -37,6 +37,7 @@ class BookingForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'bookable': forms.HiddenInput(),
+            'user': forms.HiddenInput(),
         }
 
     def clean(self):

@@ -15,6 +15,11 @@
   {% endblock %}
 </head>
 <body>
+  {% if user.is_authenticated %}
+  <a class="btn btn-info" href="/logout">Logout</a>
+  {% else %}
+  <a class="btn btn-info" href="/login">Login</a>
+  {% endif %}
   {% block calendar %}
     <div class="container">
       <h1 class="row justify-content-center" style="padding-top: 1em;">Bookables</h1>
