@@ -8,6 +8,9 @@ thead.fc-head {
 div.fc-content span {
   color: #fff;
 }
+td.fc-past {
+  color: #999;
+}
 
 .fc {
   direction: ltr;
@@ -84,7 +87,7 @@ html .fc {
 td.fc-widget-header,
 th.fc-widget-header,
 td.fc-widget-content {
-  border-color: black;
+  border-color: lightgray;
 }
 
 .fc .ui-widget-header {
