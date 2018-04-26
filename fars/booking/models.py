@@ -29,4 +29,4 @@ class Booking(models.Model):
     comment = models.CharField(max_length=128)
 
     def __str__(self):
-        return "{}, {} -> {}".format(self.comment, self.start, self.end)
+        return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
