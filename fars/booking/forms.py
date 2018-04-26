@@ -59,7 +59,8 @@ class BookingForm(forms.ModelForm):
             overlapping = Booking.objects.filter(
                 bookable=bookable, start__lt=end, end__gt=start)
             if overlapping:
-                warning = "Error: Requested booking is overlapping with following bookings: "
+                warning = "Error: Requested booking is overlapping with the following bookings:"
+                errors = [forms.ValidationError(warning)]
                 for booking in overlapping:
-                    warning = warning + str(booking)
-                raise forms.ValidationError(warning)
+                    errors.append(forms.ValidationError('• ' + str(booking)))
+                raise forms.ValidationError(errors)
