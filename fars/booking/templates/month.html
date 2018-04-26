@@ -1,11 +1,25 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block css %}
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
+  <link rel="stylesheet" href="{% static 'css/calendar-theme.css' %}">
+{% endblock %}
+
 {% block javascript %}
   <script src="{% static 'js/month.js' %}"></script>
 {% endblock %}
 
 {% block calendar %}
-  <h1>{{bookable.name}}</h1>
-  <div id="calendar" data-bookable="{{bookable.id_str}}"></div>
+  <div class="container-fluid">
+    <div class="row align-items-center text-center" style="margin: 2em;">
+      <a class="pull-left" href="/" style="color:black;">
+        <i class="fas fa-arrow-circle-left fa-3x"></i>
+      </a>
+      <h1 class="col">{{ bookable.name|upper }}</h1>
+    </div>
+  </div>
+  <div class="col-md-10 col-sm-12 offset-md-1">
+    <div id="calendar" data-bookable="{{bookable.id_str}}"></div>
+  </div>
 {% endblock %}

@@ -3,11 +3,14 @@
 <head>
   <title>FARS</title>
   {% load static %}
+  {% load tags %}
   <!-- For calendar -->
   <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+  {% block css %}
+  {% endblock %}
   {% block javascript %}
   {% endblock %}
 </head>
@@ -18,16 +21,21 @@
   <a class="btn btn-info" href="/login">Login</a>
   {% endif %}
   {% block calendar %}
-    <h1>Bookables</h1>
-    <ul>
-    {% for bookable in bookables %}
-      <li>
-        <a href="/booking/{{bookable.id_str}}">{{bookable.name}}</a>
-      </li>
-    {% empty %}
-      There are no bookables, add some through the admin interface.
-    {% endfor %}
-    </ul>
+    <div class="container">
+      <h1 class="row justify-content-center" style="padding-top: 1em;">Bookables</h1>
+      <div class="row justify-content-center">
+        {% for bookable in bookables %}
+        <div class="text-center" style="margin:1em 1em;">
+          <a class="btn btn-light btn-outline-secondary" href="/booking/{{bookable.id_str}}">
+            <img src="{% static "img/"|add:bookable.icon %}" alt="Bookable Icon" width="150" height="120" style="margin:1em;"></img>
+            <p>{{bookable.name}}</p>
+          </a>
+        </div>
+        {% empty %}
+          There are no bookables, add some through the admin interface.
+        {% endfor %}
+      </div>
+    </div>
   {% endblock %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
