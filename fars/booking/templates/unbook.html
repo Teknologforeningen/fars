@@ -42,6 +42,6 @@ Unbooking {{ booking.bookable }}
   });
 </script>
 {% else %}
-<div class="alert alert-warning">Only the user who made the booking may unbook it</div>
+<div class="alert alert-warning">{{warning}}</div>
 {% endif %}
 {% endblock %}

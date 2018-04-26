@@ -68,16 +68,35 @@ def book(request, bookable):
 
 def unbook(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
-    # TODO: is this the proper way to check if users are the same?
-    unbookable = (request.user.username == booking.user.username) \
-        or request.user.is_staff
+    # Check if unbooking is allowed
+    now = datetime.now(booking.start.tzinfo) # TODO: Do we want to deal with timezones? should we use UTC?
+    unbookable = True
+    warning = None
+    if request.user.is_staff:
+        # Admin may unbook anything
+        pass
+    elif booking.end < now:
+        unbookable = False
+        warning = "Bookings in the past may not be unbooked"
+    # TODO: is this the proper way to check if users are the same?''
+    elif request.user.username != booking.user.username:
+        unbookable = False
+        warning = "Only the user that made the booking may unbook it"
+
     if request.method == 'POST' and unbookable:
-        booking.delete()
+        if booking.start < now and booking.end > now:
+            # Booking is ongoing, end it now
+            booking.end = now
+            booking.save()
+        else:
+            booking.delete()
         return HttpResponse()
+
     context = {
         'url': request.path,
         'booking': booking,
         'user': request.user,
         'unbookable': unbookable,
+        'warning': warning,
     }
     return render(request, 'unbook.html', context)
