@@ -17,9 +17,12 @@ from django.urls import include, path
 from django.conf.urls import url
 from django.contrib import admin
 from django.views.generic.base import RedirectView
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^login/$', auth_views.login, {'template_name': 'auth/login.html'}, name='login'),
+    url(r'^logout/$', auth_views.logout, {'next_page': 'home'}, name='logout'),
     url(r'^api/', include('api.urls')),
     path('booking/', include('booking.urls')),
     path('', RedirectView.as_view(url='booking/')),
