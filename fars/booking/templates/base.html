@@ -17,7 +17,11 @@
 <body>
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
-    <a href="/" class="navbar-brand">FARS</a>
+    {% if bookable %}
+      <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
+    {% else %}
+      <a href="/" class="navbar-brand">FARS</a>
+    {% endif %}
     {% if user.is_authenticated %}
       <a class="btn btn-outline-danger nav-item" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">Logout</a>
     {% else %}
