@@ -40,6 +40,18 @@ class BookingForm(forms.ModelForm):
             'user': forms.HiddenInput(),
         }
 
+    def clean_start(self):
+        start = self.cleaned_data['start']
+        # If start is in the past, make it "now"
+        return datetime.now() if start < datetime.now() else start
+
+    def clean_end(self):
+        end = self.cleaned_data['end']
+        # Check that booking is not in the past
+        if end <= datetime.now():
+            raise forms.ValidationError("Booking may not be in the past")
+        return end
+
     def clean(self):
         cleaned_data = super().clean()
         bookable = cleaned_data.get("bookable")
@@ -50,10 +62,6 @@ class BookingForm(forms.ModelForm):
             # Check that end is not earlier than start
             if end <= start:
                 raise forms.ValidationError("Booking cannot end before it begins")
-
-            # Check that booking is not in the past
-            if end <= datetime.now():
-                raise forms.ValidationError("Booking may not be in the past")
 
             # Check that booking does not overlap with previous bookings
             overlapping = Booking.objects.filter(
