@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block calendar %}
-  <h1><a href="{% url 'month' bookable=bookable.id_str %}">{{bookable.name}}</a></h1>
   <div id="calendar" data-date="{{date}}" data-bookable="{{bookable.id_str}}"></div>
   <div id="modalBox" class="modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">

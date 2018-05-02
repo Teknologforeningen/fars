@@ -11,14 +11,6 @@
 {% endblock %}
 
 {% block calendar %}
-  <div class="container-fluid">
-    <div class="row align-items-center text-center" style="margin: 2em;">
-      <a class="pull-left" href="/" style="color:black;">
-        <i class="fas fa-arrow-circle-left fa-3x"></i>
-      </a>
-      <h1 class="col">{{ bookable.name|upper }}</h1>
-    </div>
-  </div>
   <div class="col-md-10 col-sm-12 offset-md-1">
     <div id="calendar" data-bookable="{{bookable.id_str}}"></div>
   </div>
