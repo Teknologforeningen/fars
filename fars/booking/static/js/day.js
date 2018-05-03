@@ -3,6 +3,7 @@ $(document).ready(function() {
       date = calendar.data('date'),
       bookable = calendar.data('bookable');
   calendar.fullCalendar({
+      height: 'auto',
       aspectRatio: 2,
       // header
       header: {
