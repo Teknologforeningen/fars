@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/calendar-theme.css' %}">
+{% endblock %}
+
 {% block javascript %}
   <script src="{% static 'js/day.js' %}"></script>
 {% endblock %}

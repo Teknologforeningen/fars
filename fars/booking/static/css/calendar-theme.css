@@ -15,7 +15,11 @@ td.fc-day:hover {
   background: #EEEEEE;
   cursor: pointer;
 }
-div.fc-content-skeleton {
+div.fc-slats td:hover {
+  background: #EEEEEE;
+  cursor: pointer;
+}
+div.fc-week div.fc-content-skeleton {
   pointer-events: none;
 }
 .fc {
