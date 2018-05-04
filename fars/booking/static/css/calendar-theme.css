@@ -11,7 +11,13 @@ div.fc-content span {
 td.fc-past {
   color: #999;
 }
-
+td.fc-day:hover {
+  background: #EEEEEE;
+  cursor: pointer;
+}
+div.fc-content-skeleton {
+  pointer-events: none;
+}
 .fc {
   direction: ltr;
   text-align: left; }
