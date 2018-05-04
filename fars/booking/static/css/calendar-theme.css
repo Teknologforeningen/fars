@@ -2,9 +2,6 @@ thead.fc-head {
   background-color: #b20738;
   color: #fff;
 }
-.fc-event {
-  background-color: #6c757d;
-}
 div.fc-content span {
   color: #fff;
 }
@@ -15,11 +12,11 @@ td.fc-day:hover {
   background: #EEEEEE;
   cursor: pointer;
 }
-div.fc-slats td:hover {
+div.fc-slats td:not(.fc-time):hover {
   background: #EEEEEE;
   cursor: pointer;
 }
-div.fc-week div.fc-content-skeleton {
+div.fc-month-view div.fc-content-skeleton {
   pointer-events: none;
 }
 .fc {

@@ -17,13 +17,15 @@ $(document).ready(function() {
       firstDay: 1,
       locale: 'fi',
       timeFormat: 'H:mm',
+      slotLabelFormat: 'H:mm',
       displayEventEnd: true,
       nowIndicator: true,
       defaultView: 'agendaDay',
       defaultDate: date,
       allDaySlot: false,
       themeSystem: 'bootstrap4',
-      // If a day is clicked it opens the day-view at that date
+      eventColor: "#6c757d",
+      // If a timeslot is clicked it opens the modal for booking
       dayClick: function(date, jsEvent, view) {
         var modal = $('#modalBox');
         $.get(
