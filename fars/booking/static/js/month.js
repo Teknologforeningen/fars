@@ -20,6 +20,7 @@ $(document).ready(function() {
       timeFormat: 'H:mm',
       displayEventEnd: true,
       eventBackgroundColor: "#6c757d",
+      eventBorderColor: "grey",
       // If a day is clicked it opens the day-view at that date
       dayClick: function(date, jsEvent, view) {
         window.location.href = '/booking/' + bookable + '/' + date.toISOString();

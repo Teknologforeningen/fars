@@ -24,7 +24,9 @@ $(document).ready(function() {
       defaultDate: date,
       allDaySlot: false,
       themeSystem: 'bootstrap4',
-      eventColor: "#6c757d",
+      eventBackgroundColor: "#6c757d",
+      eventBorderColor: "grey",
+      agendaEventMinHeight: 20,
       // If a timeslot is clicked it opens the modal for booking
       dayClick: function(date, jsEvent, view) {
         var modal = $('#modalBox');

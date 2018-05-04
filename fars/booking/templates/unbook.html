@@ -3,27 +3,36 @@
 Unbooking {{ booking.bookable }}
 {% endblock %}
 {% block body %}
-<table>
-    <tr>
-        <th>Booked by:</th>
-        <td>
+<div class="container">
+    <div class="row">
+        <div class="col-3 font-weight-bold">
+            Booked by:
+        </div>
+        <div class="col-9">
             {% if booking.user.first_name and booking.user.last_name %}
                 {{booking.user.first_name}} {{booking.user.last_name}}
             {% else %}
                 {{booking.user.username}}
             {% endif %}
-        </td>
-    </tr>
-    <tr>
-        <th>Start:</th>
-        <td>{{booking.start}}</td>
-    </tr>
-    <tr>
-        <th>End:</th>
-        <td>{{booking.end}}</td>
-    </tr>
-
-</table>
+        </div>
+    </div>
+    <div class="row">   
+        <div class="col-3 font-weight-bold">
+            Start:
+        </div>
+        <div class="col-9">
+            {{booking.start}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3 font-weight-bold">
+        End:
+        </div>
+        <div class="col-9">
+            {{booking.end}}
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block footer %}
 {% if unbookable %}

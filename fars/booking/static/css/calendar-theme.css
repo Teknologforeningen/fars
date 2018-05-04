@@ -8,13 +8,17 @@ div.fc-content span {
 td.fc-past {
   color: #999;
 }
+td.fc-day {
+  cursor: pointer;
+}
 td.fc-day:hover {
   background: #EEEEEE;
+}
+div.fc-slats td:not(.fc-time) {
   cursor: pointer;
 }
 div.fc-slats td:not(.fc-time):hover {
   background: #EEEEEE;
-  cursor: pointer;
 }
 div.fc-month-view div.fc-content-skeleton {
   pointer-events: none;
@@ -222,12 +226,6 @@ thead th.fc-last {
     border-color: #dddddd; }
   .fc-state-disabled .fc-button-effect {
     display: none; }
-
-.fc-event {
-  border-style: solid;
-  border-width: 0;
-  font-size: 0.85em;
-  cursor: default; }
 
 a.fc-event, .fc-event-draggable {
   cursor: pointer; }
