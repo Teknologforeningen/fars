@@ -18,6 +18,7 @@ $(document).ready(function() {
       locale: 'fi',
       timeFormat: 'H:mm',
       displayEventEnd: true,
+      nowIndicator: true,
       defaultView: 'agendaDay',
       defaultDate: date,
       allDaySlot: false,
