@@ -23,6 +23,9 @@ div.fc-slats td:not(.fc-time):hover {
 div.fc-month-view div.fc-content-skeleton {
   pointer-events: none;
 }
+.fc-agendaDay-view .fc-today:not(.fc-day-header) { 
+  background: #fcf8e3; 
+}
 .fc {
   direction: ltr;
   text-align: left; }
