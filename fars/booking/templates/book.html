@@ -1,45 +1,60 @@
 {% extends "modalcontent.html" %}
+
 {% block title %}
-Booking {{ bookable }}
+  {% if user.first_name and user.last_name %}
+    Booking <strong>{{ bookable }}</strong> for <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+  {% else %}
+    Booking <strong>{{ bookable }}</strong> for <strong>{{ user.username }}</strong>
+  {% endif %}
 {% endblock %}
+
 {% block body %}
-{% load bootstrap4 %}
-{% if user.first_name and user.last_name %}
-<p>Booking for {{user.first_name}} {{user.last_name}}</p>
-{% else %}
-<p>Booking for {{user.username}}</p>
-{% endif %}
-<form id="bookform">
-  {% csrf_token %}
-  {% bootstrap_form_errors form %}
-  {% bootstrap_field form.bookable %}
-  {% bootstrap_field form.user %}
-  <button type="button" id="nowbutton" class="btn btn-link">Now</button>
-  {% bootstrap_field form.start layout="horizontal" horizontal_field_class="col-md-9 form-inline" %}
-  {% bootstrap_field form.end layout="horizontal" horizontal_field_class="col-md-9 form-inline" %}
-  {% bootstrap_field form.comment layout="horizontal" %}
-</form>
-<script type="text/javascript">
-  $('#bookform').submit(function(event) {
-    $.post("{{url}}", $(this).serialize())
-      .done(function() {
-        $('#calendar').fullCalendar('refetchEvents');
-        $('#modalBox').modal('hide')
-      }).fail(function(data){
-        $('#modalBox').find('.modal-content').html(data.responseText);
-      });
-    event.preventDefault();
-  });
-  $('#nowbutton').click(function() {
-    let now = moment();
-    $('#id_start_0').val(now.format('YYYY-MM-DD'));
-    $('#id_start_1').val(now.format('HH:mm'));
-    let then = now.add(1, 'hours')
-    $('#id_end_0').val(then.format('YYYY-MM-DD'));
-    $('#id_end_1').val(then.format('HH:mm'));
-  });
-</script>
+  <style>
+    label, label.col-form-label {
+      font-weight: bold;
+      font-size: 120%;
+    }
+  </style>
+  {% load bootstrap4 %}
+  {% load widget_tweaks %}
+  <form id="bookform">
+    {% csrf_token %}
+    {% bootstrap_form_errors form %}
+    {% bootstrap_field form.bookable %}
+    {% bootstrap_field form.user %}
+    <div class="row form-group">
+      <div class="col-md-6">
+        {% bootstrap_field form.start layout="vertical" vertical_field_class="col-md-9" %}
+        <button type="button" id="nowbutton" class="btn btn-warning float-right">Now</button>
+      </div>
+      <div class="col-md-6">
+        {% bootstrap_field form.end layout="vertical" vertical_field_class="col-md-9" %}
+      </div>
+    </div>
+    {% bootstrap_field form.comment layout="horizontal" %}
+  </form>
+  <script type="text/javascript">
+    $('#bookform').submit(function(event) {
+      $.post("{{url}}", $(this).serialize())
+        .done(function() {
+          $('#calendar').fullCalendar('refetchEvents');
+          $('#modalBox').modal('hide')
+        }).fail(function(data){
+          $('#modalBox').find('.modal-content').html(data.responseText);
+        });
+      event.preventDefault();
+    });
+    $('#nowbutton').click(function() {
+      let now = moment();
+      $('#id_start_0').val(now.format('YYYY-MM-DD'));
+      $('#id_start_1').val(now.format('HH:mm'));
+      let then = now.add(1, 'hours')
+      $('#id_end_0').val(then.format('YYYY-MM-DD'));
+      $('#id_end_1').val(then.format('HH:mm'));
+    });
+  </script>
 {% endblock %}
+
 {% block footer %}
-<input class="btn btn-success" type="submit" value="Submit" form="bookform">
+  <input class="btn btn-success" type="submit" value="Submit" form="bookform">
 {% endblock %}
