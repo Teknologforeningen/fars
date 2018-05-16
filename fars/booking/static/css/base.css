@@ -1,0 +1,4 @@
+.modal-body label, label.col-form-label {
+  font-weight: bold;
+  font-size: 120%;
+}
