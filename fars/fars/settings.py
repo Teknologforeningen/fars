@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+from getenv import env
+import dj_database_url
+import ldap
+from django_auth_ldap.config import LDAPSearch, PosixGroupType
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +25,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0oepaz1@nlic&%f==af@@smd#1g4u88h5a6yz^wl=d53xva)15'
+SECRET_KEY = env('SECRET_KEY', 'secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG', True)
 
 ALLOWED_HOSTS = []
 
@@ -71,6 +76,27 @@ TEMPLATES = [
     },
 ]
 
+# Logging
+if not DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'INFO',
+                'class': 'logging.FileHandler',
+                'filename': '/var/log/fars/info.log',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+        },
+    }
+
 WSGI_APPLICATION = 'fars.wsgi.application'
 
 
@@ -78,10 +104,7 @@ WSGI_APPLICATION = 'fars.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': dj_database_url.parse(env('DATABASE', 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')))
 }
 
 
@@ -127,4 +150,56 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+}
+
+# LDAP stuff
+
+# Baseline configuration.
+AUTH_LDAP_SERVER_URI = env("LDAP_SERVER_URI", "ldaps://localhost:45671")
+
+AUTH_LDAP_USER_DN_TEMPLATE = env("LDAP_USER_DN_TEMPLATE", "uid=%(user)s,dc=example,dc=com")
+
+# Set up the basic group parameters.
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+    env("LDAP_GROUP_DN", "ou=group,dc=example,dc=com"),
+    ldap.SCOPE_SUBTREE,
+    "(objectClass=PosixGroupType)"
+)
+AUTH_LDAP_GROUP_TYPE = PosixGroupType(name_attr="cn")
+
+# Populate the Django user from the LDAP directory.
+AUTH_LDAP_USER_ATTR_MAP = {
+    "username": "uid",
+    "first_name": "givenName",
+    "last_name": "sn",
+    "email": "mail"
+}
+
+# Map LDAP group to is_staff property in Member model
+# this restricts all is_staff required views to those that are members of the specified LDAP group
+AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+    "is_staff": env("LDAP_STAFF_GROUP_DN", "cn=admin,ou=group,dc=example,dc=com"),
+}
+
+# This is the default, but I like to be explicit.
+AUTH_LDAP_ALWAYS_UPDATE_USER = True
+
+# Use LDAP group membership to calculate group permissions.
+AUTH_LDAP_FIND_GROUP_PERMS = True
+
+# Cache group memberships for an hour to minimize LDAP traffic
+AUTH_LDAP_CACHE_GROUPS = True
+AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+
+
+# Keep ModelBackend around for per-user permissions and maybe a local
+# superuser.
+AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Never require cert
+AUTH_LDAP_GLOBAL_OPTIONS = {
+    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER
 }
