@@ -24,7 +24,10 @@
       <a href="/" class="navbar-brand">FARS</a>
     {% endif %}
     {% if user.is_authenticated %}
-      <a class="btn btn-outline-danger nav-item" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">Logout</a>
+      <span class="nav-item">
+        <span class="navbar-text">{{user.get_full_name}}</span>
+        <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">Logout</a>
+      </span>
     {% else %}
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
