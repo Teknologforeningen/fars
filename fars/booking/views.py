@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm
@@ -17,7 +17,7 @@ def home(request):
 def bookings_month(request, bookable):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     if not bookable_obj.public and not request.user.is_authenticated:
-        return render(request, 'modals/forbidden.html')
+        return redirect('{}?next={}'.format(reverse('login'), request.path_info))
     else:
         context = {
             'bookable': bookable_obj,
@@ -29,7 +29,7 @@ def bookings_month(request, bookable):
 def bookings_day(request, bookable, year, month, day):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     if not bookable_obj.public and not request.user.is_authenticated:
-        return render(request, 'modals/forbidden.html')
+        return redirect('{}?next={}'.format(reverse('login'), request.path_info))
     else:
         context = {
             'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day),
