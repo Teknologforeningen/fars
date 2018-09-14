@@ -11,6 +11,10 @@ class Bookable(models.Model):
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
     icon = models.CharField(max_length=32, default='tf.svg')
+    # How far in the future bookings are allowed (zero means no limit)
+    forward_limit_days = models.PositiveIntegerField(default = 0)
+    # How long bookings are allowed to be (zero means no limit)
+    length_limit_hours = models.PositiveIntegerField(default = 0)
 
     def __str__(self):
         return self.name

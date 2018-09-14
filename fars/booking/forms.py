@@ -1,6 +1,6 @@
 from django import forms
 from booking.models import Booking
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
@@ -63,6 +63,21 @@ class BookingForm(forms.ModelForm):
             if end <= start:
                 raise forms.ValidationError("Booking cannot end before it begins")
 
+            # Check that booking does not violate bookable limits
+            if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
+                raise forms.ValidationError(
+                    "{} may not be booked more than {} days in advance".format(
+                        bookable.name, bookable.forward_limit_days
+                    )
+                )
+
+            booking_length = (end - start)
+            booking_length_hours = booking_length.days * 24 + booking_length.seconds / 3600
+            if bookable.length_limit_hours > 0 and booking_length_hours > bookable.length_limit_hours:
+                raise forms.ValidationError(
+                    "{} may not be booked for longer than {} hours".format(bookable.name, bookable.length_limit_hours)
+                )
+
             # Check that booking does not overlap with previous bookings
             overlapping = Booking.objects.filter(
                 bookable=bookable, start__lt=end, end__gt=start)
@@ -72,3 +87,4 @@ class BookingForm(forms.ModelForm):
                 for booking in overlapping:
                     errors.append(forms.ValidationError('• ' + str(booking)))
                 raise forms.ValidationError(errors)
+
