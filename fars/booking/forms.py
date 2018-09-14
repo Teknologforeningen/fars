@@ -1,6 +1,8 @@
 from django import forms
 from booking.models import Booking
 from datetime import datetime
+from django.contrib.auth.forms import AuthenticationForm
+from django.forms.widgets import PasswordInput, TextInput
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
@@ -72,3 +74,8 @@ class BookingForm(forms.ModelForm):
                 for booking in overlapping:
                     errors.append(forms.ValidationError('• ' + str(booking)))
                 raise forms.ValidationError(errors)
+
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-2 col-8','placeholder': 'Username'}))
+    password = forms.CharField(widget=PasswordInput(attrs={'class':'offset-2 col-8','placeholder':'Password'}))

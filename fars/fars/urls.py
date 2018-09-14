@@ -18,10 +18,11 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
+from booking.forms import CustomLoginForm
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$', auth_views.login, {'template_name': 'login.html'}, name='login'),
+    url(r'^login/$', auth_views.login, {'template_name': 'login.html', "authentication_form": CustomLoginForm}, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': 'home'}, name='logout'),
     url(r'^api/', include('api.urls')),
     path('booking/', include('booking.urls')),
