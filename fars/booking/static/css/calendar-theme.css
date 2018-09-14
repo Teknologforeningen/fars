@@ -47,6 +47,10 @@ html .fc {
 .fc-header td {
   white-space: nowrap; }
 
+.fc-header-toolbar h2 {
+  font-size: calc(1.2em + 0.7vw);
+}
+
 .fc-header-left {
   width: 25%;
   text-align: left; }
