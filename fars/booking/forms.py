@@ -1,12 +1,8 @@
 from django import forms
 from booking.models import Booking
-<<<<<<< HEAD
-from datetime import datetime
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput
-=======
 from datetime import datetime, timedelta
->>>>>>> f984302acda118a426ff5c45898ed2c1845c844b
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
