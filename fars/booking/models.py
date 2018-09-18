@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
 
@@ -19,6 +21,12 @@ class Bookable(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@receiver(post_save, sender=Bookable)
+def create_bookable_group(sender, instance, **kwargs):
+    g = Group(name="{}_staff".format(instance.name))
+    g.save()
 
 
 # class TimeSlot(models.Model):
