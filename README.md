@@ -1,29 +1,29 @@
 # Fantastiskt Användbara ReservationsSystemet FARS
-Reservation system with modifiable bookables and timeslots
+Reservation system with modifiable bookables and timeslots.
 Make sure that you have Python 3 and pip installed and virtualenv to go with it.
 
 ## Development environment setup
 `cd` into the `fars` directory and do the following:
 
-Create virtualenv
-`virtualenv -p /usr/bin/python3 venv`
-Activate venv
-`source venv/bin/activate`
-Install prerequisites with pip
-`pip install -r requirements.txt`
-Run migrations
-`python fars/manage.py migrate`
+Create virtualenv\
+`virtualenv -p /usr/bin/python3 venv`\
+Activate venv\
+`source venv/bin/activate`\
+Install prerequisites with pip\
+`pip install -r requirements.txt`\
+Run migrations\
+`python fars/manage.py migrate`\
 
-Now you can run the dev instance
-`python fars/manage.py runserver`
+Now you can run the dev instance\
+`python fars/manage.py runserver`\
 
 View the page in your browser: `http://localhost:8000`
 
 ## Base setup
-Create a superuser account
-`python manage.py createsuperuser`
-Use this account to log in on the adminsite
-`http://localhost:8000/admin`
+Create a superuser account\
+`python manage.py createsuperuser`\
+Use this account to log in on the adminsite\
+`http://localhost:8000/admin`\
 This adminpanel is where you will do all top-level administrating such as creating bookables, adding users (if you don't have another database for that) and choosing which users are admins over which bookables. This is about all setup you need to start using the system.
 
 ## Permissions of different usertypes
