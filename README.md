@@ -57,5 +57,14 @@ Logged in users can view the different bookables in the system and make bookings
 Users that haven't logged into the site can only view the bookables that are public. All other functionality requires them to log in.
 
 ## Built with
+
 * [Django](https://www.djangoproject.com/) - The web framework used
 * [FullCalendar](https://fullcalendar.io/) - Javascript plugin used for the calendar
+
+## Authors
+* Thomas Langenskiöld
+* Castor Köhler
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
