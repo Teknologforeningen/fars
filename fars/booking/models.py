@@ -25,7 +25,7 @@ class Bookable(models.Model):
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
-    g = Group(name="{}_staff".format(instance.name))
+    g = Group(name="{}_admin".format(instance.id_str))
     g.save()
 
 

@@ -16,7 +16,7 @@ Unbooking {{ booking.bookable }}
             {% endif %}
         </div>
     </div>
-    <div class="row">   
+    <div class="row">
         <div class="col-3 font-weight-bold">
             Start:
         </div>
@@ -44,8 +44,9 @@ Unbooking {{ booking.bookable }}
 {% endblock %}
 {% block footer %}
 {% if unbookable %}
+{% load tags %}
 <button id="unbookbutton" class="btn btn-warning">
-    {% if user.is_staff %}
+    {% if user|is_bookablestaff:booking.bookable %}
     Admin
     {% endif %}
     Unbook

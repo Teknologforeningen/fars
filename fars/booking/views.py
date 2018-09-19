@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
+from django.contrib.auth.models import User
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm
 from datetime import datetime, timedelta
@@ -78,7 +79,10 @@ def unbook(request, booking_id):
     now = datetime.now(booking.start.tzinfo) # TODO: Do we want to deal with timezones? should we use UTC?
     unbookable = True
     warning = None
-    if request.user.is_staff:
+    groupname = "{}_admin".format(booking.bookable.id_str)
+    groupmembers = User.objects.filter(groups__name=groupname)
+
+    if request.user.is_superuser or request.user in groupmembers:
         # Admin may unbook anything
         pass
     elif booking.end < now:
