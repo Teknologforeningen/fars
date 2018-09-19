@@ -16,6 +16,7 @@ $(document).ready(function() {
       },
       firstDay: 1,
       locale: 'fi',
+      timezone: 'local',
       timeFormat: 'H:mm',
       slotLabelFormat: 'H:mm',
       displayEventEnd: true,
@@ -27,16 +28,21 @@ $(document).ready(function() {
       eventBackgroundColor: "#6c757d",
       eventBorderColor: "grey",
       agendaEventMinHeight: 20,
-      // If a timeslot is clicked it opens the modal for booking
-      dayClick: function(date, jsEvent, view) {
+      selectable: true,
+      selectAllow: function(selectInfo) {
+        return selectInfo.start > moment();
+      },
+      // If a time is selected it opens the modal for booking
+      select: function(start, end, jsEvent, view) {
         var modal = $('#modalBox');
+        var params = {'st': start.format(), 'et': end.format()};
         $.get(
-          '/booking/book/' + bookable + '?t=' + date.toISOString(),
+          '/booking/book/' +  bookable + '?' + $.param(params),
           function(data){
             modal.find('.modal-content').html(data)
           }
         );
-        modal.modal("show");
+        modal.modal('show');
       },
       events: function(start, end, timezone, callback) {
         $.ajax({
@@ -69,6 +75,6 @@ $(document).ready(function() {
           }
         );
         modal.modal("show");
-      }
+      },
   });
 });

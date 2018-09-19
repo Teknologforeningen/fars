@@ -15,8 +15,10 @@ $(document).ready(function() {
           titleFormat: 'MMMM YYYY'
         }
       },
+      selectable: true,
       firstDay: 1,
       locale: 'fi',
+      timezone: 'local',
       timeFormat: 'H:mm',
       displayEventEnd: true,
       eventBackgroundColor: "#6c757d",
