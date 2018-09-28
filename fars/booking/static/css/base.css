@@ -2,3 +2,7 @@
   font-weight: bold;
   font-size: 120%;
 }
+
+#calendar {
+	height: calc(100vh - 80px);
+}
