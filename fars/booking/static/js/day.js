@@ -47,6 +47,7 @@ $(document).ready(function() {
       eventBackgroundColor: '#6c757d',
       eventBorderColor: 'grey',
       agendaEventMinHeight: 20,
+      scrollTime: moment().format('HH:mm:ss'),
       businessHours: getBusinesshours(date),
       selectable: true,
       selectLongPressDelay: 300,
