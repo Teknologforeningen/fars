@@ -3,14 +3,7 @@
 
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/calendar-theme.css' %}">
-  <style>
-    body {
-      background-color: gray;
-    }
-    #loginbox {
-      border-radius: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="{% static 'css/login.css'%}">
 {% endblock %}
 
 {% block javascript %}
@@ -20,7 +13,7 @@
 {% block navbar %}{% endblock %}
 
 {% block calendar %}
-  <div class="container" style="height: 100vh;">
+  <div id="maincontainer" class="container">
     <div class="row h-100">
       <div id="loginbox" class="offset-3 col-6 my-auto py-5 border bg-light">
         <h1 class="d-flex justify-content-center offset-2 col-8 pb-3">FARS</h1>
