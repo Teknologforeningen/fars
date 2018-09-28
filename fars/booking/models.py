@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
 
@@ -11,6 +13,7 @@ class Bookable(models.Model):
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
     icon = models.CharField(max_length=32, default='tf.svg')
+    public = models.BooleanField(default=False)
     # How far in the future bookings are allowed (zero means no limit)
     forward_limit_days = models.PositiveIntegerField(default = 0)
     # How long bookings are allowed to be (zero means no limit)
@@ -18,6 +21,12 @@ class Bookable(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@receiver(post_save, sender=Bookable)
+def create_bookable_group(sender, instance, **kwargs):
+    g = Group(name="{}_admin".format(instance.id_str))
+    g.save()
 
 
 # class TimeSlot(models.Model):

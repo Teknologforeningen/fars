@@ -17,32 +17,34 @@
   {% endblock %}
 </head>
 <body>
-  <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
-    {% if bookable %}
-      <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
-    {% else %}
-      <a href="/" class="navbar-brand">FARS</a>
-    {% endif %}
-    {% if user.is_authenticated %}
-      <span class="nav-item">
-        <span class="navbar-text">{{user.get_full_name}}</span>
-        <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">Logout</a>
-      </span>
-    {% else %}
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div id="collapseContent" class="collapse navbar-collapse">
-        <form class="form-inline ml-auto my-3 my-md-0" method="post" action="{% url 'login' %}?next={{ request.build_absolute_uri }}">
-          {% csrf_token %}
-          <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
-          <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
-          <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Login</button>
-        </form>
-      </div>
-    {% endif %}
-  </nav>
+  {% block navbar %}
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
+      {% if bookable %}
+        <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
+      {% else %}
+        <a href="/" class="navbar-brand">FARS</a>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <span class="nav-item">
+          <span class="navbar-text">{{user.get_full_name}}</span>
+          <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">Logout</a>
+        </span>
+      {% else %}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="collapseContent" class="collapse navbar-collapse">
+          <form class="form-inline ml-auto my-3 my-md-0" method="post" action="{% url 'login' %}?next={{ request.build_absolute_uri }}">
+            {% csrf_token %}
+            <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
+            <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
+            <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Login</button>
+          </form>
+        </div>
+      {% endif %}
+    </nav>
+  {% endblock %}
   {% block calendar %}
 
     <!-- BOOKABLES -->
