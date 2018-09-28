@@ -10,7 +10,8 @@ function getBusinesshours(date) {
 
   return {
     'start': start,
-    'end': '24:00'
+    'end': '24:00',
+    'dow': [1, 2, 3, 4, 5, 6, 7]
   }
 };
 
