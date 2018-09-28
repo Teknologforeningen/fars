@@ -1,7 +1,25 @@
+function getBusinesshours(date) {
+  var currentTime = moment();
+  if (currentTime.isSame(date, 'day')) {
+    start = currentTime.format('HH:mm');
+  } else if (currentTime.isAfter(date)) {
+    start = '24:00';
+  } else {
+    start = '00:00';
+  }
+
+  return {
+    'start': start,
+    'end': '24:00'
+  }
+};
+
+
 $(document).ready(function() {
   var calendar = $('#calendar'),
       date = calendar.data('date'),
       bookable = calendar.data('bookable');
+
   calendar.fullCalendar({
       height: 'auto',
       aspectRatio: 2,
@@ -16,6 +34,7 @@ $(document).ready(function() {
       },
       firstDay: 1,
       locale: 'fi',
+      timezone: 'local',
       timeFormat: 'H:mm',
       slotLabelFormat: 'H:mm',
       displayEventEnd: true,
@@ -24,19 +43,32 @@ $(document).ready(function() {
       defaultDate: date,
       allDaySlot: false,
       themeSystem: 'bootstrap4',
-      eventBackgroundColor: "#6c757d",
-      eventBorderColor: "grey",
+      eventBackgroundColor: '#6c757d',
+      eventBorderColor: 'grey',
       agendaEventMinHeight: 20,
-      // If a timeslot is clicked it opens the modal for booking
-      dayClick: function(date, jsEvent, view) {
+      businessHours: getBusinesshours(date),
+      selectable: true,
+      selectAllow: function(selectInfo) {
+        var min = moment();
+        const remainder = min.minute() % 30;
+        min.subtract(remainder, 'minutes').startOf('minute');
+        return selectInfo.start >= min;
+      },
+      // If a time is selected it opens the modal for booking
+      select: function(start, end, jsEvent, view) {
+        var now = moment();
+        if (start < now) {
+          start = now;
+        }
         var modal = $('#modalBox');
+        var params = {'st': start.format(), 'et': end.format()};
         $.get(
-          '/booking/book/' + bookable + '?t=' + date.toISOString(),
+          '/booking/book/' +  bookable + '?' + $.param(params),
           function(data){
             modal.find('.modal-content').html(data)
           }
         );
-        modal.modal("show");
+        modal.modal('show');
       },
       events: function(start, end, timezone, callback) {
         $.ajax({
@@ -68,7 +100,7 @@ $(document).ready(function() {
             modal.find('.modal-content').html(data)
           }
         );
-        modal.modal("show");
-      }
+        modal.modal('show');
+      },
   });
 });
