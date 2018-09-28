@@ -21,25 +21,23 @@ def bookings_month(request, bookable):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     if not bookable_obj.public and not request.user.is_authenticated:
         return redirect('{}?next={}'.format(reverse('login'), request.path_info))
-    else:
-        context = {
-            'bookable': bookable_obj,
-            'user': request.user
-        }
-        return render(request, 'month.html', context)
+    context = {
+        'bookable': bookable_obj,
+        'user': request.user
+    }
+    return render(request, 'month.html', context)
 
 
 def bookings_day(request, bookable, year, month, day):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     if not bookable_obj.public and not request.user.is_authenticated:
         return redirect('{}?next={}'.format(reverse('login'), request.path_info))
-    else:
-        context = {
-            'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day),
-            'bookable': bookable_obj,
-            'user': request.user
-        }
-        return render(request, 'day.html', context)
+    context = {
+        'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day),
+        'bookable': bookable_obj,
+        'user': request.user
+    }
+    return render(request, 'day.html', context)
 
 
 def book(request, bookable):
