@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm
 from datetime import datetime, timedelta
+import dateutil.parser
 
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 def home(request):
     bookables = Bookable.objects.all()
@@ -52,12 +54,10 @@ def book(request, bookable):
     }
 
     if request.method == 'GET':
-        start = datetime.strptime(request.GET['t'], '%Y-%m-%dT%H:%M:%S') \
-            if 't' in request.GET else datetime.now()
+        booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
+        booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else start + timedelta(hours=1)
         booking.bookable = bookable_obj
         booking.user = request.user
-        booking.start = start
-        booking.end = start + timedelta(hours=1)
         form = BookingForm(instance=booking)
         status = 200
     elif request.method == 'POST':
