@@ -5,6 +5,11 @@ Make sure that you have Python 3 and pip installed and virtualenv to go with it.
 
 ## Development environment setup
 
+Install prerequisites
+```
+sudo apt install virtualenv python3 python3-pip libsasl2-dev python3-dev libldap2-dev libssl-dev
+```
+
 `cd` into the `fars` directory and do the following:
 
 Create virtualenv
