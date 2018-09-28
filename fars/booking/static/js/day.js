@@ -10,7 +10,8 @@ function getBusinesshours(date) {
 
   return {
     'start': start,
-    'end': '24:00'
+    'end': '24:00',
+    'dow': [1, 2, 3, 4, 5, 6, 7]
   }
 };
 
@@ -21,7 +22,7 @@ $(document).ready(function() {
       bookable = calendar.data('bookable');
 
   calendar.fullCalendar({
-      height: 'auto',
+      height: 'parent',
       aspectRatio: 2,
       // header
       header: {
@@ -48,6 +49,7 @@ $(document).ready(function() {
       agendaEventMinHeight: 20,
       businessHours: getBusinesshours(date),
       selectable: true,
+      selectLongPressDelay: 300,
       selectAllow: function(selectInfo) {
         var min = moment();
         const remainder = min.minute() % 30;

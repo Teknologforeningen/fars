@@ -1,5 +1,6 @@
 db.sqlite3
 fars/booking/static/img/
+!fars/booking/static/img/tf.svg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
