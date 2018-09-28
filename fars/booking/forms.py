@@ -38,6 +38,7 @@ class BookingForm(forms.ModelForm):
         widgets = {
             'bookable': forms.HiddenInput(),
             'user': forms.HiddenInput(),
+            'comment': forms.TextInput(attrs={'autocomplete': 'off'})
         }
 
     def clean_start(self):
