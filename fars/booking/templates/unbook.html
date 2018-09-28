@@ -46,7 +46,7 @@ Unbooking {{ booking.bookable }}
 {% if unbookable %}
 {% load tags %}
 <button id="unbookbutton" class="btn btn-warning">
-    {% if user|is_bookablestaff:booking.bookable %}
+    {% if user|is_bookableadmin:booking.bookable %}
     Admin
     {% endif %}
     Unbook
