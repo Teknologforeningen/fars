@@ -95,6 +95,10 @@ if not DEBUG:
                 'level': 'INFO',
                 'propagate': True,
             },
+            'django_auth_ldap': {
+                'handlers': ['file'],
+                'level': 'INFO',
+            },
         },
     }
 
