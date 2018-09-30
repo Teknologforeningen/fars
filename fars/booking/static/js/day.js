@@ -19,7 +19,8 @@ function getBusinesshours(date) {
 $(document).ready(function() {
   var calendar = $('#calendar'),
       date = calendar.data('date'),
-      bookable = calendar.data('bookable');
+      bookable = calendar.data('bookable'),
+      locale = calendar.data('locale')
 
   calendar.fullCalendar({
       height: 'parent',
@@ -34,7 +35,7 @@ $(document).ready(function() {
 
       },
       firstDay: 1,
-      locale: 'fi',
+      locale: locale,
       timezone: 'local',
       timeFormat: 'H:mm',
       slotLabelFormat: 'H:mm',

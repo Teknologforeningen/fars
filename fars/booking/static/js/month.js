@@ -1,8 +1,10 @@
 $(document).ready(function() {
   var calendar = $('#calendar'),
-    bookable = calendar.data('bookable');
+    bookable = calendar.data('bookable'),
+    locale = calendar.data('locale');
   calendar.fullCalendar({
       height: 'auto',
+      locale: locale,
       aspectRatio: 2,
       // header
       header: {

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load i18n %}
 
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/calendar-theme.css' %}">
@@ -18,7 +19,7 @@
       <div id="loginbox" class="offset-3 col-6 my-auto py-5 border bg-light">
         <h1 class="d-flex justify-content-center offset-2 col-8 pb-3">FARS</h1>
         {% if form.errors %}
-          <p class="offset-2 col-8 text-danger">Your username and password didn't match. Please try again.</p>
+          <p class="offset-2 col-8 text-danger">{% trans "Your username and password didn't match. Please try again." %}</p>
         {% endif %}
 
         <form method="post" action="{% url 'login' %}">

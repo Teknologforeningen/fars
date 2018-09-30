@@ -4,6 +4,9 @@
   <title>FARS</title>
   {% load static %}
   {% load tags %}
+  {% load i18n %}
+  {% get_current_language as language_code %}
+
   <!-- For calendar -->
   <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
@@ -28,7 +31,7 @@
       {% if user.is_authenticated %}
         <span class="nav-item">
           <span class="navbar-text">{{user.get_full_name}}</span>
-          <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">Logout</a>
+          <a class="btn btn-outline-danger" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">{% trans "Logout" %}</a>
         </span>
       {% else %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +42,7 @@
             {% csrf_token %}
             <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
             <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
-            <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Login</button>
+            <button type="submit" class="btn btn-outline-success my-2 my-sm-0">{% trans "Login" %}</button>
           </form>
         </div>
       {% endif %}
@@ -58,7 +61,7 @@
           </a>
         </div>
         {% empty %}
-          There are no bookables, add some through the admin interface.
+          {% trans "There are no bookables, add some through the admin interface." %}
         {% endfor %}
       </div>
     </div>
@@ -67,6 +70,7 @@
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/locale/{{language_code}}.js"></script>
   <script src="//cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
   <script src="{% static 'js/bookable.js' %}"></script>
 </body>
