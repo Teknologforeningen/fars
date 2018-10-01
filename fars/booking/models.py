@@ -4,6 +4,7 @@ from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
+from datetime import timedelta
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 
@@ -49,3 +50,8 @@ class Booking(models.Model):
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+
+class BookableRepeat(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+    delay = models.IntegerField() # in seconds
+    occurences = models.IntegerField()
