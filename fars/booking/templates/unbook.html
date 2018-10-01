@@ -1,12 +1,13 @@
 {% extends "modalcontent.html" %}
+{% load i18n %}
 {% block title %}
-Unbooking {{ booking.bookable }}
+{% blocktrans %} Unbooking {{ booking.bookable }} {% endblocktrans %}
 {% endblock %}
 {% block body %}
 <div class="container">
     <div class="row">
         <div class="col-3 font-weight-bold">
-            Booked by:
+            {% trans "Booked by:" %}
         </div>
         <div class="col-9">
             {% if booking.user.first_name and booking.user.last_name %}
@@ -18,7 +19,7 @@ Unbooking {{ booking.bookable }}
     </div>
     <div class="row">
         <div class="col-3 font-weight-bold">
-            Start:
+            {% trans "Start:" %}
         </div>
         <div class="col-9">
             {{booking.start}}
@@ -26,7 +27,7 @@ Unbooking {{ booking.bookable }}
     </div>
     <div class="row">
         <div class="col-3 font-weight-bold">
-            End:
+            {% trans "End:" %}
         </div>
         <div class="col-9">
             {{booking.end}}
@@ -34,7 +35,7 @@ Unbooking {{ booking.bookable }}
     </div>
     <div class="row">
         <div class="col-3 font-weight-bold">
-            Comment:
+            {% trans "Comment:" %}
         </div>
         <div class="col-9">
             {{booking.comment}}
@@ -47,9 +48,10 @@ Unbooking {{ booking.bookable }}
 {% load tags %}
 <button id="unbookbutton" class="btn btn-warning">
     {% if user|is_bookableadmin:booking.bookable %}
-    Admin
+    {% trans "Admin unbook" %}
+    {% else %}
+    {% trans "Unbook" %}
     {% endif %}
-    Unbook
 </button>
 <script type="text/javascript">
   $('#unbookbutton').click(function(event) {

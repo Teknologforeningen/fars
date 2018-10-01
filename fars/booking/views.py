@@ -5,6 +5,7 @@ from booking.models import Booking, Bookable
 from booking.forms import BookingForm
 from datetime import datetime, timedelta
 import dateutil.parser
+from django.utils.translation import gettext as _
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
@@ -85,11 +86,11 @@ def unbook(request, booking_id):
         pass
     elif booking.end < now:
         unbookable = False
-        warning = "Bookings in the past may not be unbooked"
+        warning = _("Bookings in the past may not be unbooked")
     # TODO: is this the proper way to check if users are the same?''
     elif request.user.username != booking.user.username:
         unbookable = False
-        warning = "Only the user that made the booking may unbook it"
+        warning = _("Only the user that made the booking may unbook it")
 
     if request.method == 'POST' and unbookable:
         if booking.start < now and booking.end > now:

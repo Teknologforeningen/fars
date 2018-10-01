@@ -1,10 +1,12 @@
 {% extends "modalcontent.html" %}
+{% load i18n %}
+
 
 {% block title %}
   {% if user.first_name and user.last_name %}
-    Booking <strong>{{ bookable }}</strong> for <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+    {% blocktrans %}Booking <strong>{{ bookable }}</strong> for {% endblocktrans %}<strong>{{ user.first_name }} {{ user.last_name }}</strong>
   {% else %}
-    Booking <strong>{{ bookable }}</strong> for <strong>{{ user.username }}</strong>
+    {% blocktrans %}Booking <strong>{{ bookable }}</strong> for {% endblocktrans %}<strong>{{ user.username }}</strong>
   {% endif %}
 {% endblock %}
 
@@ -18,7 +20,7 @@
     <div class="row form-group">
       <div class="col-md-6">
         {% bootstrap_field form.start layout="vertical" vertical_field_class="col-md-9" %}
-        <button type="button" id="nowbutton" class="btn btn-warning float-right">Now</button>
+        <button type="button" id="nowbutton" class="btn btn-warning float-right">{% trans "Now" %}</button>
       </div>
       <div class="col-md-6">
         {% bootstrap_field form.end layout="vertical" vertical_field_class="col-md-9" %}
@@ -49,5 +51,5 @@
 {% endblock %}
 
 {% block footer %}
-  <input class="btn btn-success" type="submit" value="Submit" form="bookform">
+  <input class="btn btn-success" type="submit" value="{% trans "Submit" %}" form="bookform">
 {% endblock %}

@@ -1,0 +1,138 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-09-30 00:31+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: fars/booking/forms.py:56
+msgid "Booking may not be in the past"
+msgstr "Bokningen får inte vara i det förflutna"
+
+#: fars/booking/forms.py:68
+msgid "Booking cannot end before it begins"
+msgstr "Bokningen kan inte sluta före den börjar"
+
+#: fars/booking/forms.py:73
+msgid "{} may not be booked more than {} days in advance"
+msgstr "{} kan inte bokas mer än {} dagar i förväg"
+
+#: fars/booking/forms.py:82
+msgid "{} may not be booked for longer than {} hours"
+msgstr "{} kan inte bokas för längre än {} timmar"
+
+#: fars/booking/forms.py:89
+msgid "Error: Requested booking is overlapping with the following bookings:"
+msgstr "Error: Den begärda bokningen överlappar följande bokningar:"
+
+#: fars/booking/models.py:8
+msgid "Only alphanumeric characters are allowed."
+msgstr "Endast alfanumeriska tecken är tillåtna"
+
+#: fars/booking/models.py:42
+msgid "start"
+msgstr "start"
+
+#: fars/booking/models.py:43
+msgid "end"
+msgstr "slut"
+
+#: fars/booking/models.py:44
+msgid "comment"
+msgstr "kommentar"
+
+#: fars/booking/models.py:47
+msgid "Booking"
+msgstr "Bokning"
+
+#: fars/booking/models.py:48
+msgid "Bookings"
+msgstr "Bokningar"
+
+#: fars/booking/templates/base.html:34
+msgid "Logout"
+msgstr "Logga ut"
+
+#: fars/booking/templates/base.html:45
+#: fars/booking/templates/modals/forbidden.html:10
+msgid "Login"
+msgstr "Logga in"
+
+#: fars/booking/templates/base.html:64
+msgid "There are no bookables, add some through the admin interface."
+msgstr "Det finns inga bookables, skapa dem i admin interfacen"
+
+#: fars/booking/templates/book.html:7 fars/booking/templates/book.html:9
+#, python-format
+msgid "Booking <strong>%(bookable)s</strong> for "
+msgstr "Bokar <strong>%(bookable)s</strong> för "
+
+#: fars/booking/templates/book.html:23
+msgid "Now"
+msgstr "Nu"
+
+#: fars/booking/templates/book.html:54
+msgid "Submit"
+msgstr "Boka"
+
+#: fars/booking/templates/login.html:22
+msgid "Your username and password didn't match. Please try again."
+msgstr "Ditt användarnamn eller lösenord är fel. Försök igen."
+
+#: fars/booking/templates/modals/forbidden.html:4
+msgid "Not logged in"
+msgstr "Ej inloggad"
+
+#: fars/booking/templates/modals/forbidden.html:7
+msgid "You need to log in to perform this action."
+msgstr "Du måste logga in för att utföra denna handling."
+
+#: fars/booking/templates/unbook.html:4
+#, python-format
+msgid " Unbooking %(booking.bookable)s "
+msgstr "Avbokar %(booking.bookable)s "
+
+#: fars/booking/templates/unbook.html:10
+msgid "Booked by:"
+msgstr "Bokad av:"
+
+#: fars/booking/templates/unbook.html:22
+msgid "Start:"
+msgstr "Start:"
+
+#: fars/booking/templates/unbook.html:30
+msgid "End:"
+msgstr "Slut:"
+
+#: fars/booking/templates/unbook.html:38
+msgid "Comment:"
+msgstr "Kommentar:"
+
+#: fars/booking/templates/unbook.html:51
+msgid "Admin unbook"
+msgstr "Admin avbokning"
+
+#: fars/booking/templates/unbook.html:53
+msgid "Unbook"
+msgstr "Avboka"
+
+#: fars/booking/views.py:89
+msgid "Bookings in the past may not be unbooked"
+msgstr "Bokningar i det förflutna kan inte avbokas"
+
+#: fars/booking/views.py:93
+msgid "Only the user that made the booking may unbook it"
+msgstr "Endast användaren som skapade bokningen kan avboka den"

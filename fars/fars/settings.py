@@ -33,7 +33,6 @@ DEBUG = env('DEBUG', True)
 
 ALLOWED_HOSTS = ['localhost']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -104,7 +103,6 @@ if not DEBUG:
 
 WSGI_APPLICATION = 'fars.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
@@ -136,13 +134,16 @@ LOGIN_REDIRECT_URL = 'home'
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = env('LANGUAGE_CODE', 'sv')
+LOCALE_PATHS = [
+    PROJECT_DIR + '/../locale',
+]
 
 TIME_ZONE = 'Europe/Helsinki'
 
 USE_I18N = True
 
-USE_L10N = False
+USE_L10N = True
 
 USE_TZ = True
 
