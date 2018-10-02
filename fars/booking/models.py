@@ -53,5 +53,5 @@ class Booking(models.Model):
 
 class BookableRepeat(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
-    delay = models.IntegerField() # in seconds
-    occurences = models.IntegerField()
+    frequency = models.IntegerField() # in seconds
+    repeat_until = models.DateField()
