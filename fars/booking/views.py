@@ -51,7 +51,8 @@ def book(request, bookable):
         'bookable': bookable_obj,
         'user': request.user,
     }
-
+    book_repeat = BookableRepeat()
+    book_repeat.booking = booking
     if request.method == 'GET':
         booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else start + timedelta(hours=1)
@@ -62,12 +63,21 @@ def book(request, bookable):
         groupname = "{}_admin".format(bookable)
         groupmembers = User.objects.filter(groups__name=groupname)
         if request.user.is_superuser or request.user in groupmembers:
-            repeat_form = BookableRepeatForm(instance=BookableRepeat())
+            repeat_form = BookableRepeatForm(instance=book_repeat)
             context['repeatform'] = repeat_form
     elif request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
+            if request.user.is_superuser or request.user in groupmembers:
+                repeat_form = BookableRepeatForm(request.POST, instance=book_repeat)
+                repeat_form.booking = booking
+                if repeat_form.is_valid():
+                    repeat = repeat_form.save(commit=False)
+                    repeat.booking = booking
+                    repeat.save()
+                else:
+                    status = 400
             return HttpResponse()
         else:
             status = 400

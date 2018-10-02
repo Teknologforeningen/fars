@@ -102,10 +102,10 @@ class BookableRepeatForm(forms.ModelForm):
     class Meta:
         model = BookableRepeat
         fields = '__all__'
+        exclude = ['booking']
         help_texts = {
             'frequency': _('Number of days until next repetition of event, e.g. 7 for weekly event'),
         }
         widgets = {
-            'booking' : forms.HiddenInput(),
             'repeat_until': TextInput(attrs={'type': 'date'})
         }

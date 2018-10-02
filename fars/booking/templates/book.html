@@ -45,7 +45,7 @@
 
   <script type="text/javascript">
     $('#bookform').submit(function(event) {
-      $.post("{{url}}", $(this).serialize())
+      $.post("{{url}}", $(this).serialize()+'&'+$('#repeatform').serialize())
         .done(function() {
           $('#calendar').fullCalendar('refetchEvents');
           $('#modalBox').modal('hide')
