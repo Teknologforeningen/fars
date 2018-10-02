@@ -1,7 +1,7 @@
 from django import forms
-from booking.models import Booking
+from booking.models import Booking, BookableRepeat
 from django.contrib.auth.forms import AuthenticationForm
-from django.forms.widgets import PasswordInput, TextInput
+from django.forms.widgets import PasswordInput, TextInput, NumberInput
 from datetime import datetime, timedelta
 from django.utils.translation import gettext as _
 
@@ -96,3 +96,16 @@ class BookingForm(forms.ModelForm):
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-2 col-8','placeholder': 'Username'}))
     password = forms.CharField(widget=PasswordInput(attrs={'class':'offset-2 col-8','placeholder':'Password'}))
+
+
+class BookableRepeatForm(forms.ModelForm):
+    class Meta:
+        model = BookableRepeat
+        fields = '__all__'
+        help_texts = {
+            'frequency': _('Number of days until next repetition of event, e.g. 7 for weekly event'),
+        }
+        widgets = {
+            'booking' : forms.HiddenInput(),
+            'repeat_until': TextInput(attrs={'type': 'date'})
+        }

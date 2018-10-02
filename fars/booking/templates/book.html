@@ -28,6 +28,21 @@
     </div>
     {% bootstrap_field form.comment layout="horizontal" %}
   </form>
+  {% if repeatform %}
+    <form id="repeatform">
+      {% csrf_token %}
+      {% bootstrap_form_errors repeatform %}
+      <div class="row form-group">
+        <div class="col-md-6">
+          {% trans "Frequency of repetition in days" as transfreq %}
+          {% bootstrap_field repeatform.frequency placeholder=transfreq %}
+        </div>
+        <div class="col-md-6">
+          {% bootstrap_field repeatform.repeat_until %}
+        </div>
+    </form>
+  {% endif %}
+
   <script type="text/javascript">
     $('#bookform').submit(function(event) {
       $.post("{{url}}", $(this).serialize())

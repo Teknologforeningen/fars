@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
-from booking.models import Booking, Bookable
-from booking.forms import BookingForm
+from booking.models import Booking, Bookable, BookableRepeat
+from booking.forms import BookingForm, BookableRepeatForm
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
@@ -59,6 +59,11 @@ def book(request, bookable):
         booking.user = request.user
         form = BookingForm(instance=booking)
         status = 200
+        groupname = "{}_admin".format(bookable)
+        groupmembers = User.objects.filter(groups__name=groupname)
+        if request.user.is_superuser or request.user in groupmembers:
+            repeat_form = BookableRepeatForm(instance=BookableRepeat())
+            context['repeatform'] = repeat_form
     elif request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
