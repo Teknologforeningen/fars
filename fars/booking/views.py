@@ -54,7 +54,7 @@ def book(request, bookable):
 
     if request.method == 'GET':
         booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
-        booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else start + timedelta(hours=1)
+        booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = bookable_obj
         booking.user = request.user
         form = BookingForm(instance=booking)
