@@ -57,7 +57,14 @@
       $('#repeat-form-wrapper').toggleClass('disabled');
     });
     $('#bookform').submit(function(event) {
-      $.post("{{url}}", $(this).serialize()+'&'+$('#repeatform').serialize())
+      if($('#repeat-toggle').prop('checked')) {
+        var postdata = $(this).serialize()+'&'+$('#repeatform').serialize();
+      } else {
+        var postdata = $(this).serialize();
+      }
+      console.log($('#repeat-toggle').prop('checked'));
+      console.log(postdata);
+      $.post("{{url}}", postdata)
         .done(function() {
           $('#calendar').fullCalendar('refetchEvents');
           $('#modalBox').modal('hide')
