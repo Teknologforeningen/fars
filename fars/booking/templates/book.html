@@ -58,7 +58,7 @@
     });
     $('#bookform').submit(function(event) {
       if($('#repeat-toggle').prop('checked')) {
-        var postdata = $(this).serialize()+'&'+$('#repeatform').serialize();
+        var postdata = $(this).serialize()+'&repeat=1&'+$('#repeatform').serialize();
       } else {
         var postdata = $(this).serialize();
       }

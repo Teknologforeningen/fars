@@ -67,7 +67,7 @@ def book(request, bookable):
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
             form.save(commit=False)
-            if request.user.is_superuser or request.user in groupmembers:
+            if request.POST.get('repeat') and (request.user.is_superuser or request.user in groupmembers):
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
                     'repeat_until': request.POST.get('repeat_until')
