@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
-from booking.models import Booking, Bookable, BookableRepeat
-from booking.forms import BookingForm, BookableRepeatForm
+from booking.models import Booking, Bookable
+from booking.forms import BookingForm, RepeatingBookingForm
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
@@ -51,8 +51,6 @@ def book(request, bookable):
         'bookable': bookable_obj,
         'user': request.user,
     }
-    book_repeat = BookableRepeat()
-    book_repeat.booking = booking
     if request.method == 'GET':
         booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else start + timedelta(hours=1)
@@ -63,22 +61,27 @@ def book(request, bookable):
         groupname = "{}_admin".format(bookable)
         groupmembers = User.objects.filter(groups__name=groupname)
         if request.user.is_superuser or request.user in groupmembers:
-            repeat_form = BookableRepeatForm(instance=book_repeat)
+            repeat_form = RepeatingBookingForm()
             context['repeatform'] = repeat_form
     elif request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
-            form.save()
+            form.save(commit=False)
             if request.user.is_superuser or request.user in groupmembers:
-                repeat_form = BookableRepeatForm(request.POST, instance=book_repeat)
-                repeat_form.booking = booking
+                repeatdata = {
+                    'frequency': request.POST.get('frequency'),
+                    'repeat_until': request.POST.get('repeat_until')
+                }
+                repeat_form = RepeatingBookingForm(repeatdata)
                 if repeat_form.is_valid():
-                    repeat = repeat_form.save(commit=False)
-                    repeat.booking = booking
-                    repeat.save()
+                    form.save()
+                    repeat_form.save(booking) # Also adds repeatgroup to booking
+                    return HttpResponse()
                 else:
                     status = 400
-            return HttpResponse()
+            else:
+                form.save()
+                return HttpResponse()
         else:
             status = 400
     else:

@@ -1,9 +1,10 @@
 from django import forms
-from booking.models import Booking, BookableRepeat
+from booking.models import Booking, RepeatedBookingGroup
 from django.contrib.auth.forms import AuthenticationForm
-from django.forms.widgets import PasswordInput, TextInput, NumberInput
+from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
 from datetime import datetime, timedelta
 from django.utils.translation import gettext as _
+from datetime import date
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
@@ -38,6 +39,7 @@ class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = '__all__'
+        exclude = ['repeatgroup']
         widgets = {
             'bookable': forms.HiddenInput(),
             'user': forms.HiddenInput(),
@@ -98,14 +100,13 @@ class CustomLoginForm(AuthenticationForm):
     password = forms.CharField(widget=PasswordInput(attrs={'class':'offset-2 col-8','placeholder':'Password'}))
 
 
-class BookableRepeatForm(forms.ModelForm):
-    class Meta:
-        model = BookableRepeat
-        fields = '__all__'
-        exclude = ['booking']
-        help_texts = {
-            'frequency': _('Number of days until next repetition of event, e.g. 7 for weekly event'),
-        }
-        widgets = {
-            'repeat_until': TextInput(attrs={'type': 'date'})
-        }
+class RepeatingBookingForm(forms.Form):
+    frequency = forms.IntegerField(label='Frequency of repetitions (in days)', initial=7)
+    repeat_until = forms.DateField(initial=date.today() + timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
+
+    def save(self, booking, commit=True):
+        data = self.cleaned_data
+        rbg = RepeatedBookingGroup.objects.create(name=booking.comment)
+        rbg.save()
+        booking.repeatgroup = rbg
+        booking.save()

@@ -62,8 +62,6 @@
       } else {
         var postdata = $(this).serialize();
       }
-      console.log($('#repeat-toggle').prop('checked'));
-      console.log(postdata);
       $.post("{{url}}", postdata)
         .done(function() {
           $('#calendar').fullCalendar('refetchEvents');

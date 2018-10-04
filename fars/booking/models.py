@@ -37,12 +37,17 @@ def create_bookable_group(sender, instance, **kwargs):
 #     bookable = models.ForeignKey(max_length=8, Bookable, on_delete=models.CASCADE)
 
 
+class RepeatedBookingGroup(models.Model):
+    name = models.CharField(max_length=128)
+
+
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start = models.DateTimeField(_("start"))
     end = models.DateTimeField(_("end"))
     comment = models.CharField(_("comment"), max_length=128)
+    repeatgroup = models.ForeignKey(RepeatedBookingGroup, null=True, on_delete=models.CASCADE, default=None)
 
     class Meta:
         verbose_name = _("Booking")
@@ -50,8 +55,3 @@ class Booking(models.Model):
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
-
-class BookableRepeat(models.Model):
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
-    frequency = models.IntegerField() # in seconds
-    repeat_until = models.DateField()
