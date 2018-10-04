@@ -110,3 +110,10 @@ class RepeatingBookingForm(forms.Form):
         rbg.save()
         booking.repeatgroup = rbg
         booking.save()
+        # Copy booking for every repetition
+
+        while(booking.start.date() + timedelta(days=data.get('frequency')) <= data.get('repeat_until')):
+            booking.pk = None
+            booking.start += timedelta(days=data.get('frequency'))
+            booking.end += timedelta(days=data.get('frequency'))
+            booking.save()
