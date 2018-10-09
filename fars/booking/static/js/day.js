@@ -20,7 +20,8 @@ $(document).ready(function() {
   var calendar = $('#calendar'),
       date = calendar.data('date'),
       bookable = calendar.data('bookable'),
-      locale = calendar.data('locale')
+      locale = calendar.data('locale'),
+      user = calendar.data('user')
 
   calendar.fullCalendar({
       height: 'parent',
@@ -90,11 +91,17 @@ $(document).ready(function() {
                 title: $(this).attr('comment'),
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
+                user: $(this).attr('user'),
               });
             });
             callback(events);
           }
         });
+      },
+      eventAfterRender: function(calEvent, jsEvent, view) {
+        if (user === calEvent.user) {
+          jsEvent.css('background-color', '#000066');
+        }
       },
       eventClick: function(calEvent, jsEvent, view) {
         var modal = $('#modalBox');
