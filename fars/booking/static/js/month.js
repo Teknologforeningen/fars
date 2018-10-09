@@ -2,6 +2,7 @@ $(document).ready(function() {
   var calendar = $('#calendar'),
     bookable = calendar.data('bookable'),
     locale = calendar.data('locale');
+    user = calendar.data('user');
   calendar.fullCalendar({
       height: 'auto',
       locale: locale,
@@ -43,12 +44,19 @@ $(document).ready(function() {
                 title: $(this).attr('comment'),
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
+                user: $(this).attr('user'),
               });
             });
             callback(events);
           }
         });
-      }
+      },
+      eventAfterRender: function(calEvent, jsEvent, view) {
+        console.log("test");
+        if (user === calEvent.user) {
+          jsEvent.css('background-color', '#000066');
+        }
+      },
   });
   var Key = {
     LEFT:   37,
