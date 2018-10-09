@@ -40,6 +40,10 @@ def create_bookable_group(sender, instance, **kwargs):
 class RepeatedBookingGroup(models.Model):
     name = models.CharField(max_length=128)
 
+    def delete_from_date_forward(self, date):
+        bookings = self.booking_set.filter(start__gte=date)
+        bookings.delete()
+
 
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)

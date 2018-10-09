@@ -93,20 +93,31 @@ def book(request, bookable):
 def unbook(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
     # Check if unbooking is allowed
-    now = datetime.now(booking.start.tzinfo) # TODO: Do we want to deal with timezones? should we use UTC?
+    now = datetime.now(booking.start.tzinfo)
     unbookable = True
     warning = None
     groupname = "{}_admin".format(booking.bookable.id_str)
     groupmembers = User.objects.filter(groups__name=groupname)
 
+    # User is admin
     if request.user.is_superuser or request.user in groupmembers:
-        # Admin may unbook anything
-        pass
+        '''
+        Removal of a repeating booking. There are 3 different levels of removal
+        of a repeating booking:
+        0 : Delete only this booking
+        1 : Delete this booking and bookings after this one
+        2 : Delete all bookings from this series of booking (past and future)
+        '''
+        if request.method == 'POST' and booking.repeatgroup and int(request.POST.get('repeat')) >= 1:
+            removal_level = int(request.POST.get('repeat'))
+            if removal_level == 1:
+                booking.repeatgroup.delete_from_date_forward(booking.start)
+            elif removal_level == 2:
+                booking.repeatgroup.delete()
     elif booking.end < now:
         unbookable = False
         warning = _("Bookings in the past may not be unbooked")
-    # TODO: is this the proper way to check if users are the same?''
-    elif request.user.username != booking.user.username:
+    elif request.user != booking.user:
         unbookable = False
         warning = _("Only the user that made the booking may unbook it")
 
