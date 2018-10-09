@@ -20,7 +20,8 @@ $(document).ready(function() {
   var calendar = $('#calendar'),
       date = calendar.data('date'),
       bookable = calendar.data('bookable'),
-      locale = calendar.data('locale')
+      locale = calendar.data('locale'),
+      user = calendar.data('user');
 
   calendar.fullCalendar({
       height: 'parent',
@@ -83,12 +84,16 @@ $(document).ready(function() {
           success: function(data) {
             var events = [];
             $(data).each(function() {
-              events.push({
+              var event = {
                 id: $(this).attr('id'),
                 title: $(this).attr('comment'),
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
-              });
+              };
+              if ($(this).attr('user') === user) {
+                event.className = 'bg-primary'
+              }
+              events.push(event);
             });
             callback(events);
           }
