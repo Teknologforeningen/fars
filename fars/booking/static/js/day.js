@@ -45,8 +45,6 @@ $(document).ready(function() {
       defaultDate: date,
       allDaySlot: false,
       themeSystem: 'bootstrap4',
-      eventBackgroundColor: '#6c757d',
-      eventBorderColor: 'grey',
       agendaEventMinHeight: 20,
       scrollTime: moment().format('HH:mm:ss'),
       businessHours: getBusinesshours(date),

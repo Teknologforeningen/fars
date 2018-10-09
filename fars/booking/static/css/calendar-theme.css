@@ -234,6 +234,11 @@ thead th.fc-last {
   .fc-state-disabled .fc-button-effect {
     display: none; }
 
+.fc-event {
+  background-color: #6c757d;
+  border-color: grey;
+}
+
 a.fc-event, .fc-event-draggable {
   cursor: pointer; }
 
