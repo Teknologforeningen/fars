@@ -90,9 +90,15 @@ $(document).ready(function() {
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
               };
-              if ($(this).attr('user') === user) {
-                event.className = 'bg-own';
+              var today = moment();
+              var classNames = [];
+              if (moment(event.end)._d.getTime() < today._d.getTime()) {
+                classNames.push("past");
               }
+              if ($(this).attr('user') === user) {
+                classNames.push('bg-own');
+              }
+              event.className = classNames;
               events.push(event);
             });
             callback(events);
