@@ -5,7 +5,6 @@ $(document).ready(function() {
     user = calendar.data('user');
   calendar.fullCalendar({
       height: 'auto',
-      locale: locale,
       aspectRatio: 2,
       // header
       header: {
@@ -45,13 +44,19 @@ $(document).ready(function() {
                 end: $(this).attr('end'),
               };
               if ($(this).attr('user') === user) {
-                event.className = 'bg-primary';
+                event.className = 'bg-own';
               }
               events.push(event);
             });
             callback(events);
           }
         });
+      },
+      eventRender: function (calev, elt, view) {
+        var ntoday = new Date();
+        if (calev.start._d.getTime() < ntoday.getTime()) {
+          elt.addClass("past");
+        }
       }
   });
   var Key = {

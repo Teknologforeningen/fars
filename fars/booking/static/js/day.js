@@ -91,7 +91,7 @@ $(document).ready(function() {
                 end: $(this).attr('end'),
               };
               if ($(this).attr('user') === user) {
-                event.className = 'bg-primary'
+                event.className = 'bg-own';
               }
               events.push(event);
             });
