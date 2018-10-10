@@ -59,3 +59,11 @@ class Booking(models.Model):
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+
+    def get_overlapping_bookings(self):
+        overlapping = Booking.objects.filter(
+            bookable=self.bookable,
+            start__lt=self.end,
+            end__gt=self.start
+            )
+        return list(overlapping)

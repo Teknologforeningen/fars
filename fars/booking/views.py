@@ -6,6 +6,8 @@ from booking.forms import BookingForm, RepeatingBookingForm
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
+from django.db import transaction
+from django.forms import ValidationError
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
@@ -64,26 +66,30 @@ def book(request, bookable):
             repeat_form = RepeatingBookingForm()
             context['repeatform'] = repeat_form
     elif request.method == 'POST':
-        form = BookingForm(request.POST, instance=booking)
-        if form.is_valid():
-            form.save(commit=False)
-            if request.POST.get('repeat') and (request.user.is_superuser or request.user in groupmembers):
-                repeatdata = {
-                    'frequency': request.POST.get('frequency'),
-                    'repeat_until': request.POST.get('repeat_until')
-                }
-                repeat_form = RepeatingBookingForm(repeatdata)
-                if repeat_form.is_valid():
-                    form.save()
-                    repeat_form.save(booking) # Also adds repeatgroup to booking
-                    return HttpResponse()
+        with transaction.atomic():
+            form = BookingForm(request.POST, instance=booking)
+            if form.is_valid():
+                form.save(commit=False)
+                if request.POST.get('repeat') and (request.user.is_superuser or request.user in groupmembers):
+                    repeatdata = {
+                        'frequency': request.POST.get('frequency'),
+                        'repeat_until': request.POST.get('repeat_until')
+                    }
+                    repeat_form = RepeatingBookingForm(repeatdata)
+                    if repeat_form.is_valid():
+                        form.save()
+                        # Also adds repeatgroup to booking
+                        errors = repeat_form.save(booking)
+                        if len(errors) > 0:
+                            raise ValidationError(errors)
+                        return HttpResponse()
+                    else:
+                        status = 400
                 else:
-                    status = 400
+                    form.save()
+                    return HttpResponse()
             else:
-                form.save()
-                return HttpResponse()
-        else:
-            status = 400
+                status = 400
     else:
         raise Http404
     context['form'] = form

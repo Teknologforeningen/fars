@@ -5,6 +5,7 @@ from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInpu
 from datetime import datetime, timedelta
 from django.utils.translation import gettext as _
 from datetime import date
+from django.db import transaction
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
@@ -105,15 +106,23 @@ class RepeatingBookingForm(forms.Form):
     repeat_until = forms.DateField(initial=date.today() + timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
 
     def save(self, booking, commit=True):
+        warning = _("Error: Requested booking is overlapping with the following bookings:")
+        errors = [forms.ValidationError(warning)]
         data = self.cleaned_data
         rbg = RepeatedBookingGroup.objects.create(name=booking.comment)
         rbg.save()
         booking.repeatgroup = rbg
         booking.save()
-        # Copy booking for every repetition
 
+        # Copy booking for every repetition
         while(booking.start.date() + timedelta(days=data.get('frequency')) <= data.get('repeat_until')):
             booking.pk = None
             booking.start += timedelta(days=data.get('frequency'))
             booking.end += timedelta(days=data.get('frequency'))
+            overlapping = booking.get_overlapping_bookings()
             booking.save()
+            if overlapping:
+                for overlap_booking in overlapping:
+                    errors.append(forms.ValidationError('• ' + str(overlap_booking)))
+        if len(errors) > 1:
+            return errors
