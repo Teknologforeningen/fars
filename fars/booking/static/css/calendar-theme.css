@@ -239,20 +239,20 @@ thead th.fc-last {
 }
 
 .fc-event {
-  background-color: #3068c1;
-  border-color: #3068c1;
+  background-color: rgba(48, 104, 193, 0.8);
+  border-color: rgba(48, 104, 193, 1);
 }
 .fc-event.bg-own {
-  background-color: rgb(57, 150, 75);
-  border-color: rgb(57, 150, 75);
+  background-color: rgba(57, 150, 75, 0.8);
+  border-color: rgba(57, 150, 75, 1);
 }
-.fc-event.past.bg-own {
-  background-color: rgba(57, 150, 75, 0.5);
-  border-color: rgba(57, 150, 75, 0.8);
+.fc-event.past-event.bg-own {
+  background-color: rgba(57, 150, 75, 0.3);
+  border-color: rgba(57, 150, 75, 0.5);
 }
-.fc-event.past {
-  background-color: rgba(48, 104, 193, 0.5);
-  border-color: rgba(48, 104, 193, 0.8);
+.fc-event.past-event {
+  background-color: rgba(48, 104, 193, 0.3);
+  border-color: rgba(48, 104, 193, 0.5);
 }
 
 a.fc-event, .fc-event-draggable {

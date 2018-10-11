@@ -45,8 +45,8 @@ $(document).ready(function() {
               };
               var today = moment();
               var classNames = [];
-              if (moment(event.end)._d.getTime() < today._d.getTime()) {
-                classNames.push("past");
+              if (moment(event.end) < today) {
+                classNames.push("past-event");
               }
               if ($(this).attr('user') === user) {
                 classNames.push('bg-own');
