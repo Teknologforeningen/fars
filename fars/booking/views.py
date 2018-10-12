@@ -18,6 +18,16 @@ def home(request):
     return render(request, 'base.html', context)
 
 
+def profile(request):
+    all_bookings = Booking.objects.filter(user=request.user)
+    context = {
+        'past_bookings': all_bookings.filter(end__lt=datetime.now()),
+        'future_bookings': all_bookings.filter(start__gt=datetime.now()),
+        'ongoing_bookings': all_bookings.filter(start__lt=datetime.now(), end__gt=datetime.now())
+    }
+    return render(request, 'profile.html', context)
+
+
 def bookings_month(request, bookable):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     if not bookable_obj.public and not request.user.is_authenticated:

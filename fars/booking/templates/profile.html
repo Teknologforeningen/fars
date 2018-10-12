@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block css %}
+{% load static %}
+<link rel="stylesheet" href='{% static "css/profile.css" %}' />
+{% endblock %}
+
+{% block calendar %}
+<div class="row col-10 offset-1">
+  <div class="col-8">
+    <div class="row text-center">
+      <h3 class="col-12">{% trans "Your Bookings" %}</h3>
+    </div>
+    <!-- Ongoing bookings -->
+    <div class="row">
+      <h5 class="col-12">{% trans "Ongoing bookings" %}<hr></h5>
+      {% for b in ongoing_bookings %}
+      <div class="col-10 offset-1 profile-event">
+        <div class="row">
+          <div class="col-6 offset-1 font-weight-bold">
+              {% trans "Booking of:" %}
+          </div>
+          <div class="col-6">
+              {{ b.bookable }}
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-3 offset-1 font-weight-bold">
+                {% trans "Start:" %}
+            </div>
+            <div class="col-8">
+                {{ b.start | date:"Y-m-d" }} {{ b.start | time:"H:i"}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-3 offset-1 font-weight-bold">
+                {% trans "End:" %}
+            </div>
+            <div class="col-8">
+                {{ b.end }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-3 offset-1 font-weight-bold">
+                {% trans "Comment:" %}
+            </div>
+            <div class="col-8">
+                {{ b.comment }}
+            </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <!-- Future bookings -->
+    <div class="row">
+      <h5 class="col-12">{% trans "Upcoming bookings" %}<hr></h5>
+      {% for b in future_bookings %}
+      <div class="col-10 offset-1 profile-event text-center">
+        <div class="row">
+          <div class="col-6 font-weight-bold">
+              {% trans "Booking of:" %}
+          </div>
+          <div class="col-4">
+              {{ b.bookable }}
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-6 font-weight-bold">
+                {% trans "Start:" %}
+            </div>
+            <div class="col-4">
+                {{ b.start }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 font-weight-bold">
+                {% trans "End:" %}
+            </div>
+            <div class="col-4">
+                {{ b.end }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6 font-weight-bold">
+                {% trans "Comment:" %}
+            </div>
+            <div class="col-4">
+                {{ b.comment }}
+            </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="row text-center">
+      <h3 class="col-12" style="margin-bottom:20px;">{% trans "Statistics" %}</h3>
+      <div class="col-10 offset-1">
+        {% for s in statistics %}
+          <div class="row">
+            <h5 class="col-7 font-weight-bold">
+                {{ s.key }}
+            </h5>
+            <div class="col-5">
+                {{ s.value }}
+            </div>
+          </div>
+        {% empty %}
+          <h5 class="col-12">{% trans "No data available" %}</h5>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

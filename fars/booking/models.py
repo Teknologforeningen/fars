@@ -51,6 +51,7 @@ class Booking(models.Model):
     class Meta:
         verbose_name = _("Booking")
         verbose_name_plural = _("Bookings")
+        ordering = ["start"]
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
