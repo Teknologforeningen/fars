@@ -96,13 +96,13 @@
     <div class="row text-center">
       <h3 class="col-12" style="margin-bottom:20px;">{% trans "Statistics" %}</h3>
       <div class="col-10 offset-1">
-        {% for s in statistics %}
+        {% for key,value in statistics.items %}
           <div class="row">
             <h5 class="col-7 font-weight-bold">
-                {{ s.key }}
+                {{ key }}
             </h5>
             <div class="col-5">
-                {{ s.value }}
+                {{ value }}
             </div>
           </div>
         {% empty %}
