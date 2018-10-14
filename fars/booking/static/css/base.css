@@ -6,3 +6,11 @@
 #calendar {
 	height: calc(100vh - 80px);
 }
+
+#toolbar-user-name {
+  padding-right: .7rem;
+}
+
+#toolbar-btn {
+  vertical-align: inherit;
+}

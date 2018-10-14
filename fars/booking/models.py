@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
@@ -27,8 +27,13 @@ class Bookable(models.Model):
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
-    g = Group(name="{}_admin".format(instance.id_str))
+    g, createad  = Group.objects.get_or_create(name="{}_admin".format(instance.id_str))
     g.save()
+
+
+@receiver(post_delete, sender=Bookable)
+def delete_bookable_group(sender, instance, **kwargs):
+    Group.objects.get(name="{}_admin".format(instance.id_str)).delete()
 
 
 # class TimeSlot(models.Model):
