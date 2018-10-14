@@ -2,9 +2,8 @@ from django import forms
 from booking.models import Booking, RepeatedBookingGroup
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from django.utils.translation import gettext as _
-from datetime import date
 from django.db import transaction
 
 
@@ -66,18 +65,13 @@ class BookingForm(forms.ModelForm):
         end = cleaned_data.get("end")
 
         if bookable and start and end:
-            # Check that end is not earlier than start
-            if end <= start:
-                raise forms.ValidationError(_("Booking cannot end before it begins"))
-
-            # Check that booking does not violate bookable limits
+            # Check that booking does not violate bookable forward limit
             if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
                 raise forms.ValidationError(
-                    _("{} may not be booked more than {} days in advance").format(
-                        bookable.name, bookable.forward_limit_days
-                    )
+                    _("{} may not be booked more than {} days in advance").format(bookable.name, bookable.forward_limit_days)
                 )
 
+            # Check that booking does not violate bookable length limit
             booking_length = (end - start)
             booking_length_hours = booking_length.days * 24 + booking_length.seconds / 3600
             if bookable.length_limit_hours > 0 and booking_length_hours > bookable.length_limit_hours:
@@ -86,8 +80,7 @@ class BookingForm(forms.ModelForm):
                 )
 
             # Check that booking does not overlap with previous bookings
-            overlapping = Booking.objects.filter(
-                bookable=bookable, start__lt=end, end__gt=start)
+            overlapping = Booking.objects.filter(bookable=bookable, start__lt=end, end__gt=start)
             if overlapping:
                 warning = _("Error: Requested booking is overlapping with the following bookings:")
                 errors = [forms.ValidationError(warning)]

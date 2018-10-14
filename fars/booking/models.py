@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -72,3 +73,8 @@ class Booking(models.Model):
             end__gt=self.start
             )
         return list(overlapping)
+
+    def clean(self):
+        # Check that end is not earlier than start
+        if self.end <= self.start:
+            raise ValidationError(_("Booking cannot end before it begins"))
