@@ -25,16 +25,19 @@ class Bookable(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def admin_group_name(self):
+        return '{}_admin'.format(self.id_str)
+
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
-    g, createad  = Group.objects.get_or_create(name="{}_admin".format(instance.id_str))
-    g.save()
+    g = Group.objects.get_or_create(name=instance.admin_group_name).save()
 
 
 @receiver(post_delete, sender=Bookable)
 def delete_bookable_group(sender, instance, **kwargs):
-    Group.objects.get(name="{}_admin".format(instance.id_str)).delete()
+    Group.objects.get(name=instance.admin_group_name).delete()
 
 
 # class TimeSlot(models.Model):

@@ -95,27 +95,27 @@ class CustomLoginForm(AuthenticationForm):
 
 
 class RepeatingBookingForm(forms.Form):
-    frequency = forms.IntegerField(label='Frequency of repetitions (in days)', initial=7)
+    frequency = forms.IntegerField(label=_('Frequency of repetitions (in days)'), initial=7)
     repeat_until = forms.DateField(initial=date.today() + timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
 
-    def save_repeating_booking_group(self, booking_form):
-        booking = booking_form.instance
+    # creates all bookings in a repeated booking
+    def save_repeating_booking_group(self, booking):
         data = self.cleaned_data
         group = RepeatedBookingGroup.objects.create(name=booking.comment)
         group.save()
         booking.repeatgroup = group
-        booking_form.save() # May throw an error, aborting the save
         skipped_bookings = []
 
         # Copy booking for every repetition
-        while(booking.start.date() + timedelta(days=data.get('frequency')) <= data.get('repeat_until')):
-            new_booking = Booking()
-            new_booking.start += timedelta(days=data.get('frequency'))
-            new_booking.end += timedelta(days=data.get('frequency'))
-            new_booking.repeatgroup = group
-            overlapping = new_booking.get_overlapping_bookings()
+        while(booking.start.date() <= data.get('repeat_until')):
+            overlapping = booking.get_overlapping_bookings()
             if overlapping:
-                skipped_bookings.append(new_booking)
+                skipped_bookings.append(str(booking))
             else:
                 booking.save()
+            booking.pk = None
+            booking.start += timedelta(days=data.get('frequency'))
+            booking.end += timedelta(days=data.get('frequency'))
+            
+        return skipped_bookings
 
