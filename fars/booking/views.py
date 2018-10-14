@@ -66,30 +66,24 @@ def book(request, bookable):
             repeat_form = RepeatingBookingForm()
             context['repeatform'] = repeat_form
     elif request.method == 'POST':
-        with transaction.atomic():
-            form = BookingForm(request.POST, instance=booking)
-            if form.is_valid():
-                form.save(commit=False)
-                if request.POST.get('repeat') and (request.user.is_superuser or request.user in groupmembers):
-                    repeatdata = {
-                        'frequency': request.POST.get('frequency'),
-                        'repeat_until': request.POST.get('repeat_until')
-                    }
-                    repeat_form = RepeatingBookingForm(repeatdata)
-                    if repeat_form.is_valid():
-                        form.save()
-                        # Also adds repeatgroup to booking
-                        errors = repeat_form.save(booking)
-                        if len(errors) > 0:
-                            raise ValidationError(errors)
-                        return HttpResponse()
-                    else:
-                        status = 400
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            if request.POST.get('repeat') and (request.user.is_superuser or request.user in groupmembers):
+                #repeatdata = {
+                #    'frequency': request.POST.get('frequency'),
+                #    'repeat_until': request.POST.get('repeat_until')
+                #}
+                repeat_form = RepeatingBookingForm(request.POST)
+                if repeat_form.is_valid():
+                    # Creates repeating bookings as specified, adding all created bookings to group
+                    repeat_form.save_repeating_booking_group(form)
                 else:
-                    form.save()
-                    return HttpResponse()
+                    status = 400
             else:
-                status = 400
+                form.save()
+                return HttpResponse()
+        else:
+            status = 400
     else:
         raise Http404
     context['form'] = form

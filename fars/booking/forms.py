@@ -98,24 +98,24 @@ class RepeatingBookingForm(forms.Form):
     frequency = forms.IntegerField(label='Frequency of repetitions (in days)', initial=7)
     repeat_until = forms.DateField(initial=date.today() + timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
 
-    def save(self, booking, commit=True):
-        warning = _("Error: Requested booking is overlapping with the following bookings:")
-        errors = [forms.ValidationError(warning)]
+    def save_repeating_booking_group(self, booking_form):
+        booking = booking_form.instance
         data = self.cleaned_data
-        rbg = RepeatedBookingGroup.objects.create(name=booking.comment)
-        rbg.save()
-        booking.repeatgroup = rbg
-        booking.save()
+        group = RepeatedBookingGroup.objects.create(name=booking.comment)
+        group.save()
+        booking.repeatgroup = group
+        booking_form.save() # May throw an error, aborting the save
+        skipped_bookings = []
 
         # Copy booking for every repetition
         while(booking.start.date() + timedelta(days=data.get('frequency')) <= data.get('repeat_until')):
-            booking.pk = None
-            booking.start += timedelta(days=data.get('frequency'))
-            booking.end += timedelta(days=data.get('frequency'))
-            overlapping = booking.get_overlapping_bookings()
-            booking.save()
+            new_booking = Booking()
+            new_booking.start += timedelta(days=data.get('frequency'))
+            new_booking.end += timedelta(days=data.get('frequency'))
+            new_booking.repeatgroup = group
+            overlapping = new_booking.get_overlapping_bookings()
             if overlapping:
-                for overlap_booking in overlapping:
-                    errors.append(forms.ValidationError('• ' + str(overlap_booking)))
-        if len(errors) > 1:
-            return errors
+                skipped_bookings.append(new_booking)
+            else:
+                booking.save()
+
