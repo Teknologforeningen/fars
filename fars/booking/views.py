@@ -9,7 +9,6 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 from django.forms import ValidationError
 
-DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 def home(request):
     bookables = Bookable.objects.all()
@@ -74,8 +73,8 @@ def book(request, bookable):
                 repeat_form = RepeatingBookingForm(repeatdata)
                 if repeat_form.is_valid():
                     # Creates repeating bookings as specified, adding all created bookings to group
-                    repeat_form.save_repeating_booking_group(form.instance)
-                    return HttpResponse()
+                    skipped_bookings = repeat_form.save_repeating_booking_group(form.instance)
+                    return JsonResponse({'skipped_bookings': skipped_bookings})
                 else:
                     status = 400
             else:
