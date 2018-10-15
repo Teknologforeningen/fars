@@ -18,6 +18,26 @@ def home(request):
     return render(request, 'base.html', context)
 
 
+def profile(request):
+    all_bookings_by_user = Booking.objects.filter(user=request.user)
+    context = {}
+    stats = {}
+    context['statistics'] = stats
+
+    starts = [x.start for x in all_bookings_by_user]
+    ends = [x.end for x in all_bookings_by_user]
+    timebooked = timedelta(
+        seconds=sum([(y-x).total_seconds() for x, y in zip(starts, ends)])
+    )
+    stats[_('Total time booked')] = timebooked
+
+    future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
+    ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
+    context['future_bookings'] = future_bookings
+    context['ongoing_bookings'] = ongoing_bookings
+    return render(request, 'profile.html', context)
+
+
 def bookings_month(request, bookable):
     bookable_obj = get_object_or_404(Bookable, id_str=bookable)
     if not bookable_obj.public and not request.user.is_authenticated:
