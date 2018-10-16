@@ -15,36 +15,36 @@
     <div class="row">
       <h5 class="col-12">{% trans "Ongoing bookings" %}<hr></h5>
       {% for b in ongoing_bookings %}
-      <div class="col-10 offset-1 profile-event">
+      <div class="col-10 offset-1 profile-event text-center">
         <div class="row">
-          <div class="col-6 offset-1 font-weight-bold">
+          <div class="col-6 font-weight-bold">
               {% trans "Booking of:" %}
           </div>
-          <div class="col-6">
+          <div class="col-4">
               {{ b.bookable }}
           </div>
         </div>
         <div class="row">
-            <div class="col-3 offset-1 font-weight-bold">
+            <div class="col-6 font-weight-bold">
                 {% trans "Start:" %}
             </div>
-            <div class="col-8">
-                {{ b.start | date:"Y-m-d" }} {{ b.start | time:"H:i"}}
+            <div class="col-4">
+                {{ b.start }}
             </div>
         </div>
         <div class="row">
-            <div class="col-3 offset-1 font-weight-bold">
+            <div class="col-6 font-weight-bold">
                 {% trans "End:" %}
             </div>
-            <div class="col-8">
+            <div class="col-4">
                 {{ b.end }}
             </div>
         </div>
         <div class="row">
-            <div class="col-3 offset-1 font-weight-bold">
+            <div class="col-6 font-weight-bold">
                 {% trans "Comment:" %}
             </div>
-            <div class="col-8">
+            <div class="col-4">
                 {{ b.comment }}
             </div>
         </div>

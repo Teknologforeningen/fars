@@ -19,20 +19,20 @@ def home(request):
 
 
 def profile(request):
-    all_bookings = Booking.objects.filter(user=request.user)
+    all_bookings_by_user = Booking.objects.filter(user=request.user)
     context = {}
     stats = {}
     context['statistics'] = stats
 
-    starts = [x.start for x in all_bookings]
-    ends = [x.end for x in all_bookings]
+    starts = [x.start for x in all_bookings_by_user]
+    ends = [x.end for x in all_bookings_by_user]
     timebooked = timedelta(
         seconds=sum([(y-x).total_seconds() for x, y in zip(starts, ends)])
     )
-    stats['Total time booked'] = timebooked
+    stats[_('Total time booked')] = timebooked
 
-    future_bookings = all_bookings.filter(start__gt=datetime.now())
-    ongoing_bookings = all_bookings.filter(start__lt=datetime.now(), end__gt=datetime.now())
+    future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
+    ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
     context['future_bookings'] = future_bookings
     context['ongoing_bookings'] = ongoing_bookings
     return render(request, 'profile.html', context)
