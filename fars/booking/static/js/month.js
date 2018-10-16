@@ -61,7 +61,8 @@ $(document).ready(function() {
   });
   var Key = {
     LEFT:   37,
-    RIGHT:  39
+    RIGHT:  39,
+    D: 68
   };
 
   /**
@@ -86,6 +87,10 @@ $(document).ready(function() {
         break;
       case Key.RIGHT:
         calendar.fullCalendar('next');
+        break;
+      case Key.D:
+        bookable = calendar.data('bookable')
+        window.location.href = '/booking/' + bookable + '/' + moment().format("YYYY-MM-DD");
         break;
     }
   }

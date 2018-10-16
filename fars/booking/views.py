@@ -9,7 +9,6 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 from django.forms import ValidationError
 
-DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 def home(request):
     bookables = Bookable.objects.all()
@@ -60,36 +59,29 @@ def book(request, bookable):
         booking.user = request.user
         form = BookingForm(instance=booking)
         status = 200
-        groupname = "{}_admin".format(bookable)
-        groupmembers = User.objects.filter(groups__name=groupname)
-        if request.user.is_superuser or request.user in groupmembers:
+        if _is_admin(request.user, bookable):
             repeat_form = RepeatingBookingForm()
             context['repeatform'] = repeat_form
     elif request.method == 'POST':
-        with transaction.atomic():
-            form = BookingForm(request.POST, instance=booking)
-            if form.is_valid():
-                form.save(commit=False)
-                if request.POST.get('repeat') and (request.user.is_superuser or request.user in groupmembers):
-                    repeatdata = {
-                        'frequency': request.POST.get('frequency'),
-                        'repeat_until': request.POST.get('repeat_until')
-                    }
-                    repeat_form = RepeatingBookingForm(repeatdata)
-                    if repeat_form.is_valid():
-                        form.save()
-                        # Also adds repeatgroup to booking
-                        errors = repeat_form.save(booking)
-                        if len(errors) > 0:
-                            raise ValidationError(errors)
-                        return HttpResponse()
-                    else:
-                        status = 400
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            if request.POST.get('repeat') and _is_admin(request.user, bookable):
+                repeatdata = {
+                    'frequency': request.POST.get('frequency'),
+                    'repeat_until': request.POST.get('repeat_until')
+                }
+                repeat_form = RepeatingBookingForm(repeatdata)
+                if repeat_form.is_valid():
+                    # Creates repeating bookings as specified, adding all created bookings to group
+                    skipped_bookings = repeat_form.save_repeating_booking_group(form.instance)
+                    return JsonResponse({'skipped_bookings': skipped_bookings})
                 else:
-                    form.save()
-                    return HttpResponse()
+                    status = 400
             else:
-                status = 400
+                form.save()
+                return HttpResponse()
+        else:
+            status = 400
     else:
         raise Http404
     context['form'] = form
@@ -102,11 +94,8 @@ def unbook(request, booking_id):
     now = datetime.now(booking.start.tzinfo)
     unbookable = True
     warning = None
-    groupname = "{}_admin".format(booking.bookable.id_str)
-    groupmembers = User.objects.filter(groups__name=groupname)
 
-    # User is admin
-    if request.user.is_superuser or request.user in groupmembers:
+    if _is_admin(request.user, booking.bookable):
         '''
         Removal of a repeating booking. There are 3 different levels of removal
         of a repeating booking:
@@ -144,3 +133,8 @@ def unbook(request, booking_id):
         'warning': warning,
     }
     return render(request, 'unbook.html', context)
+
+
+# Returns whether user is admin for given bookable
+def _is_admin(user, bookable):
+    return user.is_superuser or user.groups.filter(name=bookable.admin_group_name).exists()

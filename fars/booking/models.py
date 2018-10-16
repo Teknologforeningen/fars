@@ -1,7 +1,8 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
@@ -24,11 +25,19 @@ class Bookable(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def admin_group_name(self):
+        return '{}_admin'.format(self.id_str)
+
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
-    g = Group(name="{}_admin".format(instance.id_str))
-    g.save()
+    g = Group.objects.get_or_create(name=instance.admin_group_name).save()
+
+
+@receiver(post_delete, sender=Bookable)
+def delete_bookable_group(sender, instance, **kwargs):
+    Group.objects.get(name=instance.admin_group_name).delete()
 
 
 # class TimeSlot(models.Model):
@@ -67,3 +76,8 @@ class Booking(models.Model):
             end__gt=self.start
             )
         return list(overlapping)
+
+    def clean(self):
+        # Check that end is not earlier than start
+        if self.end <= self.start:
+            raise ValidationError(_("Booking cannot end before it begins"))
