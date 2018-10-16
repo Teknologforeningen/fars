@@ -5,9 +5,9 @@ from api.serializers import *
 
 
 class BookingFilter(filters.FilterSet):
-    bookable = filters.CharFilter(name='bookable__id_str')
-    before = filters.IsoDateTimeFilter(name='start', lookup_expr='lte')
-    after = filters.IsoDateTimeFilter(name='end', lookup_expr='gte')
+    bookable = filters.CharFilter(field_name='bookable__id_str')
+    before = filters.IsoDateTimeFilter(field_name='start', lookup_expr='lte')
+    after = filters.IsoDateTimeFilter(field_name='end', lookup_expr='gte')
 
     class Meta:
         model = Booking

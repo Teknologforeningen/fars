@@ -19,7 +19,9 @@ function getBusinesshours(date) {
 $(document).ready(function() {
   var calendar = $('#calendar'),
       date = calendar.data('date'),
-      bookable = calendar.data('bookable');
+      bookable = calendar.data('bookable'),
+      locale = calendar.data('locale'),
+      user = calendar.data('user');
 
   calendar.fullCalendar({
       height: 'parent',
@@ -34,7 +36,7 @@ $(document).ready(function() {
 
       },
       firstDay: 1,
-      locale: 'fi',
+      locale: locale,
       timezone: 'local',
       timeFormat: 'H:mm',
       slotLabelFormat: 'H:mm',
@@ -44,10 +46,8 @@ $(document).ready(function() {
       defaultDate: date,
       allDaySlot: false,
       themeSystem: 'bootstrap4',
-      eventBackgroundColor: '#6c757d',
-      eventBorderColor: 'grey',
       agendaEventMinHeight: 20,
-      scrollTime: moment().format('HH:mm:ss'),
+      scrollTime: '08:00:00',
       businessHours: getBusinesshours(date),
       selectable: true,
       selectLongPressDelay: 300,
@@ -84,12 +84,22 @@ $(document).ready(function() {
           success: function(data) {
             var events = [];
             $(data).each(function() {
-              events.push({
+              var event = {
                 id: $(this).attr('id'),
                 title: $(this).attr('comment'),
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
-              });
+              };
+              var today = moment();
+              var classNames = [];
+              if (moment(event.end) < today) {
+                classNames.push("past-event");
+              }
+              if ($(this).attr('user') === user) {
+                classNames.push('bg-own');
+              }
+              event.className = classNames;
+              events.push(event);
             });
             callback(events);
           }
@@ -106,4 +116,41 @@ $(document).ready(function() {
         modal.modal('show');
       },
   });
+  var Key = {
+    LEFT:   37,
+    RIGHT:  39,
+    M: 77
+  };
+
+  /**
+   * old IE: attachEvent
+   * Firefox, Chrome, or modern browsers: addEventListener
+   */
+  function _addEventListener(evt, element, fn) {
+    if (window.addEventListener) {
+      element.addEventListener(evt, fn, false);
+    }
+    else {
+      element.attachEvent('on'+evt, fn);
+    }
+  }
+
+  function handleKeyboardEvent(evt) {
+    if (!evt) {evt = window.event;} // for old IE compatible
+    var keycode = evt.keyCode || evt.which; // also for cross-browser compatible
+    switch (keycode) {
+      case Key.LEFT:
+        calendar.fullCalendar('prev');
+        break;
+      case Key.RIGHT:
+        calendar.fullCalendar('next');
+        break;
+      case Key.M:
+        bookable = calendar.data('bookable')
+        window.location.href = '/booking/' + bookable;
+        break;
+    }
+  }
+
+  _addEventListener('keydown', document, handleKeyboardEvent);
 });

@@ -1,10 +1,11 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.utils.translation import gettext as _
 
-alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
+alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 
 
 class Bookable(models.Model):
@@ -25,8 +26,13 @@ class Bookable(models.Model):
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
-    g = Group(name="{}_admin".format(instance.id_str))
+    g, createad  = Group.objects.get_or_create(name="{}_admin".format(instance.id_str))
     g.save()
+
+
+@receiver(post_delete, sender=Bookable)
+def delete_bookable_group(sender, instance, **kwargs):
+    Group.objects.get(name="{}_admin".format(instance.id_str)).delete()
 
 
 # class TimeSlot(models.Model):
@@ -38,9 +44,14 @@ def create_bookable_group(sender, instance, **kwargs):
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start = models.DateTimeField()
-    end = models.DateTimeField()
-    comment = models.CharField(max_length=128)
+    start = models.DateTimeField(_("start"))
+    end = models.DateTimeField(_("end"))
+    comment = models.CharField(_("comment"), max_length=128)
+
+    class Meta:
+        verbose_name = _("Booking")
+        verbose_name_plural = _("Bookings")
+        ordering = ["start"]
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))

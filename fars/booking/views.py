@@ -5,6 +5,7 @@ from booking.models import Booking, Bookable
 from booking.forms import BookingForm
 from datetime import datetime, timedelta
 import dateutil.parser
+from django.utils.translation import gettext as _
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
@@ -15,6 +16,26 @@ def home(request):
         'user': request.user,
     }
     return render(request, 'base.html', context)
+
+
+def profile(request):
+    all_bookings_by_user = Booking.objects.filter(user=request.user)
+    context = {}
+    stats = {}
+    context['statistics'] = stats
+
+    starts = [x.start for x in all_bookings_by_user]
+    ends = [x.end for x in all_bookings_by_user]
+    timebooked = timedelta(
+        seconds=sum([(y-x).total_seconds() for x, y in zip(starts, ends)])
+    )
+    stats[_('Total time booked')] = timebooked
+
+    future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
+    ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
+    context['future_bookings'] = future_bookings
+    context['ongoing_bookings'] = ongoing_bookings
+    return render(request, 'profile.html', context)
 
 
 def bookings_month(request, bookable):
@@ -53,7 +74,7 @@ def book(request, bookable):
 
     if request.method == 'GET':
         booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
-        booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else start + timedelta(hours=1)
+        booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = bookable_obj
         booking.user = request.user
         form = BookingForm(instance=booking)
@@ -85,11 +106,11 @@ def unbook(request, booking_id):
         pass
     elif booking.end < now:
         unbookable = False
-        warning = "Bookings in the past may not be unbooked"
+        warning = _("Bookings in the past may not be unbooked")
     # TODO: is this the proper way to check if users are the same?''
     elif request.user.username != booking.user.username:
         unbookable = False
-        warning = "Only the user that made the booking may unbook it"
+        warning = _("Only the user that made the booking may unbook it")
 
     if request.method == 'POST' and unbookable:
         if booking.start < now and booking.end > now:

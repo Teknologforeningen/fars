@@ -22,8 +22,8 @@ from booking.forms import CustomLoginForm
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$', auth_views.login, {'template_name': 'login.html', "authentication_form": CustomLoginForm}, name='login'),
-    url(r'^logout/$', auth_views.logout, {'next_page': 'home'}, name='logout'),
+    url(r'^login/$', auth_views.LoginView.as_view(template_name='login.html', authentication_form=CustomLoginForm), name='login'),
+    url(r'^logout/$', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     url(r'^api/', include('api.urls')),
     path('booking/', include('booking.urls')),
     path('', RedirectView.as_view(url='booking/')),

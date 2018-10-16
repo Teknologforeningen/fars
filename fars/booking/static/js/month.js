@@ -1,6 +1,8 @@
 $(document).ready(function() {
   var calendar = $('#calendar'),
-    bookable = calendar.data('bookable');
+    bookable = calendar.data('bookable'),
+    locale = calendar.data('locale'),
+    user = calendar.data('user');
   calendar.fullCalendar({
       height: 'auto',
       aspectRatio: 2,
@@ -20,8 +22,6 @@ $(document).ready(function() {
       timezone: 'local',
       timeFormat: 'H:mm',
       displayEventEnd: true,
-      eventBackgroundColor: '#6c757d',
-      eventBorderColor: 'grey',
       // If a day is clicked it opens the day-view at that date
       dayClick: function(date, jsEvent, view) {
         window.location.href = '/booking/' + bookable + '/' + date.toISOString();
@@ -37,11 +37,22 @@ $(document).ready(function() {
           success: function(data) {
             var events = [];
             $(data).each(function() {
-              events.push({
+              var event = {
+                id: $(this).attr('id'),
                 title: $(this).attr('comment'),
                 start: $(this).attr('start'),
                 end: $(this).attr('end'),
-              });
+              };
+              var today = moment();
+              var classNames = [];
+              if (moment(event.end) < today) {
+                classNames.push("past-event");
+              }
+              if ($(this).attr('user') === user) {
+                classNames.push('bg-own');
+              }
+              event.className = classNames;
+              events.push(event);
             });
             callback(events);
           }
@@ -50,7 +61,8 @@ $(document).ready(function() {
   });
   var Key = {
     LEFT:   37,
-    RIGHT:  39
+    RIGHT:  39,
+    D: 68
   };
 
   /**
@@ -75,6 +87,10 @@ $(document).ready(function() {
         break;
       case Key.RIGHT:
         calendar.fullCalendar('next');
+        break;
+      case Key.D:
+        bookable = calendar.data('bookable')
+        window.location.href = '/booking/' + bookable + '/' + moment().format("YYYY-MM-DD");
         break;
     }
   }
