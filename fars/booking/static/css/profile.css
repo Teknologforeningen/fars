@@ -1,0 +1,6 @@
+div.profile-event {
+  border-radius: 10px;
+  border: solid 1px gray;
+  margin-bottom: 20px;
+  padding: 5px;
+}
