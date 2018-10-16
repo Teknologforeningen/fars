@@ -94,7 +94,11 @@ def book(request, bookable):
                 if repeat_form.is_valid():
                     # Creates repeating bookings as specified, adding all created bookings to group
                     skipped_bookings = repeat_form.save_repeating_booking_group(form.instance)
-                    return JsonResponse({'skipped_bookings': skipped_bookings})
+                    return JsonResponse({
+                        'title': _('<strong>Booking succeeded with the following exceptions:</strong>'),
+                        'skipped_bookings': skipped_bookings,
+                        'error': _('Following bookings were skipped because of overlaps:')
+                    })
                 else:
                     status = 400
             else:

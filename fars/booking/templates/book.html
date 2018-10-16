@@ -1,5 +1,7 @@
 {% extends "modalcontent.html" %}
 {% load i18n %}
+{% load bootstrap4 %}
+{% load static %}
 
 
 {% block title %}
@@ -11,12 +13,10 @@
 {% endblock %}
 
 {% block body %}
-  {% load bootstrap4 %}
-  {% load static %}
   <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
   <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <link rel="stylesheet" href="{% static 'css/book.css' %}">
-  <form id="bookform">
+  <form id="bookform" data-url="{{ url }}">
     {% csrf_token %}
     {% bootstrap_form_errors form %}
     {% bootstrap_field form.bookable %}
@@ -52,34 +52,7 @@
     </div>
   {% endif %}
 
-  <script type="text/javascript">
-    $('#repeat-toggle').change(function() {
-      $('#repeat-form-wrapper').toggleClass('disabled');
-    });
-    $('#bookform').submit(function(event) {
-      if($('#repeat-toggle').prop('checked')) {
-        var postdata = $(this).serialize()+'&repeat=1&'+$('#repeatform').serialize();
-      } else {
-        var postdata = $(this).serialize();
-      }
-      $.post("{{url}}", postdata)
-        .done(function() {
-          $('#calendar').fullCalendar('refetchEvents');
-          $('#modalBox').modal('hide')
-        }).fail(function(data){
-          $('#modalBox').find('.modal-content').html(data.responseText);
-        });
-      event.preventDefault();
-    });
-    $('#nowbutton').click(function() {
-      let now = moment();
-      $('#id_start_0').val(now.format('YYYY-MM-DD'));
-      $('#id_start_1').val(now.format('HH:mm'));
-      let then = now.add(1, 'hours')
-      $('#id_end_0').val(then.format('YYYY-MM-DD'));
-      $('#id_end_1').val(then.format('HH:mm'));
-    });
-  </script>
+  <script src="{% static "js/book.js" %}"></script>
 {% endblock %}
 
 {% block footer %}
