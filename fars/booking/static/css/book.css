@@ -1,0 +1,11 @@
+.disabled {
+  color: gray;
+  background-color: rgb(0, 0, 0, .2);
+  pointer-events: none;
+}
+#toggle-wrapper {
+  margin-bottom: 12px;
+}
+#repeat-form-wrapper {
+  border-radius: 5px;
+}
