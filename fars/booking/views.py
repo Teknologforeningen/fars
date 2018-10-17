@@ -79,13 +79,13 @@ def book(request, bookable):
         booking.user = request.user
         form = BookingForm(instance=booking)
         status = 200
-        if _is_admin(request.user, bookable):
+        if _is_admin(request.user, bookable_obj):
             repeat_form = RepeatingBookingForm()
             context['repeatform'] = repeat_form
     elif request.method == 'POST':
         form = BookingForm(request.POST, instance=booking)
         if form.is_valid():
-            if request.POST.get('repeat') and _is_admin(request.user, bookable):
+            if request.POST.get('repeat') and _is_admin(request.user, bookable_obj):
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
                     'repeat_until': request.POST.get('repeat_until')
