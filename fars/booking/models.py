@@ -32,7 +32,7 @@ class Bookable(models.Model):
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
-    g = Group.objects.get_or_create(name=instance.admin_group_name).save()
+    Group.objects.get_or_create(name=instance.admin_group_name)
 
 
 @receiver(post_delete, sender=Bookable)
