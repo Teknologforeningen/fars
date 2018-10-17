@@ -111,9 +111,8 @@ class BookView(View):
 
     def post(self, request, bookable):
         form = BookingForm(request.POST, instance=Booking())
-
         if form.is_valid():
-            if request.POST.get('repeat') and _is_admin(request.user, bookable):
+            if request.POST.get('repeat') and _is_admin(request.user, self.context['bookable']):
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
                     'repeat_until': request.POST.get('repeat_until')
@@ -138,40 +137,43 @@ class BookView(View):
         return render(request, self.template, context=self.context, status=status)
 
 
-class UnBookView(View):
+class BookingView(View):
 
-    template = 'unbook.html'
+    template = 'booking.html'
+    context = {}
+
 
     def dispatch(self, request, booking_id):
         booking = get_object_or_404(Booking, id=booking_id)
-        # Check if unbooking is allowed
-        now = datetime.now(booking.start.tzinfo)
-        unbookable = True
-        warning = None
+        is_unbookable, warning = self._is_unbookable(request.user, booking)
 
-        if _is_admin(request.user, booking.bookable):
-            '''
-            Removal of a repeating booking. There are 3 different levels of removal
-            of a repeating booking:
-            0 : Delete only this booking
-            1 : Delete this booking and bookings after this one
-            2 : Delete all bookings from this series of booking (past and future)
-            '''
-            if request.method == 'POST' and booking.repeatgroup and int(request.POST.get('repeat')) >= 1:
+        self.context['url']        = request.path
+        self.context['user']       = request.user
+        self.context['booking']    = booking
+        self.context['unbookable'] = is_unbookable
+        self.context['warning']    = warning
+
+        return super().dispatch(request, booking_id)
+
+
+    def post(self, request, booking_id):
+        booking = self.context['booking']
+        is_admin = _is_admin(request.user, booking.bookable)
+        if _is_admin or self.context['unbookable']:
+            now = datetime.now(booking.start.tzinfo)
+            if is_admin and booking.repeatgroup and int(request.POST.get('repeat')) >= 1:
+                # Removal of a repeating booking. There are 3 different levels of removal
+                # of a repeating booking:
+                # 0 : Delete only this booking
+                # 1 : Delete this booking and bookings after this one
+                # 2 : Delete all bookings from this series of booking (past and future)
                 removal_level = int(request.POST.get('repeat'))
                 if removal_level == 1:
                     booking.repeatgroup.delete_from_date_forward(booking.start)
                 elif removal_level == 2:
                     booking.repeatgroup.delete()
-        elif booking.end < now:
-            unbookable = False
-            warning = _("Bookings in the past may not be unbooked")
-        elif request.user != booking.user:
-            unbookable = False
-            warning = _("Only the user that made the booking may unbook it")
 
-        if request.method == 'POST' and unbookable:
-            if booking.start < now and booking.end > now:
+            elif booking.start < now and booking.end > now:
                 # Booking is ongoing, end it now
                 booking.end = now
                 booking.save()
@@ -179,14 +181,19 @@ class UnBookView(View):
                 booking.delete()
             return HttpResponse()
 
-        context = {
-            'url': request.path,
-            'booking': booking,
-            'user': request.user,
-            'unbookable': unbookable,
-            'warning': warning,
-        }
-        return render(request, self.template, context)
+        return render(request, self.template, self.context)
+
+
+    def get(self, request, booking_id):
+        return render(request, self.template, self.context)        
+
+
+    def _is_unbookable(self, user, booking):
+        if booking.end < datetime.now(booking.start.tzinfo):
+            return False, _("Bookings in the past may not be unbooked")
+        if user != booking.user:
+            return False, _("Only the user that made the booking may unbook it")
+        return True, ''
 
 
 # Returns whether user is admin for given bookable

@@ -7,5 +7,5 @@ urlpatterns = [
     path('<slug:bookable>', views.MonthView.as_view(), name="month"),
     path('<slug:bookable>/<int:year>-<int:month>-<int:day>', views.DayView.as_view(), name="day"),
     path('book/<slug:bookable>', views.BookView.as_view(), name="book"),
-    path('unbook/<int:booking_id>', views.UnBookView.as_view(), name="unbook"),
+    path('booking/<int:booking_id>', views.BookingView.as_view(), name="booking"),
 ]
