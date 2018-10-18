@@ -28,9 +28,13 @@ $(document).ready(function() {
     $.post($(this).data('url'), postdata)
       .done(function(data) {
         $('#calendar').fullCalendar('refetchEvents');
-        if (data.skipped_bookings) {
-          $('#modalBox').find('.modal-title').html(data.title);
-          $('#modalBox').find('.modal-body').html(data.error);
+        if (data.skipped_bookings.length > 0) {
+          $('#modalBox').find('.modal-title').html(
+            '<strong>Booking succeeded with the following exceptions:</strong>'
+          );
+          $('#modalBox').find('.modal-body').html(
+            'Following bookings were skipped because of overlaps:'
+          );
           $('#modalBox').find('.modal-body').append(makeUL(data.skipped_bookings));
         } else {
           $('#modalBox').modal('hide');
