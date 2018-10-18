@@ -14,7 +14,7 @@ from django.views import View
 class HomeView(View):
 
     template = 'base.html'
-    
+
     def get(self, request):
         bookables = Bookable.objects.all()
         context = {
@@ -25,7 +25,7 @@ class HomeView(View):
 
 
 class ProfileView(View):
-    
+
     template = 'profile.html'
 
     def get(self, request):
@@ -80,14 +80,14 @@ class DayView(View):
 
 
 class BookView(View):
-    
+
     template = 'book.html'
     context = {}
 
     def dispatch(self, request, bookable):
         if not request.user.is_authenticated:
             return render(request, 'modals/forbidden.html', status=403)
-        
+
         self.context['url'] = request.path
         self.context['bookable'] = get_object_or_404(Bookable, id_str=bookable)
         self.context['user'] = request.user
@@ -121,11 +121,7 @@ class BookView(View):
                 if repeat_form.is_valid():
                     # Creates repeating bookings as specified, adding all created bookings to group
                     skipped_bookings = repeat_form.save_repeating_booking_group(form.instance)
-                    return JsonResponse({
-                        'title': _('<strong>Booking succeeded with the following exceptions:</strong>'),
-                        'skipped_bookings': skipped_bookings,
-                        'error': _('Following bookings were skipped because of overlaps:')
-                    })
+                    return JsonResponse({'skipped_bookings': skipped_bookings})
                 else:
                     status = 400
             else:
@@ -185,7 +181,7 @@ class BookingView(View):
 
 
     def get(self, request, booking_id):
-        return render(request, self.template, self.context)        
+        return render(request, self.template, self.context)
 
 
     def _is_unbookable(self, user, booking):
