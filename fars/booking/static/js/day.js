@@ -108,7 +108,7 @@ $(document).ready(function() {
       eventClick: function(calEvent, jsEvent, view) {
         var modal = $('#modalBox');
         $.get(
-          '/booking/unbook/' + calEvent.id,
+          '/booking/booking/' + calEvent.id,
           function(data){
             modal.find('.modal-content').html(data)
           }
@@ -138,17 +138,19 @@ $(document).ready(function() {
   function handleKeyboardEvent(evt) {
     if (!evt) {evt = window.event;} // for old IE compatible
     var keycode = evt.keyCode || evt.which; // also for cross-browser compatible
-    switch (keycode) {
-      case Key.LEFT:
-        calendar.fullCalendar('prev');
-        break;
-      case Key.RIGHT:
-        calendar.fullCalendar('next');
-        break;
-      case Key.M:
-        bookable = calendar.data('bookable')
-        window.location.href = '/booking/' + bookable;
-        break;
+    if (!$('#modalBox').hasClass('show')) {
+      switch (keycode) {
+        case Key.LEFT:
+          calendar.fullCalendar('prev');
+          break;
+        case Key.RIGHT:
+          calendar.fullCalendar('next');
+          break;
+        case Key.M:
+          bookable = calendar.data('bookable')
+          window.location.href = '/booking/' + bookable;
+          break;
+      }
     }
   }
 
