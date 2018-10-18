@@ -108,7 +108,7 @@ $(document).ready(function() {
       eventClick: function(calEvent, jsEvent, view) {
         var modal = $('#modalBox');
         $.get(
-          '/booking/unbook/' + calEvent.id,
+          '/booking/booking/' + calEvent.id,
           function(data){
             modal.find('.modal-content').html(data)
           }
