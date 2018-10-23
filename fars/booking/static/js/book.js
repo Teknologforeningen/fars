@@ -28,7 +28,7 @@ $(document).ready(function() {
     $.post($(this).data('url'), postdata)
       .done(function(data) {
         $('#calendar').fullCalendar('refetchEvents');
-        if (data.skipped_bookings.length > 0) {
+        if (data.hasOwnProperty('skipped_bookings') && data.skipped_bookings.length > 0) {
           $('#modalBox').find('.modal-title').html(
             '<strong>Booking succeeded with the following exceptions:</strong>'
           );
