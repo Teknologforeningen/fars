@@ -192,6 +192,30 @@ class BookingView(View):
         return True, ''
 
 
+class TabletView(View):
+    template = 'tablet.html'
+
+    def get(self, request, bookable):
+        bookable_obj = get_object_or_404(Bookable, id_str=bookable)
+        if not bookable_obj.public and not request.user.is_authenticated:
+            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+        now = datetime.now()
+        end_of_today = datetime(
+            year=now.year,
+            month=now.month,
+            day=now.day,
+            hour=23,
+            minute=59
+        )
+        bookings = Booking.objects.filter(bookable=bookable_obj, start__lt=end_of_today, end__gt=now)
+        context = {
+            'date': now,
+            'bookable': bookable_obj,
+            'bookings': bookings
+        }
+        return render(request, self.template, context)
+
+
 # Returns whether user is admin for given bookable
 def _is_admin(user, bookable):
     return user.is_superuser or user.groups.filter(name=bookable.admin_group_name).exists()
