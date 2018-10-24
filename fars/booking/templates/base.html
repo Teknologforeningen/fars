@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FARS</title>
   {% load static %}
   {% load tags %}
   {% load i18n %}
   {% get_current_language as language_code %}
 
+  <title>{% block title %}FARS{% endblock %}</title>
+  <link rel="shortcut icon" type="image/png" href="{% static "favicon.png" %}"/>
   <!-- For calendar -->
   <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
