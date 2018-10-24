@@ -3,6 +3,10 @@
 {% load i18n %}
 {% get_current_language as language_code %}
 
+{% block title %}
+  {% blocktrans %}Book {{bookable}}{% endblocktrans %}
+{% endblock %}
+
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/calendar-theme.css' %}">
 {% endblock %}
