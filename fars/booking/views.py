@@ -152,6 +152,8 @@ class BookingView(View):
         return super().dispatch(request, booking_id)
 
 
+    # A POST request to a booking is for unbooking.
+    # A DELETE request would make more sense, but we use POST for the repeat parameter
     def post(self, request, booking_id):
         booking = self.context['booking']
         is_admin = _is_admin(request.user, booking.bookable)
