@@ -13,8 +13,6 @@
 {% endblock %}
 
 {% block body %}
-  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
   <link rel="stylesheet" href="{% static 'css/book.css' %}">
   <form id="bookform" data-url="{{ url }}">
     {% csrf_token %}
@@ -34,9 +32,9 @@
   </form>
   {% if repeatform %}
     <div id="toggle-wrapper">
-      <input id="repeat-toggle" type="checkbox" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-on="Repeating" data-off="Non-repeating">
+      <button id="repeat-toggle" class="btn btn-info" type="button" data-toggle="collapse" data-target="#repeat-form-wrapper" aria-expanded="false" aria-controls="repeat-form-wrapper">{% trans 'Make event repeating' %}</button>
     </div>
-    <div id="repeat-form-wrapper" class="disabled">
+    <div id="repeat-form-wrapper" class="collapse">
       <form id="repeatform">
         {% csrf_token %}
         {% bootstrap_form_errors repeatform %}
