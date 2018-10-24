@@ -47,51 +47,35 @@
 {% block footer %}
   {% if unbookable %}
     {% load tags %}
-    {% if booking.repeatgroup %}
-      <div id="repeatmodalBox" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-          <div class="modal-content">
-          </div>
-        </div>
-      </div>
-      <button id="repeatunbookbutton" class="btn btn-warning">
-    {% else %}
-      <button id="unbookbutton" class="btn btn-warning">
-    {% endif %}
-    {% if user|is_bookableadmin:booking.bookable %}
-      {% trans "Admin unbook" %}
-    {% else %}
-      {% trans "Unbook" %}
-    {% endif %}
-    </button>
+    <div class="form-inline">
+      {% if booking.repeatgroup %}
+        <label for="repeat-select" class="m-1">{% trans "Unbook repeated booking:" %}</label>
+        <select id="repeat-select" class="form-control m-1">
+          <option value="0">{% trans "This event only" %}</option>
+          <option value="1">{% trans "This event and subsequent events in series" %}</option>
+          <option value="2">{% trans "All events in this series" %}</option>
+        </select>
+      {% endif %}
+      <button id="unbookbutton" class="btn btn-warning m-1">
+      {% if user|is_bookableadmin:booking.bookable %}
+        {% trans "Admin unbook" %}
+      {% else %}
+        {% trans "Unbook" %}
+      {% endif %}
+      </button>
+    </div>
     <script type="text/javascript">
       $('#unbookbutton').click(function(event) {
-        $.post("{{url}}", function(data) {
-            $('#calendar').fullCalendar('refetchEvents');
-            $('#modalBox').modal('hide');
-          });
-      });
-      $('#repeatunbookbutton').click(function(event) {
-        // Create nice form with checkboxes (3 options)
-        // On submit post as normal but with a "repeated" field that is
-        // 0,1 or 2 depending on what box is checked
-        $form = $('<form id="repeat-form"></form>');
-        $div = $('<div class="row"></div>');
-        $div.append('<div class="form-check col-md-12"><input checked class="form-check-input" type="radio" name="repeat-radios" id="radio-0" value="0"><label class="form-check-label" for="radio-0">{% trans "This event" %}</label>');
-        $div.append('<div class="form-check col-md-12"><input class="form-check-input" type="radio" name="repeat-radios" id="radio-1" value="1"><label class="form-check-label" for="radio-1">{% trans "This event and events after this one" %}</label>');
-        $div.append('<div class="form-check col-md-12"><input class="form-check-input" type="radio" name="repeat-radios" id="radio-2" value="2"><label class="form-check-label" for="radio-2">{% trans "All events from this series" %}</label>');
-        $form.append($div);
-        $('.modal-header').html('<h5 class="modal-title">Avboka återkommande händelse</h5>');
-        $('.container').html($form);
-        $('.modal-footer').html('<input id="repeat-confirm-button" class="pull-right btn btn-warning" type="button" value="{% trans "Admin unbook" %}" />');
-        $('#repeat-confirm-button').click(function(event) {
-          $.post("{{url}}", {'repeat': $("input[name='repeat-radios']:checked").val()}, function(data) {
-              $('#calendar').fullCalendar('refetchEvents');
-              $('#modalBox').modal('hide');
-            });
+        var data = {}
+        var repeatSelect = $('#repeat-select');
+        if (repeatSelect.length) {
+          data.repeat = repeatSelect.val();
+        }
+        $.post('{{url}}', data, function(data) {
+          $('#calendar').fullCalendar('refetchEvents');
+          $('#modalBox').modal('hide');
         });
       });
-
     </script>
   {% else %}
     <div class="alert alert-warning">{{warning}}</div>
