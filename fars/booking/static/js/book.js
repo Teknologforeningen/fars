@@ -16,11 +16,14 @@ function makeUL(array) {
 
 
 $(document).ready(function() {
-  $('#repeat-toggle').change(function() {
-    $('#repeat-form-wrapper').toggleClass('disabled');
+  $('#repeat-toggle').click(function(){
+    $(this).toggleClass('btn-info').toggleClass('btn-success');
+    $(this).text(
+      ($(this).text() == 'Make event repeating') ? 'Event is repeating' : 'Make event repeating'
+    );
   });
   $('#bookform').submit(function(event) {
-    if($('#repeat-toggle').prop('checked')) {
+    if($('#repeat-form-wrapper').hasClass('show')) {
       var postdata = $(this).serialize()+'&repeat=1&'+$('#repeatform').serialize();
     } else {
       var postdata = $(this).serialize();
