@@ -189,6 +189,8 @@ class BookingView(View):
     def _is_unbookable(self, user, booking):
         if booking.end < datetime.now(booking.start.tzinfo):
             return False, _("Bookings in the past may not be unbooked")
+        if _is_admin(user, booking.bookable):
+            return True, ''
         if user != booking.user:
             return False, _("Only the user that made the booking may unbook it")
         return True, ''

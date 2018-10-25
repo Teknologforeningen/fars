@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load bootstrap4 %}
 {% load static %}
-
+{% load tags %}
 
 {% block title %}
   {% if user.first_name and user.last_name %}
@@ -30,7 +30,7 @@
     </div>
     {% bootstrap_field form.comment layout="horizontal" %}
   </form>
-  {% if repeatform %}
+  {% if repeatform and user|is_bookableadmin:bookable %}
     <div id="toggle-wrapper">
       <button id="repeat-toggle" class="btn btn-info" type="button" data-toggle="collapse" data-target="#repeat-form-wrapper" aria-expanded="false" aria-controls="repeat-form-wrapper">{% trans 'Make event repeating' %}</button>
     </div>
