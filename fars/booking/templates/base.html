@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>FARS</title>
   {% load static %}
   {% load tags %}
   {% load i18n %}
   {% get_current_language as language_code %}
 
+  <title>{% block title %}FARS{% endblock %}</title>
+  <link rel="shortcut icon" type="image/png" href="{% static "favicon.png" %}"/>
   <!-- For calendar -->
   <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
@@ -23,10 +24,13 @@
   {% block navbar %}
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
-      {% if bookable %}
+      <!-- TODO: Make navbar brand a block -->
+      {% if date %} <!-- Day view -->
         <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
-      {% else %}
-        <a href="/" class="navbar-brand">FARS</a>
+      {% elif bookable %}<!-- Month view -->
+        <a href="{% url 'home' %}" class="navbar-brand">{{ bookable.name }}</a>
+      {% else %}<!-- Other -->
+        <a href="#" class="navbar-brand">FARS</a>
       {% endif %}
       {% if user.is_authenticated %}
         <span class="nav-item">
