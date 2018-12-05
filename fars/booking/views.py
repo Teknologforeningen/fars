@@ -9,7 +9,8 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 from django.forms import ValidationError
 from django.views import View
-
+import pytz
+from fars.settings import TIME_ZONE
 
 class HomeView(View):
 
@@ -201,9 +202,7 @@ class TabletView(View):
 
     def get(self, request, bookable):
         bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-        if not bookable_obj.public and not request.user.is_authenticated:
-            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
-        now = datetime.now()
+        now = pytz.timezone(TIME_ZONE).localize(datetime.now())
         end_of_today = datetime(
             year=now.year,
             month=now.month,
@@ -212,10 +211,16 @@ class TabletView(View):
             minute=59
         )
         bookings = Booking.objects.filter(bookable=bookable_obj, start__lt=end_of_today, end__gt=now)
+        vacant = True
+        for booking in bookings:
+            if booking.start <= now and booking.end >= now:
+                vacant = False
+                break
         context = {
             'date': now,
             'bookable': bookable_obj,
-            'bookings': bookings
+            'bookings': bookings,
+            'vacant': vacant
         }
         return render(request, self.template, context)
 

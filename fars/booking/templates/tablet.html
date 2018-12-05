@@ -4,34 +4,106 @@
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
   <title>{{ bookable }}</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+    }
+    div#vacancyindicator,
+    div#time-bookbtn {
+      height: 100vh;
+    }
+    div.vacant {
+      background-color: rgba(38, 160, 54, 1);
+    }
+    div.occupied {
+      background-color: rgba(193, 29, 29, 1);
+    }
+    div.row {
+      max-width:100%;
+    }
+    .text-green {
+      color: rgba(38, 160, 54, 1);
+    }
+    h2.timebox {
+      border-right: 1px grey solid;
+      font-size: 225%;
+    }
+    div.clock {
+      font-size: 600%;
+    }
+    div.dateinfo {
+      font-size: 200%;
+    }
+    hr.titlehr {
+      border-color: white;
+    }
+  </style>
 </head>
 <body>
-  <main role="main" id="main-wrapper" class="container text-center">
-    <div class="row">
-      <h1 class="col-12">{{ bookable.name }}</h1>
-    </div>
-    <div class="row">
-      <h2 class="col-12">{{ date|date:"l j.n.Y" }}</h2>
-    </div>
-    {% for booking in bookings %}
-      <div class="row">
-        <h4 class="col-12">{{ booking.start|date:"H:i" }} - {{ booking.end|date:"H:i" }}: {{ booking.user }}</h4>
+  <div class="row">
+    <!-- Indicator that is green if room is vacant and red if occipied -->
+    <div id="vacancyindicator" class="col-1 {% if vacant %}vacant{% else %}occupied{% endif %}"></div>
+    <!-- Box with the time -->
+    <div id="time-bookbtn" class="col-4 d-flex flex-column justify-content-center">
+      <div class="clock mt-auto align-self-center">
+        <span class="hours"></span>:<span class="min"></span>
       </div>
-    {% endfor %}
-    <div class="row">
-      <button class="btn btn-lg col-12" disabled>Book now</button>
+      <div class="dateinfo align-self-center">
+        {{ date|date:"l"|title }}
+      </div>
+      <div class="dateinfo mb-auto align-self-center">
+        {{ date|date:"j.n.Y"|title }}
+      </div>
+      <button class="btn btn-warning mb-5 align-self-center w-50"><i class="far fa-clock"></i> Boka</button>
     </div>
-  </main>
-
+    <!-- Title of bookable and upcoming bookings today -->
+    <div class="col-6 pt-5">
+      <h1 id="title">{{ bookable.name | upper }}</h1>
+      <hr class="titlehr"/>
+      <div class="">
+        {% for booking in bookings %}
+          <div class="row pt-4">
+            <h2 class="col-5 timebox pt-3">
+              {{ booking.start|date:"H:i" }} - {{ booking.end|date:"H:i" }}
+            </h2>
+            <div class="col-7">
+              <h2 class="col-12">
+                {{ booking.comment }}
+              </h2>
+              <p class="col-12">
+                {{ booking.user }}
+              </p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+  <script>
+    $(document).ready(function() {
+      function updateTime() {
+        var hours = new Date().getHours();
+        $(".hours").html(( hours < 10 ? "0" : "" ) + hours);
+        var minutes = new Date().getMinutes();
+        $(".min").html(( minutes < 10 ? "0" : "" ) + minutes);
+      }
+      updateTime();
+      setInterval(updateTime, 1000);
+    });
+  </script>
 </body>
 </html>
