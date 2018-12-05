@@ -13,6 +13,7 @@
   <title>{{ bookable }}</title>
 </head>
 <body>
+  <span id="hidden-data" data-bookable="{{ bookable.id_str }}"></span>
   <div class="row">
     <!-- Indicator that is green if room is vacant and red if occipied -->
     <div id="vacancyindicator" class="col-1 {% if vacant %}vacant{% else %}occupied{% endif %}"></div>
@@ -33,13 +34,13 @@
     <div class="col-6 pt-5">
       <h1 id="title">{{ bookable.name | upper }}</h1>
       <hr class="titlehr"/>
-      <div class="">
+      <div id="bookingbox">
         {% for booking in bookings %}
           <div class="row pt-4">
-            <h2 class="col-5 timebox pt-3">
+            <h2 class="col-6 timebox pt-3">
               {{ booking.start|date:"H:i" }} - {{ booking.end|date:"H:i" }}
             </h2>
-            <div class="col-7">
+            <div class="col-6">
               <h2 class="col-12">
                 {{ booking.comment }}
               </h2>
@@ -48,13 +49,18 @@
               </p>
             </div>
           </div>
+        {% empty %}
+          Inga bokningar idag
         {% endfor %}
       </div>
     </div>
   </div>
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   <script src="{% static 'js/tablet.js' %}"></script>
