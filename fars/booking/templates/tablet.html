@@ -28,7 +28,7 @@
       <div class="dateinfo mb-auto align-self-center">
         {{ date|date:"j.n.Y"|title }}
       </div>
-      <button class="btn btn-warning mb-5 align-self-center w-50"><i class="far fa-clock"></i> Boka</button>
+      <button type="button" class="btn btn-warning mb-5 align-self-center w-50" data-toggle="modal" data-target="#exampleModalCenter"><i class="far fa-clock"></i> Boka</button>
     </div>
     <!-- Title of bookable and upcoming bookings today -->
     <div class="col-6 pt-5">
@@ -55,6 +55,7 @@
       </div>
     </div>
   </div>
+  {% include 'modals/tablet_book.html' %}
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script
