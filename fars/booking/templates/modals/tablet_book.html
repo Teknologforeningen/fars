@@ -1,0 +1,45 @@
+{% load bootstrap4 %}
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content bg-dark">
+      <div class="modal-header">
+        <h5 class="modal-title">Boka {{ bookable.name }}</h5>
+        <button type="button" class="close text-light" data-dismiss="modal" aria-label="close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="bookform" data-url="{{ url }}">
+          {% csrf_token %}
+          {% bootstrap_form_errors bookform %}
+          {% bootstrap_field bookform.bookable %}
+          {% bootstrap_field bookform.user %}
+          <div class="row form-group">
+            <div class="col-6">
+              {% bootstrap_field bookform.start layout="vertical" vertical_field_class="col-9" %}
+            </div>
+            <div class="col-6">
+              {% bootstrap_field bookform.end layout="vertical" vertical_field_class="col-9" %}
+            </div>
+          </div>
+          <div class="row form-group">
+            <div class="col-12">
+              {% bootstrap_field bookform.comment layout="vertical" %}
+            </div>
+          </div>
+          <div class="row form-group">
+            <div class="col-6">
+              <label for="#id_username">Användarnamn</label>
+              <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
+            </div>
+            <div class="col-6">
+              <label for="#id_password">Lösenord</label>
+              <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning">Boka</button>
+      </div>
+    </div>
+  </div>
+</div>

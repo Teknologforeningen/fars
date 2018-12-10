@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
 from booking.models import Booking, Bookable
-from booking.forms import BookingForm, RepeatingBookingForm
+from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
@@ -216,11 +216,16 @@ class TabletView(View):
             if booking.start <= now and booking.end >= now:
                 vacant = False
                 break
+
+        booking = Booking()
+        booking.bookable = bookable_obj
+
         context = {
             'date': now,
             'bookable': bookable_obj,
             'bookings': bookings,
-            'vacant': vacant
+            'vacant': vacant,
+            'bookform': BookingForm(instance=booking)
         }
         return render(request, self.template, context)
 
