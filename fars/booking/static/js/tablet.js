@@ -14,15 +14,22 @@ function zeropad(num) {
 }
 
 function createBooking(booking) {
-  var start = new Date(Date.parse(booking.start)),
+  var start = new Date(Date.parse(booking.start)),  // Create start and end strings
       start_str = zeropad(start.getHours()) + ':' + zeropad(start.getMinutes()),
       end = new Date(Date.parse(booking.end)),
       end_str = zeropad(end.getHours()) + ':' + zeropad(end.getMinutes()),
-      htmlstr = '';
-  htmlstr += '<div class="row pt-4"><h2 class="col-6 timebox pt-3">' + start_str + ' - ' + end_str + '</h2>';
-  htmlstr += '<div class="col-6"><h2 class="col-12">' + booking.comment + '</h2><p class="col-12">' + booking.user + '</p></div></div>';
-  // TODO: Change user to actual get the users name and not the ID
-  return htmlstr;
+      time_str = start_str + ' - ' + end_str,
+      time = $('<h2 class="col-6 timebox pt-3"></h2>').append(time_str),
+      comment = $('<h2 class="col-12"></h2>').append(booking.comment),
+      name_str = booking.user.first_name + " " + booking.user.last_name,
+      name = $('<p class="col-12"></p>').append(name_str),
+      comment_and_name = $('<div class="col-6"></div>'),
+      booking_box = $('<div class="row pt-4"></div>');
+
+  comment_and_name.append(comment).append(name);
+  booking_box.append(time).append(comment_and_name);
+
+  return booking_box;
 }
 
 function getBookings() {
