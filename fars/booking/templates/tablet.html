@@ -28,31 +28,13 @@
       <div class="dateinfo mb-auto align-self-center">
         {{ date|date:"j.n.Y"|title }}
       </div>
-      <button type="button" class="btn btn-warning mb-5 align-self-center w-50" data-toggle="modal" data-target="#exampleModalCenter"><i class="far fa-clock"></i> Boka</button>
+      <button id="bookbtn" type="button" class="btn btn-warning mb-5 align-self-center w-50"><i class="far fa-clock"></i> Boka</button>
     </div>
     <!-- Title of bookable and upcoming bookings today -->
     <div class="col-6 pt-5">
       <h1 id="title">{{ bookable.name | upper }}</h1>
       <hr class="titlehr"/>
-      <div id="bookingbox">
-        {% for booking in bookings %}
-          <div class="row pt-4">
-            <h2 class="col-6 timebox pt-3">
-              {{ booking.start|date:"H:i" }} - {{ booking.end|date:"H:i" }}
-            </h2>
-            <div class="col-6">
-              <h2 class="col-12">
-                {{ booking.comment }}
-              </h2>
-              <p class="col-12">
-                {{ booking.user }}
-              </p>
-            </div>
-          </div>
-        {% empty %}
-          Inga bokningar idag
-        {% endfor %}
-      </div>
+      <div id="bookingbox"></div>
     </div>
   </div>
   {% include 'modals/tablet_book.html' with bookable=bookable bookform=bookform %}
