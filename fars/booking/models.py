@@ -21,6 +21,8 @@ class Bookable(models.Model):
     forward_limit_days = models.PositiveIntegerField(default = 0)
     # How long bookings are allowed to be (zero means no limit)
     length_limit_hours = models.PositiveIntegerField(default = 0)
+    # Groups that may be used to make group bookings for this bookable
+    allowed_booker_groups = models.ManyToManyField(Group)
 
     def __str__(self):
         return self.name
@@ -28,6 +30,9 @@ class Bookable(models.Model):
     @property
     def admin_group_name(self):
         return '{}_admin'.format(self.id_str)
+
+    def get_allowed_booker_groups_for_user(self, user):
+        return self.allowed_booker_groups.filter(id__in=user.groups.all())
 
 
 @receiver(post_save, sender=Bookable)
@@ -61,6 +66,7 @@ class Booking(models.Model):
     end = models.DateTimeField(_("end"))
     comment = models.CharField(_("comment"), max_length=128)
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, null=True, on_delete=models.CASCADE, default=None)
+    booking_group = models.ForeignKey(Group, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = _("Booking")
@@ -82,3 +88,7 @@ class Booking(models.Model):
         # Check that end is not earlier than start
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
+
+        # Check that booking group is allowed
+        if self.booking_group and self.booking_group not in self.bookable.get_allowed_booker_groups_for_user(self.user):
+            raise ValidationError(_("Group booking is not allowed with the provided user and group"))
