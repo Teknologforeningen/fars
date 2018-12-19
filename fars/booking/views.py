@@ -204,28 +204,11 @@ class TabletView(View):
     def get(self, request, bookable):
         bookable_obj = get_object_or_404(Bookable, id_str=bookable)
         now = pytz.timezone(TIME_ZONE).localize(datetime.now())
-        end_of_today = datetime(
-            year=now.year,
-            month=now.month,
-            day=now.day,
-            hour=23,
-            minute=59
-        )
-        bookings = Booking.objects.filter(bookable=bookable_obj, start__lt=end_of_today, end__gt=now)
-        vacant = True
-        for booking in bookings:
-            if booking.start <= now and booking.end >= now:
-                vacant = False
-                break
-
         booking = Booking()
         booking.bookable = bookable_obj
 
         context = {
-            'date': now,
             'bookable': bookable_obj,
-            'bookings': bookings,
-            'vacant': vacant,
             'bookform': BookingForm(instance=booking)
         }
         return render(request, self.template, context)
