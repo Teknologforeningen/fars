@@ -11,6 +11,7 @@ from django.forms import ValidationError
 from django.views import View
 import pytz
 from fars.settings import TIME_ZONE
+from django.contrib.auth import authenticate
 
 class HomeView(View):
 
@@ -228,6 +229,33 @@ class TabletView(View):
             'bookform': BookingForm(instance=booking)
         }
         return render(request, self.template, context)
+
+
+    def post(self, request, bookable):
+        username = request.POST.get('username')
+        pw = request.POST.get('password')
+        user = authenticate(username=username, password=pw)
+        if user is not None:
+            postdata = request.POST.copy()
+            postdata['user'] = user.id
+            form = BookingForm(postdata, instance=Booking())
+            if form.is_valid():
+                form.save()
+                return JSONResponse({'success': 1})
+            else:
+                resp = JSONResponse({
+                    'success': 0,
+                    'error': form.error,
+                    'status_code': 400
+                })
+                return resp
+        else:
+            resp = JSONResponse({
+                'success': 0,
+                'error': 'Usercredentials are not correct',
+                'status_code': 400
+            })
+            return resp
 
 
 # Returns whether user is admin for given bookable

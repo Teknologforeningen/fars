@@ -82,4 +82,18 @@ $(document).ready(function() {
     $('#book-modal').modal('show');
     updateBookformInfo(new Date());
   });
+  $('#booksubmit').click(function(event) {
+    var bookable = $('#hidden-data').data('bookable');
+    $.ajax({
+      url: location.pathname,
+      type: 'post',
+      data: $('#bookform').serialize(),
+      success: function(data) {
+        location.reload();
+      },
+      error: function(data) {
+        console.log(data);
+      }
+    });
+  });
 });
