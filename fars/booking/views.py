@@ -224,16 +224,16 @@ class TabletView(View):
             form = BookingForm(postdata, instance=Booking())
             if form.is_valid():
                 form.save()
-                return JSONResponse({'success': 1})
+                return JsonResponse({'success': 1})
             else:
-                resp = JSONResponse({
+                resp = JsonResponse({
                     'success': 0,
                     'error': form.error,
                     'status_code': 400
                 })
                 return resp
         else:
-            resp = JSONResponse({
+            resp = JsonResponse({
                 'success': 0,
                 'error': 'Usercredentials are not correct',
                 'status_code': 400

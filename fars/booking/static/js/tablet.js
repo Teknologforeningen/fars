@@ -50,10 +50,19 @@ function updateBookings() {
     },
     success: function(data) {
       $('#bookingbox').html('');
+      var vacant = true;
       for(booking in data) {
+        var now = Date.now();
         $('#bookingbox').append(createBooking(data[booking]));
+        if(Date.parse(data[booking].start) <= now && Date.parse(data[booking].end) >= now) {
+          vacant = false;
+        }
       }
-      // TODO: Update vacancy color
+      if (!vacant) {
+        $('#vacancyindicator').removeClass('vacant').addClass('occupied');
+      } else {
+        $('#vacancyindicator').addClass('vacant').removeClass('occupied');
+      }
     }
   });
 }

@@ -16,7 +16,7 @@
   <span id="hidden-data" data-bookable="{{ bookable.id_str }}"></span>
   <div class="row">
     <!-- Indicator that is green if room is vacant and red if occipied -->
-    <div id="vacancyindicator" class="col-1 {% if vacant %}vacant{% else %}occupied{% endif %}"></div>
+    <div id="vacancyindicator" class="col-1"></div>
     <!-- Box with the time -->
     <div id="time-bookbtn" class="col-4 d-flex flex-column justify-content-center">
       <div class="clock mt-auto align-self-center">
@@ -29,7 +29,7 @@
       <div class="dateinfo mb-auto align-self-center">
         {% now "j.n.Y" %}
       </div>
-      <button id="bookbtn" type="button" class="btn btn-warning mb-5 align-self-center w-50"><i class="far fa-clock"></i> Boka</button>
+      <button id="bookbtn" type="button" class="btn btn-warning mb-5 align-self-center w-50"><i class="far fa-clock"></i> Boka nu</button>
     </div>
     <!-- Title of bookable and upcoming bookings today -->
     <div class="col-6 pt-5">
