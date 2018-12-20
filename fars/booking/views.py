@@ -200,45 +200,43 @@ class BookingView(View):
 
 class TabletView(View):
     template = 'tablet.html'
+    context = {}
+
+    def dispatch(self, request, bookable):
+        bookable_obj = get_object_or_404(Bookable, id_str=bookable)
+        self.context['bookable'] = bookable_obj
+        self.context['errors'] = 0
+        return super().dispatch(request, bookable)
 
     def get(self, request, bookable):
-        bookable_obj = get_object_or_404(Bookable, id_str=bookable)
         now = pytz.timezone(TIME_ZONE).localize(datetime.now())
         booking = Booking()
-        booking.bookable = bookable_obj
-
-        context = {
-            'bookable': bookable_obj,
-            'bookform': BookingForm(instance=booking)
-        }
-        return render(request, self.template, context)
+        booking.bookable = self.context['bookable']
+        self.context['bookform'] = BookingForm(instance=booking)
+        return render(request, self.template, context=self.context)
 
 
     def post(self, request, bookable):
         username = request.POST.get('username')
         pw = request.POST.get('password')
         user = authenticate(username=username, password=pw)
-        if user is not None:
-            postdata = request.POST.copy()
+        postdata = request.POST.copy()
+        try:
             postdata['user'] = user.id
-            form = BookingForm(postdata, instance=Booking())
-            if form.is_valid():
-                form.save()
-                return JsonResponse({'success': 1})
-            else:
-                resp = JsonResponse({
-                    'success': 0,
-                    'error': form.error,
-                    'status_code': 400
-                })
-                return resp
+        except AttributeError:
+            postdata['user'] = -1
+            self.context['errors'] = 1
+            # TODO: pass "Credentials invalid error" to frontend
+        form = BookingForm(postdata, instance=Booking())
+        if form.is_valid():
+            form.save()
+            return redirect('tablet', bookable=bookable)
         else:
-            resp = JsonResponse({
-                'success': 0,
-                'error': 'Usercredentials are not correct',
-                'status_code': 400
-            })
-            return resp
+            self.context['errors'] = 1
+            status = 400
+
+        self.context['bookform'] = form
+        return render(request, self.template, context=self.context, status=status)
 
 
 # Returns whether user is admin for given bookable

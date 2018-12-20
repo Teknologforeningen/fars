@@ -87,22 +87,12 @@ $(document).ready(function() {
   setInterval(updateTime, 1000);
   setInterval(updateBookings, 60000);
 
+  if($('#bookform').data('errors')) {
+    $('#book-modal').modal('show');
+  }
+
   $("#bookbtn").click(function(event) {
     $('#book-modal').modal('show');
     updateBookformInfo(new Date());
-  });
-  $('#booksubmit').click(function(event) {
-    var bookable = $('#hidden-data').data('bookable');
-    $.ajax({
-      url: location.pathname,
-      type: 'post',
-      data: $('#bookform').serialize(),
-      success: function(data) {
-        location.reload();
-      },
-      error: function(data) {
-        console.log(data);
-      }
-    });
   });
 });
