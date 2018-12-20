@@ -226,7 +226,7 @@ class TabletView(View):
         except AttributeError:
             postdata['user'] = -1
             self.context['errors'] = 1
-            # TODO: pass "Credentials invalid error" to frontend
+            self.context['credential_error'] = 1
         form = BookingForm(postdata, instance=Booking())
         if form.is_valid():
             form.save()

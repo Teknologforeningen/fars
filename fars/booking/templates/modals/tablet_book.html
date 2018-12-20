@@ -9,6 +9,12 @@
       <form id="bookform" method="post" action="{{ url }}" data-errors="{{ errors }}">
         <div class="modal-body">
           {% csrf_token %}
+          {% if credential_error %}
+            <div class="alert alert-danger alert-dismissable alert-link">
+              <button class="close" type="button" data-dismiss="alert" aria-hidden="true">&#215;</button>
+              Ditt användarnamn eller lösenord är fel.
+            </div>
+          {% endif %}
           {% bootstrap_form_errors bookform %}
           {% bootstrap_field bookform.bookable %}
           {% bootstrap_field bookform.user %}
