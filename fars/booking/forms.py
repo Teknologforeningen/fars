@@ -36,6 +36,10 @@ class BookingForm(forms.ModelForm):
     start = DateTimeField()
     end = DateTimeField()
 
+    def __init__(self, allowed_booking_groups, *args, **kwargs):
+        super(BookingForm, self).__init__(*args, **kwargs)
+        self.fields['booking_group'].choices = allowed_booking_groups
+
     class Meta:
         model = Booking
         fields = '__all__'

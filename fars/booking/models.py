@@ -22,7 +22,7 @@ class Bookable(models.Model):
     # How long bookings are allowed to be (zero means no limit)
     length_limit_hours = models.PositiveIntegerField(default = 0)
     # Groups that may be used to make group bookings for this bookable
-    allowed_booker_groups = models.ManyToManyField(Group)
+    allowed_booker_groups = models.ManyToManyField(Group, blank=True)
 
     def __str__(self):
         return self.name
