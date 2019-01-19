@@ -31,9 +31,6 @@ class Bookable(models.Model):
     def admin_group_name(self):
         return '{}_admin'.format(self.id_str)
 
-    def get_allowed_booker_groups_for_user(self, user):
-        return self.allowed_booker_groups.filter(id__in=user.groups.all())
-
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
@@ -76,6 +73,15 @@ class Booking(models.Model):
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
 
+    def get_booker_groups(self):
+        allowed_groups = []
+        if self.bookable_id is not None:
+            allowed_groups = self.bookable.allowed_booker_groups
+            if self.user_id is not None:
+               allowed_groups = allowed_groups.filter(id__in=self.user.groups.all()) 
+
+        return allowed_groups
+
     def get_overlapping_bookings(self):
         overlapping = Booking.objects.filter(
             bookable=self.bookable,
@@ -90,5 +96,5 @@ class Booking(models.Model):
             raise ValidationError(_("Booking cannot end before it begins"))
 
         # Check that booking group is allowed
-        if self.booking_group and self.booking_group not in self.bookable.get_allowed_booker_groups_for_user(self.user):
+        if self.booking_group and self.booking_group not in self.get_booker_groups():
             raise ValidationError(_("Group booking is not allowed with the provided user and group"))

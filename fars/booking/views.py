@@ -101,9 +101,7 @@ class BookView(View):
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
         booking.user = request.user
-        allowed_booker_groups = booking.bookable.get_allowed_booker_groups_for_user(booking.user)
-        choices = [(None, _('No group'))] + [(group.id, group.name) for group in allowed_booker_groups]
-        form = BookingForm(choices, instance=booking)
+        form = BookingForm(instance=booking)
         self.context['form'] = form
 
         if _is_admin(request.user, self.context['bookable']):
