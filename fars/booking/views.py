@@ -192,8 +192,8 @@ class BookingView(View):
             return False, _("Bookings in the past may not be unbooked")
         if _is_admin(user, booking.bookable):
             return True, ''
-        if user != booking.user:
-            return False, _("Only the user that made the booking may unbook it")
+        if user != booking.user and booking.booking_group not in user.groups.all():
+            return False, _("Only the user or group that made the booking may unbook it")
         return True, ''
 
 
