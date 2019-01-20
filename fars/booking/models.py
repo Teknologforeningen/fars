@@ -63,7 +63,7 @@ class Booking(models.Model):
     end = models.DateTimeField(_("end"))
     comment = models.CharField(_("comment"), max_length=128)
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, null=True, on_delete=models.CASCADE, default=None)
-    booking_group = models.ForeignKey(Group, null=True, on_delete=models.SET_NULL)
+    booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = _("Booking")
