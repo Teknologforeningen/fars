@@ -6,6 +6,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
+from booking.metadata_forms import METADATA_FORM_OPTIONS
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 
@@ -21,6 +22,7 @@ class Bookable(models.Model):
     forward_limit_days = models.PositiveIntegerField(default = 0)
     # How long bookings are allowed to be (zero means no limit)
     length_limit_hours = models.PositiveIntegerField(default = 0)
+    metadata_form = models.CharField(max_length=2, null=True, blank=True, default=None, choices=METADATA_FORM_OPTIONS)
 
     def __str__(self):
         return self.name
@@ -61,6 +63,7 @@ class Booking(models.Model):
     end = models.DateTimeField(_("end"))
     comment = models.CharField(_("comment"), max_length=128)
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, null=True, on_delete=models.CASCADE, default=None)
+    metadata = models.CharField(max_length=256, blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = _("Booking")

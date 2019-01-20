@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm, RepeatingBookingForm
+from booking.metadata_forms import METADATA_FORM_CLASSES
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
@@ -105,6 +106,11 @@ class BookView(View):
 
         if _is_admin(request.user, self.context['bookable']):
             self.context['repeatform'] = RepeatingBookingForm()
+
+        metadata_form_name = self.context['bookable'].metadata_form
+
+        if metadata_form_name and metadata_form_name in METADATA_FORM_CLASSES:
+            self.context['metadataform'] = METADATA_FORM_CLASSES[metadata_form_name]()
 
         return render(request, self.template, context=self.context)
 

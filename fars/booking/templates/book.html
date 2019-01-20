@@ -29,6 +29,10 @@
       </div>
     </div>
     {% bootstrap_field form.comment layout="horizontal" %}
+    {% if metadataform %}
+      {% bootstrap_form metadataform %}
+    {% endif %}
+
   </form>
   {% if repeatform and user|is_bookableadmin:bookable %}
     <div id="toggle-wrapper">
