@@ -6,7 +6,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
-from booking.metadata_forms import METADATA_FORM_OPTIONS
+from booking.metadata_forms import METADATA_FORM_OPTIONS, METADATA_FORM_CLASSES
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 
@@ -30,6 +30,12 @@ class Bookable(models.Model):
     @property
     def admin_group_name(self):
         return '{}_admin'.format(self.id_str)
+
+    def get_metadata_form(self, data=None):
+        if self.metadata_form in METADATA_FORM_CLASSES:
+            return METADATA_FORM_CLASSES[self.metadata_form](data)
+        else:
+            return None
 
 
 @receiver(post_save, sender=Bookable)

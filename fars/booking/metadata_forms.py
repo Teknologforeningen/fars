@@ -19,6 +19,7 @@ class PiSaunaMetadataForm(forms.Form):
         required=False,
         label=_('Doorcode'),
         help_text=_('Optionally provide a doorcode with which the door to the Lounge can be opened during your booking'),
+        widget=forms.NumberInput,
         validators=[
             RegexValidator(
                 regex='^[0-9]{4,6}$',

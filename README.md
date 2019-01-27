@@ -61,6 +61,10 @@ Logged in users can view the different bookables in the system and make bookings
 
 Users that haven't logged into the site can only view the bookables that are public. All other functionality requires them to log in.
 
+### Metadata forms
+
+If your bookable requires any kind of metadata to be attached to each booking, simply create a standard django form in `fars/booking/metadata_forms.py`, then add it to the `METADATA_FORM_OPTIONS` and `METADATA_FORM_CLASSES` dicts. The data will be stored in the booking's `metadata` field.
+
 ## Built with
 
 * [Django](https://www.djangoproject.com/) - The web framework used
