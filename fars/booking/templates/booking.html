@@ -84,10 +84,14 @@
         if (repeatSelect.length) {
           data.repeat = repeatSelect.val();
         }
-        $.post('{{url}}', data, function(data) {
-          $('#calendar').fullCalendar('refetchEvents');
-          $('#modalBox').modal('hide');
-        });
+        $.ajax({
+          url: '{{url}}' + '?' + $.param(data),
+          type: 'DELETE',
+          success: function(data) {
+            $('#calendar').fullCalendar('refetchEvents');
+            $('#modalBox').modal('hide');
+          }
+        })
       });
     </script>
   {% else %}
