@@ -101,7 +101,8 @@ class BookView(View):
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
         booking.user = request.user
-        self.context['form'] = BookingForm(instance=booking)
+        form = BookingForm(instance=booking)
+        self.context['form'] = form
 
         if _is_admin(request.user, self.context['bookable']):
             self.context['repeatform'] = RepeatingBookingForm()
@@ -191,8 +192,8 @@ class BookingView(View):
             return False, _("Bookings in the past may not be unbooked")
         if _is_admin(user, booking.bookable):
             return True, ''
-        if user != booking.user:
-            return False, _("Only the user that made the booking may unbook it")
+        if user != booking.user and booking.booking_group not in user.groups.all():
+            return False, _("Only the user or group that made the booking may unbook it")
         return True, ''
 
 

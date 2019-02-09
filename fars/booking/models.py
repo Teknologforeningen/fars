@@ -21,6 +21,8 @@ class Bookable(models.Model):
     forward_limit_days = models.PositiveIntegerField(default = 0)
     # How long bookings are allowed to be (zero means no limit)
     length_limit_hours = models.PositiveIntegerField(default = 0)
+    # Groups that may be used to make group bookings for this bookable
+    allowed_booker_groups = models.ManyToManyField(Group, blank=True)
 
     def __str__(self):
         return self.name
@@ -61,6 +63,7 @@ class Booking(models.Model):
     end = models.DateTimeField(_("end"))
     comment = models.CharField(_("comment"), max_length=128)
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, null=True, on_delete=models.CASCADE, default=None)
+    booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = _("Booking")
@@ -69,6 +72,15 @@ class Booking(models.Model):
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+
+    def get_booker_groups(self):
+        allowed_groups = []
+        if self.bookable_id is not None:
+            allowed_groups = self.bookable.allowed_booker_groups
+            if self.user_id is not None:
+               allowed_groups = allowed_groups.filter(id__in=self.user.groups.all()) 
+
+        return allowed_groups
 
     def get_overlapping_bookings(self):
         overlapping = Booking.objects.filter(
@@ -82,3 +94,7 @@ class Booking(models.Model):
         # Check that end is not earlier than start
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
+
+        # Check that booking group is allowed
+        if self.booking_group and self.booking_group not in self.get_booker_groups():
+            raise ValidationError(_("Group booking is not allowed with the provided user and group"))
