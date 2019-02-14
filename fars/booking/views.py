@@ -103,7 +103,8 @@ class BookView(View):
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
         booking.user = request.user
-        self.context['form'] = BookingForm(instance=booking)
+        form = BookingForm(instance=booking)
+        self.context['form'] = form
 
         if _is_admin(request.user, self.context['bookable']):
             self.context['repeatform'] = RepeatingBookingForm()
@@ -166,20 +167,18 @@ class BookingView(View):
         return super().dispatch(request, booking_id)
 
 
-    # A POST request to a booking is for unbooking.
-    # A DELETE request would make more sense, but we use POST for the repeat parameter
-    def post(self, request, booking_id):
+    def delete(self, request, booking_id):
         booking = self.context['booking']
         is_admin = _is_admin(request.user, booking.bookable)
         if _is_admin or self.context['unbookable']:
             now = datetime.now(booking.start.tzinfo)
-            if is_admin and booking.repeatgroup and int(request.POST.get('repeat')) >= 1:
+            removal_level = int(request.GET.get('repeat'))
+            if is_admin and booking.repeatgroup and removal_level >= 1:
                 # Removal of a repeating booking. There are 3 different levels of removal
                 # of a repeating booking:
                 # 0 : Delete only this booking
                 # 1 : Delete this booking and bookings after this one
                 # 2 : Delete all bookings from this series of booking (past and future)
-                removal_level = int(request.POST.get('repeat'))
                 if removal_level == 1:
                     booking.repeatgroup.delete_from_date_forward(booking.start)
                 elif removal_level == 2:
@@ -205,8 +204,8 @@ class BookingView(View):
             return False, _("Bookings in the past may not be unbooked")
         if _is_admin(user, booking.bookable):
             return True, ''
-        if user != booking.user:
-            return False, _("Only the user that made the booking may unbook it")
+        if user != booking.user and booking.booking_group not in user.groups.all():
+            return False, _("Only the user or group that made the booking may unbook it")
         return True, ''
 
 
