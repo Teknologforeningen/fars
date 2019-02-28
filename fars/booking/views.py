@@ -233,9 +233,8 @@ class TabletView(View):
         if form.is_valid():
             form.save()
             return redirect('tablet', bookable=bookable)
-        else:
-            self.context['errors'] = 1
-            status = 400
+        self.context['errors'] = 1
+        status = 400
 
         self.context['bookform'] = form
         return render(request, self.template, context=self.context, status=status)

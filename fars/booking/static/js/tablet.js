@@ -1,7 +1,7 @@
 function updateTime() {
-  var hours = new Date().getHours();
+  const hours = new Date().getHours();
   $(".hours").html(( hours < 10 ? "0" : "" ) + hours);
-  var minutes = new Date().getMinutes();
+  const minutes = new Date().getMinutes();
   $(".min").html(( minutes < 10 ? "0" : "" ) + minutes);
 }
 
@@ -14,7 +14,7 @@ function zeropad(num) {
 }
 
 function createBooking(booking) {
-  var start = new Date(Date.parse(booking.start)),  // Create start and end strings
+  const start = new Date(Date.parse(booking.start)),  // Create start and end strings
       start_str = zeropad(start.getHours()) + ':' + zeropad(start.getMinutes()),
       end = new Date(Date.parse(booking.end)),
       end_str = zeropad(end.getHours()) + ':' + zeropad(end.getMinutes()),
@@ -33,7 +33,7 @@ function createBooking(booking) {
 }
 
 function updateBookings() {
-  var bookable = $('#hidden-data').data('bookable'),
+  const bookable = $('#hidden-data').data('bookable'),
       now = new Date(),
       eod = new Date(
         now.getFullYear(),
@@ -52,7 +52,6 @@ function updateBookings() {
       $('#bookingbox').html('');
       var vacant = true;
       for(booking in data) {
-        var now = Date.now();
         $('#bookingbox').append(createBooking(data[booking]));
         if(Date.parse(data[booking].start) <= now && Date.parse(data[booking].end) >= now) {
           vacant = false;
@@ -63,13 +62,13 @@ function updateBookings() {
       } else {
         $('#vacancyindicator').addClass('vacant').removeClass('occupied');
       }
-      updateBookformInfo(new Date(), data);
+      updateBookformInfo(now, data);
     }
   });
 }
 
 function updateBookformInfo(now, bookings) {
-  var day = ("0" + now.getDate()).slice(-2),
+  const day = ("0" + now.getDate()).slice(-2),
       month = ("0" + (now.getMonth() + 1)).slice(-2),
       today = now.getFullYear()+"-"+(month)+"-"+(day),
       now_h = now.getHours(),
