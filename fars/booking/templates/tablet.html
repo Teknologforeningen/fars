@@ -33,9 +33,11 @@
     </div>
     <!-- Title of bookable and upcoming bookings today -->
     <div class="col-6 pt-5">
-      <h1 id="title">{{ bookable.name | upper }}</h1>
-      <hr class="titlehr"/>
-      <div id="bookingbox"></div>
+      <div id="title-wrapper">
+        <h1 id="title">{{ bookable.name | upper }}</h1>
+        <hr class="titlehr"/>
+      </div>
+      <div id="bookingbox" class="scroll-y"></div>
     </div>
   </div>
   {% include 'modals/tablet_book.html' with bookable=bookable bookform=bookform %}

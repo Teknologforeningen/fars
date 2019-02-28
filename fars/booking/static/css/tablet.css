@@ -32,3 +32,10 @@ div.dateinfo {
 hr.titlehr {
   border-color: white;
 }
+div#title-wrapper {
+  max-height: 20vh;
+}
+div.scroll-y {
+  max-height: 80vh;
+  overflow-y: scroll;
+}
