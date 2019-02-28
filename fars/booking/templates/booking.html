@@ -41,6 +41,19 @@
             {{booking.comment}}
         </div>
     </div>
+    <div class="row">
+        <div class="col-3 font-weight-bold">
+            {% trans "Group:" %}
+        </div>
+        <div class="col-9">
+          {% if booking.booking_group %}
+            {{booking.booking_group}}
+          {% else %}
+            {% trans "Private booking" %}
+          {% endif %}
+          
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -71,10 +84,14 @@
         if (repeatSelect.length) {
           data.repeat = repeatSelect.val();
         }
-        $.post('{{url}}', data, function(data) {
-          $('#calendar').fullCalendar('refetchEvents');
-          $('#modalBox').modal('hide');
-        });
+        $.ajax({
+          url: '{{url}}' + '?' + $.param(data),
+          type: 'DELETE',
+          success: function(data) {
+            $('#calendar').fullCalendar('refetchEvents');
+            $('#modalBox').modal('hide');
+          }
+        })
       });
     </script>
   {% else %}
