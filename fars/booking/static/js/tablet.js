@@ -63,21 +63,23 @@ function updateBookings() {
       } else {
         $('#vacancyindicator').addClass('vacant').removeClass('occupied');
       }
+      updateBookformInfo(new Date(), data);
     }
   });
 }
 
-function updateBookformInfo(now) {
+function updateBookformInfo(now, bookings) {
   var day = ("0" + now.getDate()).slice(-2),
       month = ("0" + (now.getMonth() + 1)).slice(-2),
       today = now.getFullYear()+"-"+(month)+"-"+(day),
       now_h = now.getHours(),
       now_m = now.getMinutes();
 
+  // TODO change to 1h or till next booking starts
+  var defaultTimes = findDefaultTime(bookings);
   $('#id_start_0').val(today);
   $('#id_start_1').val(zeropad(now_h) + ":" + zeropad(now_m));
   $('#id_end_0').val(today);
-  // TODO change to 1h or till next booking starts
   $('#id_end_1').val(zeropad(now_h+1) + ":" + zeropad(now_m));
 }
 
@@ -93,6 +95,6 @@ $(document).ready(function() {
 
   $("#bookbtn").click(function(event) {
     $('#book-modal').modal('show');
-    updateBookformInfo(new Date());
+    // updateBookformInfo(new Date());
   });
 });
