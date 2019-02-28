@@ -85,7 +85,7 @@ class Booking(models.Model):
     def get_booker_groups(self):
         allowed_groups = []
         if self.bookable_id is not None:
-            allowed_groups = self.bookable.allowed_booker_groups
+            allowed_groups = self.bookable.allowed_booker_groups.all()
             if self.user_id is not None:
                allowed_groups = allowed_groups.filter(id__in=self.user.groups.all()) 
 
