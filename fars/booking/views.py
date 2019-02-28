@@ -9,6 +9,8 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 from django.forms import ValidationError
 from django.views import View
+import json
+
 
 
 class HomeView(View):
@@ -106,13 +108,25 @@ class BookView(View):
 
         if _is_admin(request.user, self.context['bookable']):
             self.context['repeatform'] = RepeatingBookingForm()
+        self.context['metadataform'] = self.context['bookable'].get_metadata_form()
 
         return render(request, self.template, context=self.context)
 
 
     def post(self, request, bookable):
         form = BookingForm(request.POST, instance=Booking())
+        self.context['form'] = form
+        metadataform = self.context['bookable'].get_metadata_form(request.POST)
+
         if form.is_valid():
+            booking = form.instance
+            if metadataform:
+                self.context['metadataform'] = metadataform
+                if metadataform.is_valid():
+                    booking.metadata = json.dumps(metadataform.cleaned_data)
+                else:
+                    return render(request, self.template, context=self.context, status=400)
+
             if request.POST.get('repeat') and _is_admin(request.user, self.context['bookable']):
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
@@ -121,17 +135,17 @@ class BookView(View):
                 repeat_form = RepeatingBookingForm(repeatdata)
                 if repeat_form.is_valid():
                     # Creates repeating bookings as specified, adding all created bookings to group
-                    skipped_bookings = repeat_form.save_repeating_booking_group(form.instance)
+                    skipped_bookings = repeat_form.save_repeating_booking_group(booking)
                     return JsonResponse({'skipped_bookings': skipped_bookings})
                 else:
-                    status = 400
+                    return render(request, self.template, context=self.context, status=400)
+
             else:
                 form.save()
-                return HttpResponse()
         else:
-            status = 400
-        self.context['form'] = form
-        return render(request, self.template, context=self.context, status=status)
+            return render(request, self.template, context=self.context, status=400)
+
+        return HttpResponse()
 
 
 class BookingView(View):
