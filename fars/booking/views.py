@@ -204,6 +204,8 @@ class TabletView(View):
 
     def dispatch(self, request, bookable):
         bookable_obj = get_object_or_404(Bookable, id_str=bookable)
+        if not bookable_obj.public and not request.user.is_authenticated:
+            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
         self.context['bookable'] = bookable_obj
         self.context['errors'] = 0
         return super().dispatch(request, bookable)
