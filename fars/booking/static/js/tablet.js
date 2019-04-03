@@ -1,31 +1,18 @@
 function updateTime() {
-  const hours = new Date().getHours();
-  $(".hours").html(( hours < 10 ? "0" : "" ) + hours);
-  const minutes = new Date().getMinutes();
-  $(".min").html(( minutes < 10 ? "0" : "" ) + minutes);
-}
-
-function zeropad(num) {
-  if(num < 10) {
-    return '0' + num;
-  } else {
-    return num.toString();
-  }
+  $(".hours").html(moment().hour());
+  $(".min").html(moment().minute());
 }
 
 function createBooking(booking) {
-  const start = new Date(Date.parse(booking.start)),  // Create start and end strings
-      start_str = zeropad(start.getHours()) + ':' + zeropad(start.getMinutes()),
-      end = new Date(Date.parse(booking.end)),
-      end_str = zeropad(end.getHours()) + ':' + zeropad(end.getMinutes()),
-      time_str = start_str + ' - ' + end_str,
+  const start = moment(booking.start).format('HH:mm'),
+      end = moment(booking.end).format('HH:mm'),
+      time_str = start + ' - ' + end,
       time = $('<h2 class="col-6 timebox pt-3"></h2>').append(time_str),
       comment = $('<h2 class="col-12"></h2>').append(booking.comment),
       name_str = booking.user.first_name + " " + booking.user.last_name,
       name = $('<p class="col-12"></p>').append(name_str),
       comment_and_name = $('<div class="col-6"></div>'),
       booking_box = $('<div class="row pt-4"></div>');
-
   comment_and_name.append(comment).append(name);
   booking_box.append(time).append(comment_and_name);
 
@@ -34,13 +21,8 @@ function createBooking(booking) {
 
 function updateBookings() {
   const bookable = $('#hidden-data').data('bookable'),
-      now = new Date(),
-      eod = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        23, 59, 59
-      );
+      now = moment(),
+      eod = moment().endOf('day');
   $.ajax({
     url: '/api/bookings',
     data: {
@@ -53,7 +35,7 @@ function updateBookings() {
       var vacant = true;
       for(booking in data) {
         $('#bookingbox').append(createBooking(data[booking]));
-        if(Date.parse(data[booking].start) <= now && Date.parse(data[booking].end) >= now) {
+        if(moment(data[booking].start) <= now && moment(data[booking].end) >= now) {
           vacant = false;
         }
       }
@@ -68,18 +50,14 @@ function updateBookings() {
 }
 
 function updateBookformInfo(now, bookings) {
-  const day = ("0" + now.getDate()).slice(-2),
-      month = ("0" + (now.getMonth() + 1)).slice(-2),
-      today = now.getFullYear()+"-"+(month)+"-"+(day),
-      now_h = now.getHours(),
-      now_m = now.getMinutes();
+  const today = now.format('YYYY-MM-DD');
 
   // TODO change to 1h or till next booking starts
   var defaultTimes = findDefaultTime(bookings);
   $('#id_start_0').val(today);
-  $('#id_start_1').val(zeropad(now_h) + ":" + zeropad(now_m));
+  $('#id_start_1').val(now.format('HH:mm'));
   $('#id_end_0').val(today);
-  $('#id_end_1').val(zeropad(now_h+1) + ":" + zeropad(now_m));
+  $('#id_end_1').val(now.add(1,'h').format('HH:mm'));
 }
 
 $(document).ready(function() {
@@ -94,6 +72,5 @@ $(document).ready(function() {
 
   $("#bookbtn").click(function(event) {
     $('#book-modal').modal('show');
-    // updateBookformInfo(new Date());
   });
 });

@@ -226,7 +226,7 @@ class TabletView(View):
         now = pytz.timezone(TIME_ZONE).localize(datetime.now())
         booking = Booking()
         booking.bookable = self.context['bookable']
-        self.context['bookform'] = BookingForm(instance=booking)
+        # self.context['bookform'] = BookingForm(instance=booking)
         return render(request, self.template, context=self.context)
 
 
