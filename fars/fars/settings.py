@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'booking',
+    'tabletpage',
     'rest_framework',
     'django_filters',
     'bootstrap4',
