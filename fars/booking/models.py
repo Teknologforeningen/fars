@@ -39,6 +39,15 @@ class Bookable(models.Model):
         else:
             return None
 
+    # It would be better if this was non-blocking
+    def notify_external_services(self):
+        try:
+            for service in ExternalService.objects.filter(bookable__id=self.id):
+                service.notify()
+        except:
+            # Avoid crashes from this
+            pass
+
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
@@ -54,6 +63,11 @@ class ExternalService(models.Models):
     name = models.CharField(max_length=64, null=False, blank=False)
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     callback_url = models.CharField(max_length=256, null=False, blank=False)
+
+    def notify(self):
+        import requests
+        requests.get(self.callback_url)
+
 
 # class TimeSlot(models.Model):
 #     start = models.CharField(null=False)
