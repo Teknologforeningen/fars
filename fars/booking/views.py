@@ -145,6 +145,8 @@ class BookView(View):
         else:
             return render(request, self.template, context=self.context, status=400)
 
+        self.context['bookable'].notify_external_services()
+
         return HttpResponse()
 
 
@@ -191,6 +193,8 @@ class BookingView(View):
             else:
                 booking.delete()
             return HttpResponse()
+
+        self.context['bookable'].notify_external_services()
 
         return render(request, self.template, self.context)
 
