@@ -50,6 +50,11 @@ def delete_bookable_group(sender, instance, **kwargs):
     Group.objects.get(name=instance.admin_group_name).delete()
 
 
+class ExternalService(models.Models):
+    name = models.CharField(max_length=64, null=False, blank=False)
+    bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
+    callback_url = models.CharField(max_length=256, null=False, blank=False)
+
 # class TimeSlot(models.Model):
 #     start = models.CharField(null=False)
 #     end = models.CharField(max_length=8, null=False)
