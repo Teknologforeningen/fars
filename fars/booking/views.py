@@ -175,7 +175,8 @@ class BookingView(View):
         is_admin = _is_admin(request.user, booking.bookable)
         if _is_admin or self.context['unbookable']:
             now = datetime.now(booking.start.tzinfo)
-            removal_level = int(request.GET.get('repeat'))
+            removal_level = request.GET.get('repeat')
+            removal_level = 0 if removal_level is None else int(removal_level)
             if is_admin and booking.repeatgroup and removal_level >= 1:
                 # Removal of a repeating booking. There are 3 different levels of removal
                 # of a repeating booking:
