@@ -32,28 +32,6 @@ class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
     renderer_classes = (GeneriKeyBookingRenderer, )
-    
-    '''
-    def get(self, request):
-     404 for non-existant bookable
-    start = datetime.now()
-    end = start + timedelta(days=7)
-    bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-    bookings = Booking.objects.filter(bookable=bookable_obj, start__lte=end, end__gte=start)
 
-    <CARD>:<COM>:<START>:<END>:<SPECIAL>:<CODE>\n
-
-    <CARD> -> bokarens kortnummer = bill-kontonummer (har du tillgång till
-    detta?)
-    <COM> -> kommittékod (LDAP-GID) ifall access skall ges till en grupp, i
-    annat fall 0; alltid 0 på utrymmen som inte stöder kommittébokning
-    <START> -> starttidens UNIX-timestamp (UTC)
-    <STOP> -> sluttidens UNIX-timestamp (UTC)
-    <SPECIAL> -> en bitfield vars betydelse beror på det bokningsbara
-    utrymmet; i böldens fall alltid 0
-    <CODE> -> en hash som definierar en kod som kan användas under
-    bokningens tid, 0 ifall funktionen inte används, unset ifall ingen kod,
-    annars en hex-hash
-    '''
 
 
