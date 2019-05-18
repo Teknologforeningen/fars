@@ -2,16 +2,17 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
 from booking.models import Booking, Bookable
-from booking.forms import BookingForm, RepeatingBookingForm
+from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
 from django.db import transaction
 from django.forms import ValidationError
 from django.views import View
+import pytz
+from fars.settings import TIME_ZONE
+from django.contrib.auth import authenticate
 import json
-
-
 
 class HomeView(View):
 
@@ -211,7 +212,6 @@ class BookingView(View):
         if user != booking.user and booking.booking_group not in user.groups.all():
             return False, _("Only the user or group that made the booking may unbook it")
         return True, ''
-
 
 # Returns whether user is admin for given bookable
 def _is_admin(user, bookable):

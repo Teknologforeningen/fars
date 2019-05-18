@@ -1,0 +1,52 @@
+{% load bootstrap4 %}
+<div class="modal fade" id="book-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content bg-dark">
+      <div class="modal-header">
+        <h5 class="modal-title">Boka {{ bookable.name }}</h5>
+        <button type="button" class="close text-light" data-dismiss="modal" aria-label="close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="bookform" method="post" action="{{ url }}" data-errors="{{ errors }}">
+        <div class="modal-body">
+          {% csrf_token %}
+          {% if credential_error %}
+            <div class="alert alert-danger alert-dismissable alert-link">
+              <button class="close" type="button" data-dismiss="alert" aria-hidden="true">&#215;</button>
+              Ditt användarnamn eller lösenord är fel.
+            </div>
+          {% endif %}
+          {% bootstrap_form_errors bookform %}
+          {% bootstrap_field bookform.bookable %}
+          {% bootstrap_field bookform.user %}
+          <div class="row form-group">
+            <div class="col-6">
+              {% bootstrap_field bookform.start layout="vertical" vertical_field_class="col-9" %}
+            </div>
+            <div class="col-6">
+              {% bootstrap_field bookform.end layout="vertical" vertical_field_class="col-9" %}
+            </div>
+          </div>
+          <!-- TODO: Add "1h" "30min" etc buttons -->
+          <div class="row form-group">
+            <div class="col-12">
+              {% bootstrap_field bookform.comment layout="vertical" %}
+            </div>
+          </div>
+          <div class="row form-group">
+            <div class="col-6">
+              <label for="#id_username">Användarnamn</label>
+              <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
+            </div>
+            <div class="col-6">
+              <label for="#id_password">Lösenord</label>
+              <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="booksubmit" class="btn btn-warning">Boka</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

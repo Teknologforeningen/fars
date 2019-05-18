@@ -26,5 +26,6 @@ urlpatterns = [
     url(r'^logout/$', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     url(r'^api/', include('api.urls')),
     path('booking/', include('booking.urls')),
+    path('tablet/', include('tabletpage.urls')),
     path('', RedirectView.as_view(url='booking/')),
 ]
