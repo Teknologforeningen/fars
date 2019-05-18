@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% load static %}
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link rel="stylesheet" href="{% static 'css/tablet.css' %}">
+  <title>{{ bookable }}</title>
+</head>
+<body>
+  <span id="hidden-data" data-bookable="{{ bookable.id_str }}"></span>
+  <div class="row">
+    <!-- Indicator that is green if room is vacant and red if occipied -->
+    <div id="vacancyindicator" class="col-1"></div>
+    <!-- Box with the time -->
+    <div id="time-bookbtn" class="col-4 d-flex flex-column justify-content-center">
+      <div class="clock mt-auto align-self-center">
+        <span class="hours"></span>:<span class="min"></span>
+      </div>
+      <div class="dateinfo align-self-center">
+        {% now "l" as weekday %}
+        {{ weekday|title }}
+      </div>
+      <div class="dateinfo mb-auto align-self-center">
+        {% now "j.n.Y" %}
+      </div>
+      <!--<button id="bookbtn" type="button" class="btn btn-warning mb-5 align-self-center w-50"><i class="far fa-clock"></i> Boka nu</button>-->
+    </div>
+    <!-- Title of bookable and upcoming bookings today -->
+    <div class="col-6 pt-5">
+      <div id="title-wrapper">
+        <h1 id="title">{{ bookable.name | upper }}</h1>
+        <hr class="titlehr"/>
+      </div>
+      <div id="bookingbox" class="scroll-y"></div>
+    </div>
+  </div>
+  {#{% include 'modals/tablet_book.html' with bookable=bookable bookform=bookform %}#}
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
+  <script src="{% static 'js/tablet.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+body {
+  background-color: black;
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+}
+div#vacancyindicator,
+div#time-bookbtn {
+  height: 100vh;
+}
+div.vacant {
+  background-color: rgba(38, 160, 54, 1);
+}
+div.occupied {
+  background-color: rgba(193, 29, 29, 1);
+}
+div.row {
+  max-width:100%;
+}
+.text-green {
+  color: rgba(38, 160, 54, 1);
+}
+h2.timebox {
+  border-right: 1px grey solid;
+  font-size: 225%;
+}
+div.clock {
+  font-size: 600%;
+}
+div.dateinfo {
+  font-size: 200%;
+}
+hr.titlehr {
+  border-color: white;
+}
+div#title-wrapper {
+  max-height: 20vh;
+}
+div.scroll-y {
+  max-height: 80vh;
+  overflow-y: scroll;
+}
