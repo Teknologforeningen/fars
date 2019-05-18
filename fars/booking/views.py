@@ -194,9 +194,8 @@ class BookingView(View):
                 booking.save()
             else:
                 booking.delete()
+            self.context['booking'].bookable.notify_external_services()
             return HttpResponse()
-
-        self.context['bookable'].notify_external_services()
 
         return render(request, self.template, self.context)
 

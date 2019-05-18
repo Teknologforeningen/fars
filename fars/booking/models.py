@@ -7,8 +7,10 @@ from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
 from booking.metadata_forms import METADATA_FORM_OPTIONS, METADATA_FORM_CLASSES
+import logging
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
+logger = logging.getLogger(__name__)
 
 
 class Bookable(models.Model):
@@ -41,13 +43,8 @@ class Bookable(models.Model):
 
     # It would be better if this was non-blocking
     def notify_external_services(self):
-        try:
-            for service in ExternalService.objects.filter(bookable__id=self.id):
-                service.notify()
-        except:
-            # Avoid crashes from this
-            pass
-
+        for service in ExternalService.objects.filter(bookable__id=self.id):
+            service.notify()
 
 @receiver(post_save, sender=Bookable)
 def create_bookable_group(sender, instance, **kwargs):
@@ -68,9 +65,12 @@ class ExternalService(models.Model):
         return self.name
 
     def notify(self):
-        import requests
-        requests.get(self.callback_url)
-
+        try:
+            import requests
+            requests.get(self.callback_url)
+        except:
+            # Avoid crashes from this
+            logger.error('Error notifying external service {} with URL {}'.format(self.name, self.callback_url))
 
 # class TimeSlot(models.Model):
 #     start = models.CharField(null=False)
