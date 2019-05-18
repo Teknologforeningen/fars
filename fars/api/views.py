@@ -1,8 +1,5 @@
 from rest_framework import viewsets, generics
-from rest_framework.views import APIView
 from django_filters import rest_framework as filters
-from django.shortcuts import render, get_object_or_404
-from datetime import datetime, timedelta
 from booking.models import *
 from api.serializers import *
 from api.renderers import *
