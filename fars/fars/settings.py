@@ -173,6 +173,7 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
     "(objectClass=PosixGroupType)"
 )
 AUTH_LDAP_GROUP_TYPE = PosixGroupType(name_attr="cn")
+AUTH_LDAP_MIRROR_GROUPS = True
 
 # Populate the Django user from the LDAP directory.
 AUTH_LDAP_USER_ATTR_MAP = {
