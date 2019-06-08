@@ -69,6 +69,12 @@ class BookingForm(forms.ModelForm):
         bookable = cleaned_data.get("bookable")
         start = cleaned_data.get("start")
         end = cleaned_data.get("end")
+        user = cleaned_data.get('user')
+
+        # Check that user has permissions to book bookable
+        restriction_groups = bookable.booking_restriction_groups.all()
+        if not user.is_superuser and restriction_groups and not user.groups.filter(id__in=restriction_groups):
+            raise forms.ValidationError(_("You do not have permissions to book this bookable"))
 
         if bookable and start and end:
             # Check that booking does not violate bookable forward limit

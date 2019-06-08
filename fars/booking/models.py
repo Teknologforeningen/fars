@@ -18,13 +18,20 @@ class Bookable(models.Model):
     description = models.CharField(max_length=256)
     icon = models.CharField(max_length=32, default='tf.svg')
     public = models.BooleanField(default=False)
+    
     # How far in the future bookings are allowed (zero means no limit)
     forward_limit_days = models.PositiveIntegerField(default = 0)
+    
     # How long bookings are allowed to be (zero means no limit)
     length_limit_hours = models.PositiveIntegerField(default = 0)
     metadata_form = models.CharField(max_length=2, null=True, blank=True, default=None, choices=METADATA_FORM_OPTIONS)
+    
     # Groups that may be used to make group bookings for this bookable
-    allowed_booker_groups = models.ManyToManyField(Group, blank=True)
+    allowed_booker_groups = models.ManyToManyField(Group, blank=True, related_name='groupbooking')
+    
+    # Bookings for this bookable are restricted to members of these groups. 
+    # If no groups are defined, any authenticated user may book.
+    booking_restriction_groups = models.ManyToManyField(Group, blank=True, related_name='restricted')
 
     def __str__(self):
         return self.name
