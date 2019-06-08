@@ -185,6 +185,7 @@ AUTH_LDAP_USER_ATTR_MAP = {
 # Map LDAP group to is_staff property in Member model
 # this restricts all is_staff required views to those that are members of the specified LDAP group
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+    "is_staff": env("LDAP_SUPERUSER_GROUP_DN", "cn=superuser,ou=group,dc=example,dc=com"),
     "is_superuser": env("LDAP_SUPERUSER_GROUP_DN", "cn=superuser,ou=group,dc=example,dc=com"),
 }
 
