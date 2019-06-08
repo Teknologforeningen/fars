@@ -4,6 +4,14 @@ from django.core.validators import RegexValidator
 
 ### Metadata forms ###
 
+class DoorCodeField(forms.CharField):
+    # obfuscated hex hash for the doorcode, as used by Generikey
+    def clean(self, value):
+        value = super().clean(value)
+        # TODO: implement obfuscated hex hash
+        salt = '42'
+        return value + salt
+
 class PiSaunaMetadataForm(forms.Form):
     disable_sauna_heating = forms.BooleanField(
         required=False,
@@ -15,7 +23,7 @@ class PiSaunaMetadataForm(forms.Form):
         label=_('Restrict keys'),
         help_text=_('Check to restrict the door to the Lounge to only open with your key')
     )
-    doorcode = forms.CharField(
+    doorcode = DoorCodeField(
         required=False,
         label=_('Doorcode'),
         help_text=_('Optionally provide a doorcode with which the door to the Lounge can be opened during your booking'),
