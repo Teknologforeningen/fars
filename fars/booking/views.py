@@ -173,7 +173,7 @@ class BookingView(View):
     def delete(self, request, booking_id):
         booking = self.context['booking']
         is_admin = _is_admin(request.user, booking.bookable)
-        if _is_admin or self.context['unbookable']:
+        if is_admin or self.context['unbookable']:
             now = datetime.now(booking.start.tzinfo)
             removal_level = request.GET.get('repeat')
             removal_level = 0 if removal_level is None else int(removal_level)
