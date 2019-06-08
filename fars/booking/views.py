@@ -146,6 +146,8 @@ class BookView(View):
         else:
             return render(request, self.template, context=self.context, status=400)
 
+        self.context['bookable'].notify_external_services()
+
         return HttpResponse()
 
 
@@ -171,7 +173,7 @@ class BookingView(View):
     def delete(self, request, booking_id):
         booking = self.context['booking']
         is_admin = _is_admin(request.user, booking.bookable)
-        if _is_admin or self.context['unbookable']:
+        if is_admin or self.context['unbookable']:
             now = datetime.now(booking.start.tzinfo)
             removal_level = int(request.GET.get('repeat') or 0)
             if is_admin and booking.repeatgroup and removal_level >= 1:
@@ -191,6 +193,7 @@ class BookingView(View):
                 booking.save()
             else:
                 booking.delete()
+            self.context['booking'].bookable.notify_external_services()
             return HttpResponse()
 
         return render(request, self.template, self.context)
