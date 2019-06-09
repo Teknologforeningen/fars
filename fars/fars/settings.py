@@ -192,13 +192,8 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 # This is the default, but I like to be explicit.
 AUTH_LDAP_ALWAYS_UPDATE_USER = True
 
-# Use LDAP group membership to calculate group permissions.
-AUTH_LDAP_FIND_GROUP_PERMS = True
-
-# Cache group memberships for an hour to minimize LDAP traffic
-AUTH_LDAP_CACHE_GROUPS = True
-AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
-
+# Mirror LDAP groups
+AUTH_LDAP_MIRROR_GROUPS = True
 
 # Keep ModelBackend around for per-user permissions and maybe a local
 # superuser.
