@@ -214,4 +214,4 @@ class BookingView(View):
 
 # Returns whether user is admin for given bookable
 def _is_admin(user, bookable):
-    return user.is_superuser or user.groups.filter(name=bookable.admin_group_name).exists()
+    return user.is_superuser or user.groups.filter(id__in=bookable.admin_groups.all()).exists()
