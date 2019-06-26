@@ -35,12 +35,11 @@ class Bookable(models.Model):
     # If no groups are defined, any authenticated user may book.
     booking_restriction_groups = models.ManyToManyField(Group, blank=True, related_name='restricted')
 
+    # Groups that have admin rights to this bookable
+    admin_groups = models.ManyToManyField(Group, blank=True, related_name='admin')
+
     def __str__(self):
         return self.name
-
-    @property
-    def admin_group_name(self):
-        return '{}_admin'.format(self.id_str)
 
     def get_metadata_form(self, data=None):
         if self.metadata_form in METADATA_FORM_CLASSES:
@@ -52,16 +51,6 @@ class Bookable(models.Model):
     def notify_external_services(self):
         for service in ExternalService.objects.filter(bookable__id=self.id):
             service.notify()
-
-@receiver(post_save, sender=Bookable)
-def create_bookable_group(sender, instance, **kwargs):
-    Group.objects.get_or_create(name=instance.admin_group_name)
-
-
-@receiver(post_delete, sender=Bookable)
-def delete_bookable_group(sender, instance, **kwargs):
-    Group.objects.get(name=instance.admin_group_name).delete()
-
 
 class ExternalService(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)

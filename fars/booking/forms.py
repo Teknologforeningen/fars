@@ -73,7 +73,7 @@ class BookingForm(forms.ModelForm):
 
         # Check that user has permissions to book bookable
         restriction_groups = bookable.booking_restriction_groups.all()
-        if not user.is_superuser and restriction_groups and not user.groups.filter(id__in=restriction_groups):
+        if not user.is_superuser and restriction_groups and not user.groups.filter(id__in=restriction_groups).exists():
             raise forms.ValidationError(_("You do not have permissions to book this bookable"))
 
         if bookable and start and end:
