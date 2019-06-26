@@ -170,7 +170,7 @@ AUTH_LDAP_USER_DN_TEMPLATE = env("LDAP_USER_DN_TEMPLATE", "uid=%(user)s,dc=examp
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
     env("LDAP_GROUP_DN", "ou=group,dc=example,dc=com"),
     ldap.SCOPE_SUBTREE,
-    "(objectClass=PosixGroupType)"
+    "(objectClass=posixGroup)"
 )
 AUTH_LDAP_GROUP_TYPE = PosixGroupType(name_attr="cn")
 
