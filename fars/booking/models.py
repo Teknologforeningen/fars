@@ -8,7 +8,6 @@ from django.utils.translation import gettext as _
 from datetime import timedelta
 from booking.metadata_forms import METADATA_FORM_OPTIONS, METADATA_FORM_CLASSES
 
-import requests_futures as r
 import logging
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
@@ -69,7 +68,7 @@ class ExternalService(models.Model):
             session.get(str(self.callback_url))
         except Exception as e:
             # Avoid crashes from this
-            logger.error('Error notifying external service "{}"" with URL {}: {}'.format(self.name, self.callback_url, str(e)))
+            logger.error('Error notifying external service "{}" with URL {}: {}'.format(self.name, self.callback_url, str(e)))
 
 # class TimeSlot(models.Model):
 #     start = models.CharField(null=False)
