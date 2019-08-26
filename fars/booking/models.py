@@ -7,6 +7,7 @@ from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
 from booking.metadata_forms import METADATA_FORM_OPTIONS, METADATA_FORM_CLASSES
+
 import logging
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
@@ -49,8 +50,10 @@ class Bookable(models.Model):
 
     # It would be better if this was non-blocking
     def notify_external_services(self):
+        from requests_futures.sessions import FuturesSession
+        session = FuturesSession(max_workers=4)
         for service in ExternalService.objects.filter(bookable__id=self.id):
-            service.notify()
+            service.notify(session)
 
 class ExternalService(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
@@ -60,13 +63,12 @@ class ExternalService(models.Model):
     def __str__(self):
         return self.name
 
-    def notify(self):
+    def notify(self, session):
         try:
-            import requests
-            requests.get(self.callback_url)
-        except:
+            session.get(str(self.callback_url))
+        except Exception as e:
             # Avoid crashes from this
-            logger.error('Error notifying external service {} with URL {}'.format(self.name, self.callback_url))
+            logger.error('Error notifying external service "{}" with URL {}: {}'.format(self.name, self.callback_url, str(e)))
 
 # class TimeSlot(models.Model):
 #     start = models.CharField(null=False)

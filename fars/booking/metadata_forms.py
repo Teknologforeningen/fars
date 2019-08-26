@@ -1,8 +1,33 @@
 from django import forms
 from django.utils.translation import gettext as _
 from django.core.validators import RegexValidator
+from zlib import crc32
+from random import choice
 
 ### Metadata forms ###
+
+class DoorCodeField(forms.CharField):
+    # obfuscated hex hash for the doorcode, as used by Generikey
+    def clean(self, value):
+        value = super().clean(value)
+        return self.get_salted_crc_hash(value)
+
+    def get_salted_crc_hash(self, code):
+        # Generate a random hex digit salt
+        salt = choice('0123456789abcdef')
+
+        # Calculate the JAMCRC (bitwise-not of the standard CRC-32) of the code plus salt
+        hashval = ~crc32((code + salt).encode('ascii', 'ignore'))
+
+        # Get the hex value of the hash, drop the 0x part, pad with zeros
+        # The & 0xffffffff is there because we don't want a signed hex
+        hexval = hex(hashval & 0xffffffff)[2:].zfill(8)
+
+        # Replace the last character with the salt
+        salted = hexval[:-1] + salt
+
+        return salted
+
 
 class PiSaunaMetadataForm(forms.Form):
     disable_sauna_heating = forms.BooleanField(
@@ -15,7 +40,7 @@ class PiSaunaMetadataForm(forms.Form):
         label=_('Restrict keys'),
         help_text=_('Check to restrict the door to the Lounge to only open with your key')
     )
-    doorcode = forms.CharField(
+    doorcode = DoorCodeField(
         required=False,
         label=_('Doorcode'),
         help_text=_('Optionally provide a doorcode with which the door to the Lounge can be opened during your booking'),
