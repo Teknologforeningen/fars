@@ -59,7 +59,7 @@ class HumpsSaunaMetadataForm(forms.Form):
         label=_('Unlock door'),
         help_text=_('Check to keep the door unlocked during your booking')
     )
-    doorcode = forms.CharField(
+    doorcode = DoorCodeField(
         required=False,
         label=_('Doorcode'),
         help_text=_('Optionally provide a doorcode with which the door to Humpsbadet can be opened during your booking'),
