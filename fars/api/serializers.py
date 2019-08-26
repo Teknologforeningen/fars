@@ -17,4 +17,11 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_group = GroupSerializer(read_only=True)
     class Meta:
         model = Booking
+        fields = '__all__'
+
+class NoMetaBookingSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    booking_group = GroupSerializer(read_only=True)
+    class Meta:
+        model = Booking
         exclude = ('metadata', )
