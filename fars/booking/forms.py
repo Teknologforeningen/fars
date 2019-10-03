@@ -102,8 +102,8 @@ class BookingForm(forms.ModelForm):
 
 
 class CustomLoginForm(AuthenticationForm):
-    username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-2 col-8','placeholder': 'Username'}))
-    password = forms.CharField(widget=PasswordInput(attrs={'class':'offset-2 col-8','placeholder':'Password'}))
+    username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-1 col-10 offset-md-3 col-md-6','placeholder': 'Username'}))
+    password = forms.CharField(widget=PasswordInput(attrs={'class':'offset-1 col-10 offset-md-3 col-md-6','placeholder':'Password'}))
 
 
 class RepeatingBookingForm(forms.Form):
@@ -128,6 +128,5 @@ class RepeatingBookingForm(forms.Form):
             booking.pk = None
             booking.start += timedelta(days=data.get('frequency'))
             booking.end += timedelta(days=data.get('frequency'))
-            
-        return skipped_bookings
 
+        return skipped_bookings

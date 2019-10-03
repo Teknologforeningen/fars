@@ -4,28 +4,46 @@
 
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/calendar-theme.css' %}">
-  <link rel="stylesheet" href="{% static 'css/login.css'%}">
+  <style>
+    body {
+      background-color: #eee;
+    }
+    #maincontainer {
+      min-height: 100vh;
+      background-color: white;
+    }
+    h1 {
+      font-size: 5em;
+    }
+    h2, h3 {
+      text-decoration: underline;
+    }
+    h1, h2, h3 {
+      font-weight: 600;
+    }
+  </style>
 {% endblock %}
 
-{% block navbar %}{% endblock %}
+{% block navbar %}{% endblock %} <!-- Hide navbar -->
 
 {% block calendar %}
   <div id="maincontainer" class="container">
-    <div class="row h-100">
-      <div id="loginbox" class="offset-3 col-6 my-auto py-5 border bg-light">
-        <h1 class="d-flex justify-content-center offset-2 col-8 pb-3">FARS</h1>
-        {% if form.errors %}
-          <p class="offset-2 col-8 text-danger">{% trans "Your username and password didn't match. Please try again." %}</p>
-        {% endif %}
-
-        <form method="post" action="{% url 'login' %}">
-          {% csrf_token %}
-          <div class="form-group">{{ form.username }}</div>
-          <div class="form-group">{{ form.password }}</div>
-          <input class="form-group offset-2 col-8 btn btn-success" type="submit" value="Login">
-          <input type="hidden" name="next" value="{{ next }}">
-        </form>
-      </div>
-    </div>
+    <h1 class="d-flex justify-content-center col-12 py-5">FARS</h1>
+    <hr>
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <h3 class="offset-1 col-10 offset-md-3 col-md-6 py-3">Login</h3>
+      {% if form.errors %}
+        <p class="offset-1 col-10 offset-md-3 col-md-6 text-danger border border-danger rounded p-2">{% trans "Your username and password didn't match. Please try again." %}</p>
+      {% endif %}
+      <div class="form-group">{{ form.username }}</div>
+      <div class="form-group">{{ form.password }}</div>
+      <input class="form-group offset-8 col-3 offset-md-6 btn btn-outline-success" type="submit" value="Login">
+      <input type="hidden" name="next" value="{{ next }}">
+    </form>
+    <hr>
+    <h2 class="d-flex justify-content-center col-12 py-3">WHAT IS FARS?</h3>
+    <p class="offset-1 col-10 offset-md-3 col-md-6">Reservation system with modifiable bookables and timeslots.</p>
+    <!-- TODO: Write better description -->
   </div>
 {% endblock %}
