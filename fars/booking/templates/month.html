@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block calendar %}
-  <div class="col-md-10 col-sm-12 offset-md-1">
-    <div id="calendar" data-bookable="{{bookable.id_str}}" data-user="{{user.id}}" data-locale="{{language_code}}"></div>
+  <div class="col-12 offset-lg-1 col-lg-10">
+    <div id="calendar" data-bookable="{{bookable.id_str}}" data-bookablestr="{{bookable}}" data-user="{{user.id}}" data-locale="{{language_code}}"></div>
   </div>
 {% endblock %}

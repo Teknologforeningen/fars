@@ -47,6 +47,10 @@ html .fc {
 .fc-header td {
   white-space: nowrap; }
 
+.fc-toolbar.fc-header-toolbar {
+  margin-bottom: 0.5em;
+}
+
 .fc-header-toolbar h2 {
   font-size: calc(1em + 1vw);
 }
@@ -71,6 +75,10 @@ html .fc {
 
 .fc .fc-header-space {
   padding-left: 10px; }
+
+.fc button {
+  height: calc(1em + 1vw);
+}
 
 .fc-header .fc-button {
   margin-bottom: 1em;
@@ -176,6 +184,10 @@ thead th.fc-last {
     margin-top: -50%;
     *margin-top: 0;
     *top: -50%; }
+
+.fc-icon {
+  height: 0.5em;
+}
 
 .fc-state-default {
   border-style: solid;
