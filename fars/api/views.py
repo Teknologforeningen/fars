@@ -18,7 +18,7 @@ class BookingFilter(filters.FilterSet):
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
+    serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
 
@@ -30,6 +30,3 @@ class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
     renderer_classes = (GeneriKeyBookingRenderer, )
-
-
-
