@@ -12,7 +12,7 @@ class GeneriKeyBookingRenderer(renderers.BaseRenderer):
             metadata = json.loads((booking['metadata']))
             booking_str = '{CARD}:{COM}:{START}:{END}:{SPECIAL}:{CODE}'.format(
                 CARD=booking['user']['username'],
-                COM=0 # TODO: To support booking groups, we ned GID here or consumer of API needs to support group name instead of GID
+                COM=0, # TODO: To support booking groups, we ned GID here or consumer of API needs to support group name instead of GID
                 # booking['booking_group']['name'] if booking['booking_group'] else 0,
                 # The serializer just had to stringify the dates for us, so now we have to parse them again
                 START=int(parser.parse(booking['start']).timestamp()),
