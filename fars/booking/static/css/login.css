@@ -1,0 +1,13 @@
+body {
+  background-color: #eee;
+}
+#maincontainer {
+  min-height: 100vh;
+  background-color: white;
+}
+h1 {
+  font-size: 5em;
+}
+h1, h2, h3 {
+  font-weight: 600;
+}
