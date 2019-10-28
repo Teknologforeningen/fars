@@ -1,0 +1,12 @@
+dist: xenial
+language: python
+python:
+  - "3.6"
+services:
+  - postgresql
+install:
+  - "pip install -r requirements.txt"
+script:
+  - "python fars/manage.py test"
+notifications:
+  email: false
