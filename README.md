@@ -1,4 +1,4 @@
-# Fantastiskt Användbara ReservationsSystemet FARS
+# Fantastiskt Användbara ReservationsSystemet FARS [![Build Status](https://travis-ci.org/Teknologforeningen/fars.svg?branch=master)](https://travis-ci.org/Teknologforeningen/fars)
 
 Reservation system with modifiable bookables and timeslots.
 Make sure that you have Python 3 and pip installed and virtualenv to go with it.
