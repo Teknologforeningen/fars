@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from booking.models import Bookable
+from booking.models import Bookable, Booking
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
 
@@ -11,6 +11,7 @@ class BookTestCase(TestCase):
             name = "B",
             description = "A bookable"
         )
+
         User = get_user_model()
         User.objects.create_user(
             username = "u",
@@ -52,8 +53,8 @@ class BookTestCase(TestCase):
         c = Client()
         now = datetime.now()
         postdata = {
-            'before': (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            'after': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'before': (now - timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'after': (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
             'bookable': 'b'
         }
 
@@ -67,11 +68,47 @@ class BookTestCase(TestCase):
         c = Client()
         now = datetime.now()
         postdata = {
-            'before': (now + timedelta(years=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            'after': (now + timedelta(years=1, hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'before': (now + timedelta(days=365)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'after': (now + timedelta(days=365, hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
             'bookable': 'b'
         }
 
         c.login(username='u', password='pw')
         response = c.post('/booking/book/b', postdata)
         self.assertEqual(response.status_code, 403)
+
+
+    def test_cant_book_too_long(self):
+        """You cant make a too long booking"""
+        c = Client()
+        now = datetime.now()
+        postdata = {
+            'before': now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'after': (now + timedelta(days=365)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'bookable': 'b'
+        }
+
+        c.login(username='u', password='pw')
+        response = c.post('/booking/book/b', postdata)
+
+        self.assertEqual(response.status_code, 403)
+
+
+    def test_booking_from_past_to_future(self):
+        """When booking from the past to the future, the booking should have starttime now and retain its endtime"""
+        c = Client()
+        now = datetime.now()
+        postdata = {
+            'before': (now - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'after': (now + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            'bookable': 'b'
+        }
+
+        c.login(username='u', password='pw')
+        response = c.post('/booking/book/b', postdata)
+        self.assertEqual(response.status_code, 201)
+
+        bookable = Bookable.objects.get(id_str="b")
+        b = Booking.objects.get(bookable=bookable)
+        self.assertEqual(b.start, now)
+        self.assertEqual(b.end, now + timedelta(hours=1))
