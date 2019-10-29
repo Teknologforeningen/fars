@@ -39,7 +39,7 @@ View the page in your browser: ```http://localhost:8000```
 
 Create a superuser account
 ```
-python manage.py createsuperuser
+python fars/manage.py createsuperuser
 ```
 Use this account to log in on the adminsite
 ```
