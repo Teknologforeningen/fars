@@ -7,6 +7,6 @@ services:
 install:
   - "pip install -r requirements.txt"
 script:
-  - "python fars/manage.py test"
+  - "python fars/manage.py test fars/"
 notifications:
   email: false
