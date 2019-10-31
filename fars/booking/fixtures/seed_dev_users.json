@@ -1,0 +1,127 @@
+[
+    {
+        "model": "auth.group",
+        "pk": 1,
+        "fields": {
+          "name": "motesrummet_admin",
+          "permissions": []
+        }
+      },
+      {
+        "model": "auth.group",
+        "pk": 2,
+        "fields": {
+          "name": "Kikkeli",
+          "permissions": []
+        }
+      },
+    
+    {
+        "model": "auth.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$150000$PB7s8415jSOG$QjBE6El7k008RvW8iwfBBmptpf3/wsg/Zp1wCQ8XGlM=",
+            "last_login": null,
+            "is_superuser": true,
+            "username": "admin",
+            "first_name": "Admin",
+            "last_name": "Teknolog",
+            "email": "",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2019-10-29T15:22:39.998Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha256$150000$kyRJbQavF1sq$/BnpZ+LVfsGlUf/j1wIFyG9e3cSJqbK5q+i9XQwpGfg=",
+            "last_login": "2019-10-28T18:05:34.796Z",
+            "is_superuser": false,
+            "username": "no_access",
+            "first_name": "No access",
+            "last_name": "Teknolog",
+            "email": "example@example.org",
+            "is_staff": false,
+            "is_active": false,
+            "date_joined": "2018-12-03T14:52:39Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 3,
+        "fields": {
+            "password": "pbkdf2_sha256$150000$kyRJbQavF1sq$/BnpZ+LVfsGlUf/j1wIFyG9e3cSJqbK5q+i9XQwpGfg=",
+            "last_login": "2019-10-28T18:05:34.796Z",
+            "is_superuser": false,
+            "username": "active",
+            "first_name": "Active",
+            "last_name": "Teknolog",
+            "email": "example@example.org",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2018-12-03T14:52:39Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 4,
+        "fields": {
+            "password": "pbkdf2_sha256$150000$kyRJbQavF1sq$/BnpZ+LVfsGlUf/j1wIFyG9e3cSJqbK5q+i9XQwpGfg=",
+            "last_login": "2019-10-28T18:05:34.796Z",
+            "is_superuser": false,
+            "username": "groupmember",
+            "first_name": "Group member",
+            "last_name": "Teknolog",
+            "email": "example@example.org",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2018-12-03T14:52:39Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 5,
+        "fields": {
+            "password": "pbkdf2_sha256$150000$kyRJbQavF1sq$/BnpZ+LVfsGlUf/j1wIFyG9e3cSJqbK5q+i9XQwpGfg=",
+            "last_login": "2019-10-28T18:05:34.796Z",
+            "is_superuser": false,
+            "username": "other_group_member",
+            "first_name": "Other Group member",
+            "last_name": "Teknolog",
+            "email": "example@example.org",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2018-12-03T14:52:39Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 6,
+        "fields": {
+            "password": "pbkdf2_sha256$150000$kyRJbQavF1sq$/BnpZ+LVfsGlUf/j1wIFyG9e3cSJqbK5q+i9XQwpGfg=",
+            "last_login": "2019-10-28T18:05:34.796Z",
+            "is_superuser": true,
+            "username": "staff",
+            "first_name": "Staff",
+            "last_name": "Teknolog",
+            "email": "example@example.org",
+            "is_staff": true,
+            "is_active": false,
+            "date_joined": "2018-12-03T14:52:39Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    }
+]
