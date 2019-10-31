@@ -30,7 +30,7 @@
       {% elif bookable %}<!-- Month view -->
         <a href="{% url 'home' %}" class="navbar-brand">{{ bookable.name }}</a>
       {% else %}<!-- Other -->
-        <a href="#" class="navbar-brand">FARS</a>
+        <a href="{% url 'home' %}" class="navbar-brand">FARS</a>
       {% endif %}
       {% if user.is_authenticated %}
         <span class="nav-item">
