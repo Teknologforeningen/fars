@@ -21,6 +21,9 @@ class Bookable(models.Model):
     description = models.CharField(max_length=256)
     icon = models.CharField(max_length=32, default='tf.svg')
     public = models.BooleanField(default=False)
+
+    # Hides the bookable in the home view
+    hidden = models.BooleanField(default=False)
     
     # How far in the future bookings are allowed (zero means no limit)
     forward_limit_days = models.PositiveIntegerField(default = 0)
