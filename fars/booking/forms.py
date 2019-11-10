@@ -57,13 +57,6 @@ class BookingForm(forms.ModelForm):
         # If start is in the past, make it "now"
         return datetime.now() if start < datetime.now() else start
 
-    def clean_end(self):
-        end = self.cleaned_data['end']
-        # Check that booking is not in the past
-        if end <= datetime.now():
-            raise forms.ValidationError(_("Booking may not be in the past"))
-        return end
-
     def clean(self):
         cleaned_data = super().clean()
         bookable = cleaned_data.get("bookable")
@@ -99,6 +92,8 @@ class BookingForm(forms.ModelForm):
                 for booking in overlapping:
                     errors.append(forms.ValidationError('• ' + str(booking)))
                 raise forms.ValidationError(errors)
+
+        return cleaned_data
 
 
 class CustomLoginForm(AuthenticationForm):
