@@ -1,6 +1,7 @@
 $(document).ready(function() {
   var calendar = $('#calendar'),
     bookable = calendar.data('bookable'),
+    bookablestr = calendar.data('bookablestr'),
     locale = calendar.data('locale'),
     user = calendar.data('user');
   calendar.fullCalendar({
@@ -8,10 +9,11 @@ $(document).ready(function() {
       aspectRatio: 2,
       // header
       header: {
-        left: 'today prev,next title',
+        left: '',
         center: '',
-        right: ''
+        right: 'title today prev,next'
       },
+      // header: false,
       views: {
         month: {
           titleFormat: 'MMMM YYYY'
@@ -55,6 +57,7 @@ $(document).ready(function() {
               events.push(event);
             });
             callback(events);
+            $('div.fc-left').html(`<h2>${bookablestr}</h2>`);
           }
         });
       }
