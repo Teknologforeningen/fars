@@ -19,7 +19,7 @@ class HomeView(View):
     template = 'base.html'
 
     def get(self, request):
-        bookables = Bookable.objects.all()
+        bookables = Bookable.objects.filter(hidden=False)
         context = {
             'bookables': bookables,
             'user': request.user,
