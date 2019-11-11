@@ -16,31 +16,31 @@ logger = logging.getLogger(__name__)
 
 class Bookable(models.Model):
     # unique ID string used in the URL
-    id_str = models.CharField(max_length=32, unique=True, validators=[alphanumeric])
+    id_str = models.CharField(max_length=32, unique=True, validators=[alphanumeric], help_text='Unique ID string used in the URL')
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
     icon = models.CharField(max_length=32, default='tf.svg')
     public = models.BooleanField(default=False)
 
     # Hides the bookable in the home view
-    hidden = models.BooleanField(default=False)
+    hidden = models.BooleanField(default=False, help_text='Hides the bookable in the home view')
     
     # How far in the future bookings are allowed (zero means no limit)
-    forward_limit_days = models.PositiveIntegerField(default = 0)
+    forward_limit_days = models.PositiveIntegerField(default = 0, help_text='How far in the future bookings are allowed (zero means no limit)')
     
     # How long bookings are allowed to be (zero means no limit)
-    length_limit_hours = models.PositiveIntegerField(default = 0)
+    length_limit_hours = models.PositiveIntegerField(default = 0, help_text='How long bookings are allowed to be (zero means no limit)')
     metadata_form = models.CharField(max_length=2, null=True, blank=True, default=None, choices=METADATA_FORM_OPTIONS)
     
     # Groups that may be used to make group bookings for this bookable
-    allowed_booker_groups = models.ManyToManyField(Group, blank=True, related_name='groupbooking')
+    allowed_booker_groups = models.ManyToManyField(Group, blank=True, related_name='groupbooking', help_text='Groups that may be used to make group bookings for this bookable.')
     
     # Bookings for this bookable are restricted to members of these groups. 
     # If no groups are defined, any authenticated user may book.
-    booking_restriction_groups = models.ManyToManyField(Group, blank=True, related_name='restricted')
+    booking_restriction_groups = models.ManyToManyField(Group, blank=True, related_name='restricted', help_text=' Bookings for this bookable are restricted to members of these groups. If no groups are defined, any authenticated user may book.')
 
     # Groups that have admin rights to this bookable
-    admin_groups = models.ManyToManyField(Group, blank=True, related_name='admin')
+    admin_groups = models.ManyToManyField(Group, blank=True, related_name='admin', help_text='Groups that have admin rights to this bookable.')
 
     def __str__(self):
         return self.name
