@@ -9,6 +9,8 @@ class GeneriKeyBookingRenderer(renderers.BaseRenderer):
     def render(self, data, media_type=None, renderer_context=None):
         results = []
         for booking in data:
+            if not booking['metadata']:
+                continue
             metadata = json.loads((booking['metadata']))
             booking_str = '{CARD}:{COM}:{START}:{END}:{SPECIAL}:{CODE}'.format(
                 CARD=booking['user']['username'],
