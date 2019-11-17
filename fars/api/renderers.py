@@ -29,9 +29,9 @@ class GeneriKeyBookingRenderer(renderers.BaseRenderer):
         # Render a binary bitfield as string
         # Note that this order of bits must be preserved.
         bitfield = ''.join([
-            str(int(metadata['disable_sauna_heating'])) if 'disable_sauna_heating' in metadata else '0',
-            str(int(metadata['restrict_keys'])) if 'restrict_keys' in metadata else '0',
             str(int(metadata['unlock_door'])) if 'unlock_door' in metadata else '0',
+            str(int(metadata['restrict_keys'])) if 'restrict_keys' in metadata else '0',
+            str(int(metadata['disable_sauna_heating'])) if 'disable_sauna_heating' in metadata else '0',
         ])
 
         # Convert binary bitfield string to int

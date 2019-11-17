@@ -10,7 +10,7 @@ class DoorCodeField(forms.CharField):
     # obfuscated hex hash for the doorcode, as used by Generikey
     def clean(self, value):
         value = super().clean(value)
-        return self.get_salted_crc_hash(value)
+        return self.get_salted_crc_hash(value) if value else '0'
 
     def get_salted_crc_hash(self, code):
         # Generate a random hex digit salt
