@@ -69,6 +69,19 @@ class BookingForm(forms.ModelForm):
         if not user.is_superuser and restriction_groups and not user.groups.filter(id__in=restriction_groups).exists():
             raise forms.ValidationError(_("You do not have permissions to book this bookable"))
 
+        # Perform BILL check if configured
+        if bookable.bill_device_id is not None:
+            from bill import BILLChecker
+            checker = BILLChecker()
+
+            try:
+                # TODO: something about the group
+                checker.user_can_book(user.username, group, bookable.bill_device_id):
+            except NotAllowedException as err:
+                raise forms.ValidationError(err)
+            except BILLException:
+                raise forms.ValidationError(_('Error during BILL check'))
+
         if bookable and start and end:
             # Check that booking does not violate bookable forward limit
             if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
