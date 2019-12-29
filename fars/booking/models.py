@@ -43,7 +43,7 @@ class Bookable(models.Model):
     admin_groups = models.ManyToManyField(Group, blank=True, related_name='admin', help_text=_('Groups that have admin rights to this bookable.'))
 
     # BILL device ID if BILL check is needed. If null no BILL check will be performed
-    bill_device_id = models.PositiveIntegerField(null=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
+    bill_device_id = models.PositiveIntegerField(null=True, blank=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
 
     def __str__(self):
         return self.name

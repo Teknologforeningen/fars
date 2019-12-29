@@ -63,6 +63,7 @@ class BookingForm(forms.ModelForm):
         start = cleaned_data.get("start")
         end = cleaned_data.get("end")
         user = cleaned_data.get('user')
+        group = cleaned_data.get('booking_group')
 
         # Check that user has permissions to book bookable
         restriction_groups = bookable.booking_restriction_groups.all()
@@ -71,12 +72,11 @@ class BookingForm(forms.ModelForm):
 
         # Perform BILL check if configured
         if bookable.bill_device_id is not None:
-            from bill import BILLChecker
+            from .bill import BILLChecker, NotAllowedException, BILLException
             checker = BILLChecker()
 
             try:
-                # TODO: something about the group
-                checker.user_can_book(user.username, group, bookable.bill_device_id):
+                checker.check_user_can_book(user.username, bookable.bill_device_id, group)
             except NotAllowedException as err:
                 raise forms.ValidationError(err)
             except BILLException:
