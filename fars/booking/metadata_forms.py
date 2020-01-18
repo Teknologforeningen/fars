@@ -53,6 +53,21 @@ class PiSaunaMetadataForm(forms.Form):
         ]
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # Perform BILL check unless sauna heating is disabled
+        if not cleaned_data.get("disable_sauna_heating"):
+            from .bill import BILLChecker, NotAllowedException, BILLException
+            checker = BILLChecker()
+
+            try:
+                checker.check_user_can_book(user.username, bookable.bill_device_id, group)
+            except NotAllowedException as err:
+                raise forms.ValidationError(err)
+            except BILLException:
+                raise forms.ValidationError(_('Error during BILL check'))
+
+
 class HumpsSaunaMetadataForm(forms.Form):
     unlock_door = forms.BooleanField(
         required=False,
