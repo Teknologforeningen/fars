@@ -96,6 +96,16 @@ class BookingForm(forms.ModelForm):
 
         return cleaned_data
 
+    def get_metadata_field_names(self):
+        return []
+
+    def metadata_fields(self):
+        return [self[k] for k in self.get_metadata_field_names()]
+
+    def get_cleaned_metadata(self):
+        metadata_field_names = self.get_metadata_field_names()
+        return None if not metadata_field_names else {k: self.cleaned_data[k] for k in metadata_field_names}
+
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-2 col-8','placeholder': 'Username'}))

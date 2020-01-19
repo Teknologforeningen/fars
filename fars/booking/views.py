@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
 from booking.models import Booking, Bookable
 from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
+from booking.metadata_forms import get_form_class
 from datetime import datetime, timedelta
 import dateutil.parser
 from django.utils.translation import gettext as _
@@ -104,29 +105,26 @@ class BookView(View):
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
         booking.user = request.user
-        form = BookingForm(instance=booking)
+        form = get_form_class(self.context['bookable'].metadata_form)(None, instance=booking)
         self.context['form'] = form
 
         if _is_admin(request.user, self.context['bookable']):
             self.context['repeatform'] = RepeatingBookingForm()
-        self.context['metadataform'] = self.context['bookable'].get_metadata_form()
 
         return render(request, self.template, context=self.context)
 
 
     def post(self, request, bookable):
-        form = BookingForm(request.POST, instance=Booking())
+        booking = Booking()
+        booking.user = self.context['user']
+        booking.bookable = self.context['bookable']
+        form = get_form_class(self.context['bookable'].metadata_form)(request.POST, instance=booking)
         self.context['form'] = form
-        metadataform = self.context['bookable'].get_metadata_form(request.POST)
 
         if form.is_valid():
             booking = form.instance
-            if metadataform:
-                self.context['metadataform'] = metadataform
-                if metadataform.is_valid():
-                    booking.metadata = json.dumps(metadataform.cleaned_data)
-                else:
-                    return render(request, self.template, context=self.context, status=400)
+            print(form.cleaned_data)
+            booking.metadata = json.dumps(form.get_cleaned_metadata())
 
             if request.POST.get('repeat') and _is_admin(request.user, self.context['bookable']):
                 repeatdata = {

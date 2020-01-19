@@ -6,9 +6,17 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
-from booking.metadata_forms import METADATA_FORM_OPTIONS, METADATA_FORM_CLASSES
 
 import logging
+
+# These are the choices used in the bookable model.
+# Adding your metadata form here will make it available for bookables.
+# The codes here must correspond to codes in METADATA_FORM_CLASSES defined in metadata_form.py
+METADATA_FORM_OPTIONS = (
+    (None, 'No metadata'),
+    ('PI', 'Pi sauna'),
+    ('HB', 'Humpsbadet'),
+)
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 logger = logging.getLogger(__name__)
@@ -48,18 +56,13 @@ class Bookable(models.Model):
     def __str__(self):
         return self.name
 
-    def get_metadata_form(self, data=None):
-        if self.metadata_form in METADATA_FORM_CLASSES:
-            return METADATA_FORM_CLASSES[self.metadata_form](data)
-        else:
-            return None
-
     # It would be better if this was non-blocking
     def notify_external_services(self):
         from requests_futures.sessions import FuturesSession
         session = FuturesSession(max_workers=4)
         for service in ExternalService.objects.filter(bookable__id=self.id):
             service.notify(session)
+
 
 class ExternalService(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
