@@ -105,10 +105,10 @@ class BookView(View):
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
         booking.user = request.user
-        form = get_form_class(self.context['bookable'].metadata_form)(None, instance=booking)
+        form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form
 
-        if _is_admin(request.user, self.context['bookable']):
+        if _is_admin(request.user, booking.bookable):
             self.context['repeatform'] = RepeatingBookingForm()
 
         return render(request, self.template, context=self.context)
@@ -118,15 +118,14 @@ class BookView(View):
         booking = Booking()
         booking.user = self.context['user']
         booking.bookable = self.context['bookable']
-        form = get_form_class(self.context['bookable'].metadata_form)(request.POST, instance=booking)
+        form = get_form_class(booking.bookable.metadata_form)(request.POST, instance=booking)
         self.context['form'] = form
 
         if form.is_valid():
             booking = form.instance
-            print(form.cleaned_data)
             booking.metadata = json.dumps(form.get_cleaned_metadata())
 
-            if request.POST.get('repeat') and _is_admin(request.user, self.context['bookable']):
+            if request.POST.get('repeat') and _is_admin(request.user, booking.bookable):
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
                     'repeat_until': request.POST.get('repeat_until')
@@ -144,7 +143,7 @@ class BookView(View):
         else:
             return render(request, self.template, context=self.context, status=400)
 
-        self.context['bookable'].notify_external_services()
+        booking.bookable.notify_external_services()
 
         return HttpResponse()
 
