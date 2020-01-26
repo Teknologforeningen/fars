@@ -30,9 +30,9 @@
     </div>
     {% bootstrap_field form.booking_group %}
     {% bootstrap_field form.comment layout="horizontal" %}
-    {% if metadataform %}
-      {% bootstrap_form metadataform %}
-    {% endif %}
+    {% for metadata_field in form.metadata_fields %}
+      {% bootstrap_field metadata_field %}
+    {% endfor %}
 
   </form>
   {% if repeatform and user|is_bookableadmin:bookable %}

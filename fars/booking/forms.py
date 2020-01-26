@@ -70,18 +70,6 @@ class BookingForm(forms.ModelForm):
         if not user.is_superuser and restriction_groups and not user.groups.filter(id__in=restriction_groups).exists():
             raise forms.ValidationError(_("You do not have permissions to book this bookable"))
 
-        # Perform BILL check if configured
-        if bookable.bill_device_id is not None:
-            from .bill import BILLChecker, NotAllowedException, BILLException
-            checker = BILLChecker()
-
-            try:
-                checker.check_user_can_book(user.username, bookable.bill_device_id, group)
-            except NotAllowedException as err:
-                raise forms.ValidationError(err)
-            except BILLException:
-                raise forms.ValidationError(_('Error during BILL check'))
-
         if bookable and start and end:
             # Check that booking does not violate bookable forward limit
             if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
@@ -107,6 +95,16 @@ class BookingForm(forms.ModelForm):
                 raise forms.ValidationError(errors)
 
         return cleaned_data
+
+    def get_metadata_field_names(self):
+        return []
+
+    def metadata_fields(self):
+        return [self[k] for k in self.get_metadata_field_names()]
+
+    def get_cleaned_metadata(self):
+        metadata_field_names = self.get_metadata_field_names()
+        return None if not metadata_field_names else {k: self.cleaned_data[k] for k in metadata_field_names}
 
 
 class CustomLoginForm(AuthenticationForm):

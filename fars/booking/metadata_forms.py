@@ -1,10 +1,16 @@
 from django import forms
 from django.utils.translation import gettext as _
 from django.core.validators import RegexValidator
+from booking.forms import BookingForm
 from zlib import crc32
 from random import choice
 
 ### Metadata forms ###
+'''
+All metadata forms must extend BookingForm and override the get_metadata_field_names() method.
+get_metadata_field_names() should return the names of all the metadata fields.
+'''
+
 
 class DoorCodeField(forms.CharField):
     # obfuscated hex hash for the doorcode, as used by Generikey
@@ -29,7 +35,7 @@ class DoorCodeField(forms.CharField):
         return salted
 
 
-class PiSaunaMetadataForm(forms.Form):
+class PiSaunaMetadataForm(BookingForm):
     disable_sauna_heating = forms.BooleanField(
         required=False,
         label=_('Disable sauna heating'),
@@ -53,7 +59,31 @@ class PiSaunaMetadataForm(forms.Form):
         ]
     )
 
-class HumpsSaunaMetadataForm(forms.Form):
+    def get_metadata_field_names(self):
+        return ("disable_sauna_heating", "restrict_keys", "doorcode")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Perform BILL check unless sauna heating is disabled
+        if not cleaned_data["disable_sauna_heating"]:
+            from .bill import BILLChecker, NotAllowedException, BILLException
+            user = cleaned_data['user']
+            group = cleaned_data['booking_group']
+            bookable = cleaned_data['bookable']
+
+            checker = BILLChecker()
+
+            try:
+                checker.check_user_can_book(user.username, bookable.bill_device_id, group)
+            except NotAllowedException as err:
+                raise forms.ValidationError(err)
+            except BILLException:
+                raise forms.ValidationError(_('Error during BILL check'))
+
+        return cleaned_data
+
+
+class HumpsSaunaMetadataForm(BookingForm):
     unlock_door = forms.BooleanField(
         required=False,
         label=_('Unlock door'),
@@ -72,17 +102,17 @@ class HumpsSaunaMetadataForm(forms.Form):
         ]
     )
 
-# These are the choices used in the bookable model.
-# Adding your metadata form here will make it available for bookables
-METADATA_FORM_OPTIONS = (
-    (None, 'No metadata'),
-    ('PI', 'Pi sauna'),
-    ('HB', 'Humpsbadet'),
-)
+    def get_metadata_field_names(self):
+        return ("unlock_door", "doorcode")
+
 
 # This is the mapping from choice string stored in DB to a real class.
-# Every choice in METADATA_FORM_OPTIONS should have a form class mapped here 
+# Every choice in METADATA_FORM_OPTIONS should have a form class mapped here
+# METADATA_FORM_OPTIONS is defined in models.py
 METADATA_FORM_CLASSES = {
     'PI': PiSaunaMetadataForm,
     'HB': HumpsSaunaMetadataForm
 }
+
+def get_form_class(code):
+    return BookingForm if code is None else METADATA_FORM_CLASSES[code]
