@@ -88,6 +88,9 @@ class ExternalService(models.Model):
 class RepeatedBookingGroup(models.Model):
     name = models.CharField(max_length=128)
 
+    def __str__(self):
+        return self.name
+
     def delete_from_date_forward(self, date):
         bookings = self.booking_set.filter(start__gte=date)
         bookings.delete()
@@ -99,7 +102,7 @@ class Booking(models.Model):
     start = models.DateTimeField(_("start"))
     end = models.DateTimeField(_("end"))
     comment = models.CharField(_("comment"), max_length=128)
-    repeatgroup = models.ForeignKey(RepeatedBookingGroup, null=True, on_delete=models.CASCADE, default=None)
+    repeatgroup = models.ForeignKey(RepeatedBookingGroup, blank=True, null=True, on_delete=models.CASCADE, default=None)
     metadata = models.CharField(max_length=256, blank=True, null=True, default=None)
     booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
 
