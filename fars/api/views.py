@@ -1,4 +1,5 @@
 from rest_framework import viewsets, generics
+from rest_framework.permissions import IsAuthenticated
 from django_filters import rest_framework as filters
 from booking.models import *
 from api.serializers import *
@@ -17,6 +18,7 @@ class BookingFilter(filters.FilterSet):
 
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Booking.objects.all()
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
     filter_backends = (filters.DjangoFilterBackend,)
