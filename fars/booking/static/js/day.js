@@ -28,8 +28,8 @@ $(document).ready(function() {
       aspectRatio: 2,
       // header
       header: {
-        left: '',
-        center: 'title',
+        left: 'today prev,next title',
+        center: '',
         right: ''
       },
       views: {
