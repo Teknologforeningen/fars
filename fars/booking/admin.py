@@ -3,7 +3,18 @@ from django.apps import apps
 
 # Register your models here.
 
-app = apps.get_app_config('booking')
+from .models import Bookable
+from .forms import BookableForm
 
-for model_name, model in app.models.items():
-    admin.site.register(model)
+class BookableAdmin(admin.ModelAdmin):
+    form = BookableForm
+
+admin.site.register(Bookable, BookableAdmin)
+
+
+models = apps.get_models()
+for model in models:
+    try:
+        admin.site.register(model)
+    except admin.sites.AlreadyRegistered:
+        pass

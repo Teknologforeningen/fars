@@ -6,8 +6,10 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta
+import json
 
 import logging
+from .validators import validate_booking_slots
 
 # These are the choices used in the bookable model.
 # Adding your metadata form here will make it available for bookables.
@@ -53,6 +55,10 @@ class Bookable(models.Model):
     # BILL device ID if BILL check is needed. If null no BILL check will be performed
     bill_device_id = models.PositiveIntegerField(null=True, blank=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
 
+    # JSON field to only allow the specific timeslots to be booked
+    booking_slots = models.JSONField(default=list, validators=[validate_booking_slots], help_text=_('Timeslots that can be booked.'))
+    
+
     def __str__(self):
         return self.name
 
@@ -62,6 +68,18 @@ class Bookable(models.Model):
         session = FuturesSession(max_workers=4)
         for service in ExternalService.objects.filter(bookable__id=self.id):
             service.notify(session)
+
+    def has_bookable_timeslots(self):
+        if len(self.get_bookable_timeslots()) > 0: return True
+        return False
+
+    def get_bookable_timeslots(self):
+        # Replace all single quotes with double quotes, because single quotes are not valid JSON while they are valid characters in Python
+        return json.loads(str(self.booking_slots).replace("'",'"'))
+
+    def get_bookable_timeslots_by_start_and_end_time(self):
+        ts = self.get_bookable_timeslots()
+        return list(map(list, zip(*ts)))
 
 
 class ExternalService(models.Model):
@@ -78,11 +96,6 @@ class ExternalService(models.Model):
         except Exception as e:
             # Avoid crashes from this
             logger.error('Error notifying external service "{}" with URL {}: {}'.format(self.name, self.callback_url, str(e)))
-
-# class TimeSlot(models.Model):
-#     start = models.CharField(null=False)
-#     end = models.CharField(max_length=8, null=False)
-#     bookable = models.ForeignKey(max_length=8, Bookable, on_delete=models.CASCADE)
 
 
 class RepeatedBookingGroup(models.Model):
@@ -135,6 +148,14 @@ class Booking(models.Model):
         # Check that end is not earlier than start
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
+
+        # Check that the booking's start and end times are on the defined booking slots, if the bookable has such defined
+        if self.bookable.has_bookable_timeslots():
+            start_times, end_times = self.bookable.get_bookable_timeslots_by_start_and_end_time()
+            if self.start.strftime("%a %H:%M") not in start_times:
+                raise ValidationError(_("Booking start time is not according to the predefined booking timeslots."))
+            if self.end.strftime("%a %H:%M") not in end_times:
+                raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
 
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():

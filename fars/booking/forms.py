@@ -1,10 +1,23 @@
 from django import forms
-from booking.models import Booking, RepeatedBookingGroup
+from booking.models import Booking, RepeatedBookingGroup, Bookable
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
 from datetime import datetime, timedelta, date
 from django.utils.translation import gettext as _
 from django.db import transaction
+
+class WeekdayTimeWidget(forms.TextInput):
+    class Media:
+        css = {'all': ('css/booking_slots.css',)}
+        js = ('js/booking_slots.js',)
+
+
+class BookableForm(forms.ModelForm):
+    booking_slots = forms.CharField(widget=WeekdayTimeWidget, required=False)
+
+    class Meta:
+        model = Bookable
+        fields = '__all__'
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
