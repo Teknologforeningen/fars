@@ -7,10 +7,8 @@ from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta, datetime
 import time
-import json
 
 import logging
-from .validators import validate_booking_slots
 
 # These are the choices used in the bookable model.
 # Adding your metadata form here will make it available for bookables.
