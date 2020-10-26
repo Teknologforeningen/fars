@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
-from booking.models import Booking, Bookable
+from booking.models import Booking, Bookable, Timeslot
 from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
 from booking.metadata_forms import get_form_class
 from datetime import datetime, timedelta
@@ -107,26 +107,11 @@ class BookView(View):
         booking.start = booking.start.replace(second=0, microsecond=0)
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
-        print(booking.start, booking.end)
 
         # if the bookable has defined bookable timeslots, move the start time and end time to the closest valid bookable timespans
         if booking.bookable.has_bookable_timeslots():
-            starts, ends = booking.bookable.get_bookable_timeslots_by_start_and_end_time()
-            
-            start_timestamps = list(map(lambda t: (booking.start + timedelta(int(time.strftime("%w", time.strptime(t, "%a %H:%M"))) - 1 - booking.start.weekday())).replace(hour=int(time.strftime("%H", time.strptime(t, "%a %H:%M"))), minute=int(time.strftime("%M", time.strptime(t, "%a %H:%M")))), starts))
-            valid_start_timestamps = list(map(lambda ts: ts + timedelta(days=7) if ts <= datetime.now(booking.start.tzinfo) else ts, start_timestamps))
-            start_timedeltas = list(map(lambda ts: (ts - booking.start).total_seconds(), valid_start_timestamps))
-            closest_index = start_timedeltas.index(min(start_timedeltas, key=abs))
-            booking.start += timedelta(seconds=start_timedeltas[closest_index])
+            booking.start, booking.end = booking.bookable.get_closest_start_and_end_datetime(booking.start, booking.end)
 
-            end_timestamps = list(map(lambda t: (booking.end + timedelta(int(time.strftime("%w", time.strptime(t, "%a %H:%M"))) - 1 - booking.end.weekday())).replace(hour=int(time.strftime("%H", time.strptime(t, "%a %H:%M"))), minute=int(time.strftime("%M", time.strptime(t, "%a %H:%M")))), ends))
-            # if end timestamp is before booking start time, move it one week forward.
-            valid_end_timestamps = list(map(lambda ts: ts + timedelta(days=7) if ts <= booking.start else ts, end_timestamps))
-            end_timedeltas = list(map(lambda ts: (ts - booking.end).total_seconds(), valid_end_timestamps))
-            closest_index = end_timedeltas.index(min(end_timedeltas, key=abs))
-            booking.end += timedelta(seconds=end_timedeltas[closest_index])
-
-        print(booking.start, booking.end)
         booking.user = request.user
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form

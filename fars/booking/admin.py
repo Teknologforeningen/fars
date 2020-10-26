@@ -3,11 +3,17 @@ from django.apps import apps
 
 # Register your models here.
 
-from .models import Bookable
-from .forms import BookableForm
+from .models import Bookable, Timeslot
+
+class TimeslotInline(admin.TabularInline):
+    model = Timeslot
+    fields = ("start_weekday", "start_time", "end_weekday", "end_time",)
+
 
 class BookableAdmin(admin.ModelAdmin):
-    form = BookableForm
+    inlines = [
+        TimeslotInline,
+    ]
 
 admin.site.register(Bookable, BookableAdmin)
 
