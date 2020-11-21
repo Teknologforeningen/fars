@@ -37,7 +37,7 @@
           <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{{user.get_full_name}}</a></span>
           <form action="{% url 'oidc_logout' %}" method="post">
             {% csrf_token %}
-            <input class="btn btn-outline-danger" id="toolbar-btn" type="submit" value="logout">
+            <input class="btn btn-outline-danger" id="toolbar-btn" type="submit" value="{% trans 'Logout' %}">
           </form>
         </span>
       {% else %}

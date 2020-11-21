@@ -131,7 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -199,8 +200,8 @@ AUTH_LDAP_MIRROR_GROUPS = True
 # Keep ModelBackend around for per-user permissions and maybe a local
 # superuser.
 AUTHENTICATION_BACKENDS = (
-    'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
-    #'django.contrib.auth.backends.ModelBackend',
+    'fars.oidc.TeknologOIDCAB',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 # Never require cert
@@ -215,3 +216,6 @@ OIDC_RP_CLIENT_SECRET = env('OIDC_RP_CLIENT_SECRET')
 OIDC_OP_AUTHORIZATION_ENDPOINT = env('OIDC_OP_AUTHORIZATION_ENDPOINT')
 OIDC_OP_TOKEN_ENDPOINT = env('OIDC_OP_TOKEN_ENDPOINT')
 OIDC_OP_USER_ENDPOINT = env('OIDC_OP_USER_ENDPOINT')
+
+OIDC_RP_SIGN_ALGO = 'RS256'
+OIDC_OP_JWKS_ENDPOINT = env('OIDC_OP_JWKS_ENDPOINT')
