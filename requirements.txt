@@ -12,3 +12,4 @@ django-auth-ldap~=2.1
 psycopg2-binary~=2.8
 requests~=2.22
 requests-futures~=1.0
+mozilla-django-oidc~=1.2.4
