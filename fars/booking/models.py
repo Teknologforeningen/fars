@@ -5,7 +5,8 @@ from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
-from datetime import timedelta
+from datetime import timedelta, datetime
+import time
 
 import logging
 
@@ -63,6 +64,114 @@ class Bookable(models.Model):
         for service in ExternalService.objects.filter(bookable__id=self.id):
             service.notify(session)
 
+    def has_bookable_timeslots(self):
+        if Timeslot.objects.filter(bookable=self).count() > 0: return True
+        return False
+
+    def get_start_slots(self, query=None):
+        if query is None:
+            timeslots = Timeslot.objects.filter(bookable=self)
+        else:
+            timeslots = query
+        return [ts.get_start() for ts in timeslots]
+
+    def get_end_slots(self, query=None):
+        if query is None:
+            timeslots = Timeslot.objects.filter(bookable=self)
+        else:
+            timeslots = query
+        return [ts.get_end() for ts in timeslots]
+
+    def get_bookable_timeslots_by_start_and_end_time(self):
+        timeslot_query = Timeslot.objects.filter(bookable=self)
+        return [self.get_start_slots(query=timeslot_query), self.get_end_slots(query=timeslot_query)]
+
+    def get_closest_start_datetime(self, dt, query=None):
+        if query is None:
+            timeslot_query = Timeslot.objects.filter(bookable=self)
+        else:
+            timeslot_query = query
+        timestamps = [ts.get_closest_start_datetime(dt) for ts in timeslot_query]
+
+        valid_start_timestamps = list(map(lambda ts: ts + timedelta(days=7) if ts <= datetime.now(dt.tzinfo) else ts, timestamps))
+        # Calculate the timedelta to dt timestamp for each datetime object
+        start_timedeltas = list(map(lambda ts: (ts - dt).total_seconds(), valid_start_timestamps))
+        # Find the closest valid match and return the timestamp that matches that index
+        closest_index = start_timedeltas.index(min(start_timedeltas, key=abs))
+        return valid_start_timestamps[closest_index]
+
+    def get_closest_end_datetime(self, dt, booking_start_dt, query=None):
+        if query is None:
+            timeslot_query = Timeslot.objects.filter(bookable=self)
+        else:
+            timeslot_query = query
+        timestamps = [ts.get_closest_end_datetime(dt) for ts in timeslot_query]
+
+        valid_end_timestamps = list(map(lambda ts: ts + timedelta(days=7) if ts <= booking_start_dt else ts, timestamps))
+        # Calculate the timedelta to dt timestamp for each datetime object
+        end_timedeltas = list(map(lambda ts: (ts - dt).total_seconds(), valid_end_timestamps))
+        # Find the closest valid match and return the timestamp that matches that index
+        closest_index = end_timedeltas.index(min(end_timedeltas, key=abs))
+        return valid_end_timestamps[closest_index]
+
+    def get_closest_start_and_end_datetime(self, start_dt, end_dt):
+        timeslot_query = Timeslot.objects.filter(bookable=self)
+        closest_start_datetime = self.get_closest_start_datetime(start_dt, timeslot_query)
+        closest_end_datetime = self.get_closest_end_datetime(end_dt, closest_start_datetime, timeslot_query)
+        return ( closest_start_datetime, closest_end_datetime, )
+
+
+def convert_time_to_closest_datetime(timestamp, datetimestamp):
+    # timestamp = time struct https://docs.python.org/3/library/time.html#time.struct_time
+    # datetimestamp = datetime object https://docs.python.org/3/library/datetime.html#datetime-objects
+    # This function returns a datetime object of the timeslot string regarding the received datetime object (dt)
+    # The converted datetime object has the same weekday, hour and minute as the time struct
+    return (datetimestamp + timedelta(timestamp.tm_wday - datetimestamp.weekday())).replace(hour=timestamp.tm_hour, minute=timestamp.tm_min)
+
+class Timeslot(models.Model):
+    class Weekdays(models.TextChoices):
+        MON = 'Mon', _('Monday')
+        TUE = 'Tue', _('Tuesday')
+        WED = 'Wed', _('Wednesday')
+        THU = 'Thu', _('Thursday')
+        FRI = 'Fri', _('Friday')
+        SAT = 'Sat', _('Saturday')
+        SUN = 'Sun', _('Sunday')
+        
+    bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
+    start_time = models.TimeField(auto_now=False, auto_now_add=False)
+    start_weekday = models.CharField(
+        max_length=3,
+        choices=Weekdays.choices,
+    )
+    end_time = models.TimeField(auto_now=False, auto_now_add=False)
+    end_weekday = models.CharField(
+        max_length=3,
+        choices=Weekdays.choices,
+    )
+
+    def get_start(self):
+        return f"{self.start_weekday} {self.start_time.strftime('%H:%M')}"
+
+    def get_start_t(self):
+        # Returns start time as a python time struct
+        # https://docs.python.org/3/library/time.html#time.struct_time
+        return time.strptime(self.get_start(), "%a %H:%M")
+
+    def get_end(self):
+        return f"{self.end_weekday} {self.end_time.strftime('%H:%M')}"
+
+    def get_end_t(self):
+        # Returns end time as a python time struct
+        # https://docs.python.org/3/library/time.html#time.struct_time
+        return time.strptime(self.get_end(), "%a %H:%M")
+
+    def get_closest_start_datetime(self, dt):
+        return convert_time_to_closest_datetime(self.get_start_t(), dt)
+
+    def get_closest_end_datetime(self, dt):
+        return convert_time_to_closest_datetime(self.get_end_t(), dt)
+
 
 class ExternalService(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
@@ -78,11 +187,6 @@ class ExternalService(models.Model):
         except Exception as e:
             # Avoid crashes from this
             logger.error('Error notifying external service "{}" with URL {}: {}'.format(self.name, self.callback_url, str(e)))
-
-# class TimeSlot(models.Model):
-#     start = models.CharField(null=False)
-#     end = models.CharField(max_length=8, null=False)
-#     bookable = models.ForeignKey(max_length=8, Bookable, on_delete=models.CASCADE)
 
 
 class RepeatedBookingGroup(models.Model):
@@ -135,6 +239,14 @@ class Booking(models.Model):
         # Check that end is not earlier than start
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
+
+        # Check that the booking's start and end times are on the defined booking slots, if the bookable has such defined
+        if self.bookable.has_bookable_timeslots():
+            start_times, end_times = self.bookable.get_bookable_timeslots_by_start_and_end_time()
+            if self.start.strftime("%a %H:%M") not in start_times:
+                raise ValidationError(_("Booking start time is not according to the predefined booking timeslots."))
+            if self.end.strftime("%a %H:%M") not in end_times:
+                raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
 
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():

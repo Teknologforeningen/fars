@@ -3,7 +3,24 @@ from django.apps import apps
 
 # Register your models here.
 
-app = apps.get_app_config('booking')
+from .models import Bookable, Timeslot
 
-for model_name, model in app.models.items():
-    admin.site.register(model)
+class TimeslotInline(admin.TabularInline):
+    model = Timeslot
+    fields = ("start_weekday", "start_time", "end_weekday", "end_time",)
+
+
+class BookableAdmin(admin.ModelAdmin):
+    inlines = [
+        TimeslotInline,
+    ]
+
+admin.site.register(Bookable, BookableAdmin)
+
+
+models = apps.get_models()
+for model in models:
+    try:
+        admin.site.register(model)
+    except admin.sites.AlreadyRegistered:
+        pass
