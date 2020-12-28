@@ -1,0 +1,62 @@
+[
+  {
+    "model": "booking.repeatedbookinggroup",
+    "pk": 1,
+    "fields": {
+      "name": "Styrelsem\u00f6te"
+    }
+  },
+  {
+    "model": "booking.bookable",
+    "pk": 1,
+    "fields": {
+      "id_str": "motesrummet",
+      "name": "M\u00f6tesrummet",
+      "description": "LOL",
+      "icon": "tf.svg",
+      "public": false,
+      "forward_limit_days": 90,
+      "length_limit_hours": 8,
+      "metadata_form": null,
+      "allowed_booker_groups": [
+        2
+      ],
+      "booking_restriction_groups": [],
+      "admin_groups": []
+    }
+  },
+  {
+    "model": "booking.bookable",
+    "pk": 2,
+    "fields": {
+      "id_str": "bolden",
+      "name": "B\u00f6lden",
+      "description": "a bookable",
+      "icon": "tf.svg",
+      "public": false,
+      "forward_limit_days": 0,
+      "length_limit_hours": 0,
+      "metadata_form": null,
+      "allowed_booker_groups": [],
+      "booking_restriction_groups": [],
+      "admin_groups": []
+    }
+  },
+  {
+    "model": "booking.bookable",
+    "pk": 3,
+    "fields": {
+      "id_str": "hyllan",
+      "name": "Hyllan",
+      "description": "a bookable",
+      "icon": "tf.svg",
+      "public": true,
+      "forward_limit_days": 0,
+      "length_limit_hours": 0,
+      "metadata_form": null,
+      "allowed_booker_groups": [],
+      "booking_restriction_groups": [],
+      "admin_groups": []
+    }
+  }  
+  ]
