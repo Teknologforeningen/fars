@@ -28,4 +28,5 @@ urlpatterns = [
     path('booking/', include('booking.urls')),
     path('tablet/', include('tabletpage.urls')),
     path('', RedirectView.as_view(url='booking/')),
+    path('oidc/', include('mozilla_django_oidc.urls')),
 ]
