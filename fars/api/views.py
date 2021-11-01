@@ -13,10 +13,11 @@ class BookingFilter(filters.FilterSet):
     bookable = filters.CharFilter(field_name='bookable__id_str')
     before = filters.IsoDateTimeFilter(field_name='start', lookup_expr='lte')
     after = filters.IsoDateTimeFilter(field_name='end', lookup_expr='gte')
+    booking_group = filters.CharFilter(field_name='booking_group')
 
     class Meta:
         model = Booking
-        fields = ['bookable', 'before', 'after']
+        fields = ['bookable', 'before', 'after', 'booking_group']
 
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
