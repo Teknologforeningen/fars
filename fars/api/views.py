@@ -1,5 +1,5 @@
 from rest_framework import viewsets, generics
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from django_filters import rest_framework as filters
 from booking.models import *
@@ -23,9 +23,11 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Booking.objects.all()
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
-    filter_backends = (filters.DjangoFilterBackend, SearchFilter)
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
     filter_class = BookingFilter
     search_fields = ['comment', 'start', 'end', 'user__username', 'user__first_name', 'user__last_name', 'booking_group__name']
+    ordering_fields = ['start', 'end', 'id']
+    ordering = ['start', 'end']
 
     def finalize_response(self, request, response, *args, **kwargs):
         limit = request.query_params.get("limit")
