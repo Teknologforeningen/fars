@@ -29,12 +29,6 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     ordering_fields = ['start', 'end', 'id']
     ordering = ['start', 'end']
 
-    def finalize_response(self, request, response, *args, **kwargs):
-        limit = request.query_params.get("limit")
-        if limit and limit.isdigit():
-            response.data = response.data[:int(limit)]
-        return super().finalize_response(request, response, *args, **kwargs)
-
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
