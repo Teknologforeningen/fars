@@ -1,6 +1,7 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, pagination
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from django_filters import rest_framework as filters
 from booking.models import *
 from api.serializers import *
@@ -18,6 +19,11 @@ class BookingFilter(filters.FilterSet):
         model = Booking
         fields = ['bookable', 'before', 'after', 'booking_group']
 
+class BookingsPagination(pagination.LimitOffsetPagination):
+    default_limit = 5000
+    limit_query_param = 'limit'
+    offset_query_param = 'offset'
+    max_limit = 50000
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -28,7 +34,11 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     search_fields = ['comment', 'start', 'end', 'user__username', 'user__first_name', 'user__last_name', 'booking_group__name']
     ordering_fields = ['start', 'end', 'id']
     ordering = ['start', 'end']
+    pagination_class = BookingsPagination
 
+    # Override default pagination response
+    def get_paginated_response(self, data):
+        return Response(data)
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
