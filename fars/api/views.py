@@ -16,14 +16,12 @@ class BookingFilter(filters.FilterSet):
         model = Booking
         fields = ['bookable', 'before', 'after']
 
-
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Booking.objects.all()
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
-
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
@@ -32,3 +30,18 @@ class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
     renderer_classes = (GeneriKeyBookingRenderer, )
+
+class TimeslotFilter(filters.FilterSet):
+    bookable = filters.CharFilter(field_name='bookable__id_str')
+
+    class Meta:
+        model = Timeslot
+        fields = ['bookable']
+
+class TimeslotsList(viewsets.ViewSetMixin, generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    # The frontend relies on the sorted order. We sort by end time because a timeslot ending on Monday but starting the previous week should precede a slot starting on Monday.
+    queryset = Timeslot.objects.all().order_by('end_weekday', 'end_time');
+    serializer_class = TimeslotSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = TimeslotFilter

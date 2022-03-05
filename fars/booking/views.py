@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
-from booking.models import Booking, Bookable
+from booking.models import Booking, Bookable, Timeslot
 from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
 from booking.metadata_forms import get_form_class
 from datetime import datetime, timedelta
+import time
 import dateutil.parser
 from django.utils.translation import gettext as _
 from django.db import transaction
@@ -76,7 +77,7 @@ class DayView(View):
         if not bookable_obj.public and not request.user.is_authenticated:
             return redirect('{}?next={}'.format(reverse('login'), request.path_info))
         context = {
-            'date': "{y}-{m:02d}-{d:02d}".format(y=year, m=month, d=day),
+            'date': datetime(year, month, day, 0, 0, 0, 0, pytz.timezone(TIME_ZONE)).isoformat(),
             'bookable': bookable_obj,
             'user': request.user
         }
@@ -102,8 +103,15 @@ class BookView(View):
     def get(self, request, bookable):
         booking = Booking()
         booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
+        # Remove the seconds and microseconds if they are present
+        booking.start = booking.start.replace(second=0, microsecond=0)
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
+
+        # if the bookable has defined bookable timeslots, move the start time and end time to the closest valid bookable timespans
+        if booking.bookable.has_bookable_timeslots():
+            booking.start, booking.end = booking.bookable.get_closest_start_and_end_datetime(booking.start, booking.end)
+
         booking.user = request.user
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form

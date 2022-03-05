@@ -1,5 +1,5 @@
 from django import forms
-from booking.models import Booking, RepeatedBookingGroup
+from booking.models import Booking, RepeatedBookingGroup, Bookable
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
 from datetime import datetime, timedelta, date
