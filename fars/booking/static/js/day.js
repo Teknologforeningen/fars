@@ -67,7 +67,9 @@ function createCalendar(calendar, date, bookable, locale, user, timezone, timesl
         function(data){
           modal.find('.modal-content').html(data)
         }
-      );
+      ).fail(function(data){
+        modal.find('.modal-content').html(data.responseText)
+      });
       modal.modal('show');
     },
     events: function(start, end, eventTimezone, callback) {
@@ -141,7 +143,9 @@ function createCalendar(calendar, date, bookable, locale, user, timezone, timesl
           function(data){
             modal.find('.modal-content').html(data)
           }
-        );
+        ).fail(function(data){
+          modal.find('.modal-content').html(data.responseText)
+        });
       }
       modal.modal('show');
     },
