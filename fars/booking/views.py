@@ -108,10 +108,6 @@ class BookView(View):
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
         booking.bookable = self.context['bookable']
 
-        # if the bookable has defined bookable timeslots, move the start time and end time to the closest valid bookable timespans
-        if booking.bookable.has_bookable_timeslots():
-            booking.start, booking.end = booking.bookable.get_closest_start_and_end_datetime(booking.start, booking.end)
-
         booking.user = request.user
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form

@@ -67,62 +67,6 @@ class Bookable(models.Model):
     def get_time_slots(self):
         return Timeslot.objects.filter(bookable=self)
 
-    def has_bookable_timeslots(self):
-        if Timeslot.objects.filter(bookable=self).count() > 0: return True
-        return False
-
-    def get_start_slots(self, query=None):
-        if query is None:
-            timeslots = Timeslot.objects.filter(bookable=self)
-        else:
-            timeslots = query
-        return [ts.get_start() for ts in timeslots]
-
-    def get_end_slots(self, query=None):
-        if query is None:
-            timeslots = Timeslot.objects.filter(bookable=self)
-        else:
-            timeslots = query
-        return [ts.get_end() for ts in timeslots]
-
-    def get_bookable_timeslots_by_start_and_end_time(self):
-        timeslot_query = Timeslot.objects.filter(bookable=self)
-        return [self.get_start_slots(query=timeslot_query), self.get_end_slots(query=timeslot_query)]
-
-    def get_closest_start_datetime(self, dt, query=None):
-        if query is None:
-            timeslot_query = Timeslot.objects.filter(bookable=self)
-        else:
-            timeslot_query = query
-        timestamps = [ts.get_closest_start_datetime(dt) for ts in timeslot_query]
-
-        valid_start_timestamps = list(map(lambda ts: ts + timedelta(days=7) if ts <= datetime.now(dt.tzinfo) else ts, timestamps))
-        # Calculate the timedelta to dt timestamp for each datetime object
-        start_timedeltas = list(map(lambda ts: (ts - dt).total_seconds(), valid_start_timestamps))
-        # Find the closest valid match and return the timestamp that matches that index
-        closest_index = start_timedeltas.index(min(start_timedeltas, key=abs))
-        return valid_start_timestamps[closest_index]
-
-    def get_closest_end_datetime(self, dt, booking_start_dt, query=None):
-        if query is None:
-            timeslot_query = Timeslot.objects.filter(bookable=self)
-        else:
-            timeslot_query = query
-        timestamps = [ts.get_closest_end_datetime(dt) for ts in timeslot_query]
-
-        valid_end_timestamps = list(map(lambda ts: ts + timedelta(days=7) if ts <= booking_start_dt else ts, timestamps))
-        # Calculate the timedelta to dt timestamp for each datetime object
-        end_timedeltas = list(map(lambda ts: (ts - dt).total_seconds(), valid_end_timestamps))
-        # Find the closest valid match and return the timestamp that matches that index
-        closest_index = end_timedeltas.index(min(end_timedeltas, key=abs))
-        return valid_end_timestamps[closest_index]
-
-    def get_closest_start_and_end_datetime(self, start_dt, end_dt):
-        timeslot_query = Timeslot.objects.filter(bookable=self)
-        closest_start_datetime = self.get_closest_start_datetime(start_dt, timeslot_query)
-        closest_end_datetime = self.get_closest_end_datetime(end_dt, closest_start_datetime, timeslot_query)
-        return ( closest_start_datetime, closest_end_datetime, )
-
 
 def convert_time_to_closest_datetime(timestamp, datetimestamp):
     # timestamp = time struct https://docs.python.org/3/library/time.html#time.struct_time
@@ -132,6 +76,10 @@ def convert_time_to_closest_datetime(timestamp, datetimestamp):
     return (datetimestamp + timedelta(timestamp.tm_wday - datetimestamp.weekday())).replace(hour=timestamp.tm_hour, minute=timestamp.tm_min)
 
 class Timeslot(models.Model):
+
+    def __str__(self):
+        return "{} {} - {} {}".format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
+
     class Weekdays(models.TextChoices):
         # ISO 8601
         MON = '1', _('Monday')
@@ -153,28 +101,6 @@ class Timeslot(models.Model):
         max_length=1,
         choices=Weekdays.choices,
     )
-
-    def get_start(self):
-        return f"{self.start_weekday} {self.start_time.strftime('%H:%M')}"
-
-    def get_start_t(self):
-        # Returns start time as a python time struct
-        # https://docs.python.org/3/library/time.html#time.struct_time
-        return time.strptime(self.get_start(), "%u %H:%M")
-
-    def get_end(self):
-        return f"{self.end_weekday} {self.end_time.strftime('%H:%M')}"
-
-    def get_end_t(self):
-        # Returns end time as a python time struct
-        # https://docs.python.org/3/library/time.html#time.struct_time
-        return time.strptime(self.get_end(), "%u %H:%M")
-
-    def get_closest_start_datetime(self, dt):
-        return convert_time_to_closest_datetime(self.get_start_t(), dt)
-
-    def get_closest_end_datetime(self, dt):
-        return convert_time_to_closest_datetime(self.get_end_t(), dt)
 
 
 class ExternalService(models.Model):
@@ -244,12 +170,17 @@ class Booking(models.Model):
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
 
-        # Check that the booking's start and end times are on the defined booking slots, if the bookable has such defined
-        if self.bookable.has_bookable_timeslots():
-            start_times, end_times = self.bookable.get_bookable_timeslots_by_start_and_end_time()
-            if self.start.strftime("%u %H:%M") not in start_times:
-                raise ValidationError(_("Booking start time is not according to the predefined booking timeslots."))
-            if self.end.strftime("%u %H:%M") not in end_times:
+        # Check that the booking's start and end times match a defined booking slot if bookable has slots
+        timeslots = self.bookable.get_time_slots()
+        if timeslots.count() > 0:
+            timeslots = timeslots.filter(end_weekday=self.end.isoweekday(), end_time=self.end.time())
+            valid_slot_found = False
+            for slot in timeslots:
+                # Start time can be later than or equal to slot start time, which accounts for booking slots that have already started.
+                if self.start.time() >= slot.start_time:
+                    valid_slot_found = True
+                    break
+            if not valid_slot_found:
                 raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
 
         # Check that booking group is allowed
