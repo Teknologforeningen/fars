@@ -80,7 +80,7 @@ function createCalendar(calendar, bookable, locale, user, timezone, timeslots) {
             bookingEvent.className = classNames;
             bookingEvents.push(bookingEvent);
             // Remove overlapped booking slots
-            slotEvents = slotEvents.filter(slot => !(bookingEvent.end > slot.start && bookingEvent.start < slot.end));
+            slotEvents = slotEvents.filter(slot => bookingEvent.end < now || !(bookingEvent.end > slot.start && bookingEvent.start < slot.end));
           });
           callback(slotEvents.concat(bookingEvents));
         }
