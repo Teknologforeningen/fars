@@ -16,13 +16,18 @@ class BookingFilter(filters.FilterSet):
         model = Booking
         fields = ['bookable', 'before', 'after']
 
-
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Booking.objects.all()
+
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
+
+    def get_queryset(self):
+        queryset = Booking.objects.all()
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(bookable__public=True)
+        
+        return queryset
 
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
@@ -32,3 +37,22 @@ class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter
     renderer_classes = (GeneriKeyBookingRenderer, )
+
+class TimeslotFilter(filters.FilterSet):
+    bookable = filters.CharFilter(field_name='bookable__id_str')
+
+    class Meta:
+        model = Timeslot
+        fields = ['bookable']
+
+class TimeslotsList(viewsets.ViewSetMixin, generics.ListAPIView):
+    serializer_class = TimeslotSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = TimeslotFilter
+
+    def get_queryset(self):
+        queryset = Timeslot.objects.all()
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(bookable__public=True)
+        
+        return queryset

@@ -1,5 +1,4 @@
-function getBusinesshours(date) {
-  var currentTime = moment();
+function getBusinesshours(currentTime, date) {
   if (currentTime.isSame(date, 'day')) {
     start = currentTime.format('HH:mm');
   } else if (currentTime.isAfter(date)) {
@@ -15,108 +14,161 @@ function getBusinesshours(date) {
   }
 };
 
-
-$(document).ready(function() {
-  var calendar = $('#calendar'),
-      date = calendar.data('date'),
-      bookable = calendar.data('bookable'),
-      locale = calendar.data('locale'),
-      user = calendar.data('user');
-
+function createCalendar(calendar, date, bookable, locale, user, timezone, timeslots) {
+  let currentTime = moment();
+  let hasTimeslots = timeslots.length !== 0;
+  if (hasTimeslots) {
+    calendar.addClass('fars-timeslots');
+  } else {
+    calendar.addClass('fars-freeselect');
+  }
   calendar.fullCalendar({
-      height: 'parent',
-      aspectRatio: 2,
-      // header
-      header: {
-        left: 'today prev,next title',
-        center: '',
-        right: ''
-      },
-      views: {
-
-      },
-      firstDay: 1,
-      locale: locale,
-      timezone: 'local',
-      timeFormat: 'H:mm',
-      slotLabelFormat: 'H:mm',
-      displayEventEnd: true,
-      nowIndicator: true,
-      defaultView: 'agendaDay',
-      defaultDate: date,
-      allDaySlot: false,
-      themeSystem: 'bootstrap4',
-      agendaEventMinHeight: 20,
-      scrollTime: '08:00:00',
-      businessHours: getBusinesshours(date),
-      selectable: true,
-      selectLongPressDelay: 300,
-      selectAllow: function(selectInfo) {
-        var min = moment();
-        const remainder = min.minute() % 30;
-        min.subtract(remainder, 'minutes').startOf('minute');
-        return selectInfo.start >= min;
-      },
-      // If a time is selected it opens the modal for booking
-      select: function(start, end, jsEvent, view) {
-        var now = moment();
-        if (start < now) {
-          start = now;
+    height: 'parent',
+    aspectRatio: 2,
+    // header
+    header: {
+      left: '',
+      center: 'title',
+      right: ''
+    },
+    views: {},
+    firstDay: 1,
+    locale: locale,
+    timezone: timezone,
+    timeFormat: 'H:mm',
+    slotLabelFormat: 'H:mm',
+    displayEventEnd: true,
+    nowIndicator: true,
+    defaultView: 'agendaDay',
+    defaultDate: date,
+    allDaySlot: false,
+    themeSystem: 'bootstrap4',
+    agendaEventMinHeight: 20,
+    scrollTime: '08:00:00',
+    businessHours: getBusinesshours(currentTime, date),
+    selectable: !hasTimeslots,
+    selectLongPressDelay: 300,
+    selectAllow: function(selectInfo) {
+      let min = moment();
+      const remainder = min.minute() % 30;
+      min.subtract(remainder, 'minutes').startOf('minute');
+      return selectInfo.start >= min;
+    },
+    // If a time is selected it opens the modal for booking
+    select: function(start, end, jsEvent, view) {
+      let now = moment();
+      if (start < now) {
+        start = now;
+      }
+      let modal = $('#modalBox');
+      let params = {'st': start.format(), 'et': end.format()};
+      $.get(
+        '/booking/book/' +  bookable + '?' + $.param(params),
+        function(data){
+          modal.find('.modal-content').html(data)
         }
-        var modal = $('#modalBox');
-        var params = {'st': start.format(), 'et': end.format()};
-        $.get(
-          '/booking/book/' +  bookable + '?' + $.param(params),
-          function(data){
-            modal.find('.modal-content').html(data)
-          }
-        );
-        modal.modal('show');
-      },
-      events: function(start, end, timezone, callback) {
-        $.ajax({
-          url: '/api/bookings',
-          data: {
-            bookable: bookable,
-            after: start.toISOString(),
-            before: end.toISOString(),
-          },
-          success: function(data) {
-            var events = [];
-            $(data).each(function() {
-              var event = {
-                id: $(this).attr('id'),
-                title: $(this).attr('comment'),
-                start: $(this).attr('start'),
-                end: $(this).attr('end'),
-              };
-              var today = moment();
-              var classNames = [];
-              if (moment(event.end) < today) {
-                classNames.push("past-event");
-              }
-              if ($(this).attr('user') === user) {
-                classNames.push('bg-own');
-              }
-              event.className = classNames;
-              events.push(event);
-            });
-            callback(events);
-          }
-        });
-      },
-      eventClick: function(calEvent, jsEvent, view) {
-        var modal = $('#modalBox');
+      ).fail(function(data){
+        modal.find('.modal-content').html(data.responseText)
+      });
+      modal.modal('show');
+    },
+    events: function(start, end, eventTimezone, callback) {
+      // Fill booking slots
+      let now = moment();
+      let slotEvents = [];
+
+      if (hasTimeslots) {
+        // Fill the requested time range with timeslots, week by week. Stop when cursor's week is later than end.
+        // Important to pay attention to the distinction between year and week-year here.
+        for (let cursor = moment(start); (cursor.isoWeekYear() == end.isoWeekYear() && cursor.isoWeek() <= end.isoWeek()) || cursor.isoWeekYear() < end.isoWeekYear(); cursor.add(1, 'weeks')) {
+          let year = cursor.isoWeekYear();
+          let week = cursor.isoWeek();
+          timeslots.forEach(function(timeslot) {
+            let slotStart = moment([year, String(week).padStart(2, '0'), timeslot.start_weekday, timeslot.start_time].join(' '), 'GGGG WW E HH:mm:ss')
+            let slotEnd = moment([year, String(week).padStart(2, '0'), timeslot.end_weekday, timeslot.end_time].join(' '), 'GGGG WW E HH:mm:ss')
+            // Start time of a slot may be in the previous week. If start ends up after end, move it back one week.
+            if (slotStart > slotEnd) {
+              slotStart.subtract(1, 'weeks');
+            }
+            if (slotEnd > now && slotEnd > start && slotStart < end) {
+              slotEvents.push({start: slotStart, end: slotEnd, className: ['fars-timeslot']});
+            }
+          });
+        }
+      }
+
+      // Add bookings
+      $.get(
+        '/api/bookings',
+        {bookable: bookable, after: start.toISOString(), before: end.toISOString()},
+        function(bookings) {
+          let bookingEvents = [];
+          bookings.forEach(function(booking) {
+            let bookingEvent = {
+              id: booking.id,
+              title: booking.comment,
+              start: moment(booking.start),
+              end: moment(booking.end),
+            };
+            let classNames = [];
+            if (bookingEvent.end < now) {
+              classNames.push("past-event");
+            }
+            if (booking.user === user) {
+              classNames.push('bg-own');
+            }
+            bookingEvent.className = classNames;
+            bookingEvents.push(bookingEvent);
+            // Remove overlapped booking slots
+            slotEvents = slotEvents.filter(slot => bookingEvent.end < now || !(bookingEvent.end > slot.start && bookingEvent.start < slot.end));
+          });
+          callback(slotEvents.concat(bookingEvents));
+        }
+      );
+    },
+    eventClick: function(calEvent, jsEvent, view) {
+      let modal = $('#modalBox');
+      if (calEvent.hasOwnProperty('id')) {
         $.get(
           '/booking/booking/' + calEvent.id,
           function(data){
             modal.find('.modal-content').html(data)
           }
         );
-        modal.modal('show');
-      },
-  });
-  var Key = {
+      } else {
+        // This is a timeslot event
+        let params = {'st': calEvent.start.format(), 'et': calEvent.end.format()};
+        $.get(
+          '/booking/book/' +  bookable + '?' + $.param(params),
+          function(data){
+            modal.find('.modal-content').html(data)
+          }
+        ).fail(function(data){
+          modal.find('.modal-content').html(data.responseText)
+        });
+      }
+      modal.modal('show');
+    },
+  })
+}
+
+
+$(document).ready(function() {
+  let calendar = $('#calendar'),
+    date = calendar.data('date'),
+    bookable = calendar.data('bookable'),
+    locale = calendar.data('locale'),
+    user = calendar.data('user'),
+    timezone = calendar.data('timezone')
+  $.get(
+    '/api/timeslots',
+    {bookable: bookable},
+    function(timeslots) {
+      createCalendar(calendar, date, bookable, locale, user, timezone, timeslots);
+    }
+  );
+
+  let Key = {
     LEFT:   37,
     RIGHT:  39,
     M: 77
@@ -137,7 +189,7 @@ $(document).ready(function() {
 
   function handleKeyboardEvent(evt) {
     if (!evt) {evt = window.event;} // for old IE compatible
-    var keycode = evt.keyCode || evt.which; // also for cross-browser compatible
+    let keycode = evt.keyCode || evt.which; // also for cross-browser compatible
     if (!$('#modalBox').hasClass('show')) {
       switch (keycode) {
         case Key.LEFT:
