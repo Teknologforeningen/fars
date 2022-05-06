@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  fars_test:
+     build: /srv/docker/fars_test
+     image: tf_fars:test
+     hostname: fars_test
+     container_name: fars_test
+
+     networks:
+       - dvalin_internal
+
+networks:
+  dvalin_internal:
+    external:
+      name: dvalin_internal

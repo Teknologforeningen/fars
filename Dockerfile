@@ -7,5 +7,6 @@ RUN apt update && apt install -y gcc git libpq-dev libsasl2-dev python-dev libld
 COPY requirements.txt .
 RUN pip install gunicorn && pip install -r requirements.txt
 COPY fars .
+RUN mkdir /var/log/fars && touch /var/log/fars/info.log
 RUN python manage.py migrate
 CMD exec gunicorn --timeout 90 --bind 0.0.0.0:8888 fars.wsgi:application
