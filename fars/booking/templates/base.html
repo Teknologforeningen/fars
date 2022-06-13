@@ -35,19 +35,17 @@
       {% if user.is_authenticated %}
         <span class="nav-item">
           <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{{user.get_full_name}}</a></span>
-          <a class="btn btn-outline-danger" id="toolbar-btn" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">{% trans "Logout" %}</a>
+          <form action="{% url 'oidc_logout' %}" method="post">
+            {% csrf_token %}
+            <input class="btn btn-outline-danger" id="toolbar-btn" type="submit" value="{% trans 'Logout' %}">
+          </form>
         </span>
       {% else %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div id="collapseContent" class="collapse navbar-collapse">
-          <form class="form-inline ml-auto my-3 my-md-0" method="post" action="{% url 'login' %}?next={{ request.build_absolute_uri }}">
-            {% csrf_token %}
-            <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
-            <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
-            <button type="submit" class="btn btn-outline-success my-2 my-sm-0">{% trans "Login" %}</button>
-          </form>
+          <a class="btn btn-outline-success ml-auto my-2 my-sm-0" href="{% url 'oidc_authentication_init' %}">{% trans "Login" %}</a>
         </div>
       {% endif %}
     </nav>

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mozilla_django_oidc',
     'booking',
     'tabletpage',
     'rest_framework',
@@ -130,7 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -198,7 +200,7 @@ AUTH_LDAP_MIRROR_GROUPS = True
 # Keep ModelBackend around for per-user permissions and maybe a local
 # superuser.
 AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
+    'fars.oidc.TeknologOIDCAB',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -206,3 +208,14 @@ AUTHENTICATION_BACKENDS = (
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER
 }
+
+# OIDC settings
+OIDC_RP_CLIENT_ID = env('OIDC_RP_CLIENT_ID')
+OIDC_RP_CLIENT_SECRET = env('OIDC_RP_CLIENT_SECRET')
+
+OIDC_OP_AUTHORIZATION_ENDPOINT = env('OIDC_OP_AUTHORIZATION_ENDPOINT')
+OIDC_OP_TOKEN_ENDPOINT = env('OIDC_OP_TOKEN_ENDPOINT')
+OIDC_OP_USER_ENDPOINT = env('OIDC_OP_USER_ENDPOINT')
+
+OIDC_RP_SIGN_ALGO = 'RS256'
+OIDC_OP_JWKS_ENDPOINT = env('OIDC_OP_JWKS_ENDPOINT')
