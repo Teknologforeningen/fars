@@ -86,6 +86,10 @@ function createCalendar(calendar, date, bookable, locale, user, timezone, timesl
           timeslots.forEach(function(timeslot) {
             let slotStart = moment([year, String(week).padStart(2, '0'), timeslot.start_weekday, timeslot.start_time].join(' '), 'GGGG WW E HH:mm:ss')
             let slotEnd = moment([year, String(week).padStart(2, '0'), timeslot.end_weekday, timeslot.end_time].join(' '), 'GGGG WW E HH:mm:ss')
+            // If end time is before the cursor and the start time, the end time should be moved to the next week.
+            if (slotStart > slotEnd && slotEnd < cursor) {
+              slotEnd.add(1, 'weeks');
+            }
             // Start time of a slot may be in the previous week. If start ends up after end, move it back one week.
             if (slotStart > slotEnd) {
               slotStart.subtract(1, 'weeks');
