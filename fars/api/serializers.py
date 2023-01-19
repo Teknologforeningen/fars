@@ -22,13 +22,10 @@ class BookingSerializer(serializers.ModelSerializer):
     booking_group = GroupSerializer(read_only=True)
     class Meta:
         model = Booking
-        fields = '__all__'
+        exclude = ()
 
-class NoMetaBookingSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    booking_group = GroupSerializer(read_only=True)
-    class Meta:
-        model = Booking
+class NoMetaBookingSerializer(BookingSerializer):
+    class Meta(BookingSerializer.Meta):
         exclude = ('metadata', )
 
 class TimeslotSerializer(serializers.ModelSerializer):
