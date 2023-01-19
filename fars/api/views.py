@@ -29,6 +29,18 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
         
         return queryset
 
+class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
+    serializer_class = BookableSerializer
+
+    def get_queryset(self):
+        queryset = Bookable.objects.all()
+        user = self.request.user
+
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            queryset = queryset.filter(public=True)
+
+        return queryset
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):

@@ -12,6 +12,11 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('name', )
 
+class BookableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookable
+        fields = ('id', 'id_str', 'name', 'description', 'forward_limit_days', 'length_limit_hours')
+
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     booking_group = GroupSerializer(read_only=True)
