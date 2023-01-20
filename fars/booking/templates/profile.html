@@ -21,7 +21,7 @@
               {% trans "Booking of:" %}
           </div>
           <div class="col-4">
-              {{ b.bookable }}
+            <a href="/booking/{{b.bookable.id_str}}">{{ b.bookable.name }}</a>
           </div>
         </div>
         <div class="row">
@@ -61,7 +61,7 @@
               {% trans "Booking of:" %}
           </div>
           <div class="col-4">
-              {{ b.bookable }}
+            <a href="/booking/{{b.bookable.id_str}}">{{ b.bookable.name }}</a>
           </div>
         </div>
         <div class="row">
