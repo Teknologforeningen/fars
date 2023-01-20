@@ -39,12 +39,16 @@ class ProfileView(View):
         stats = {}
         context['statistics'] = stats
 
+        stats[_('Bookings')] = all_bookings_by_user.count()
+        stats[_('Bookables used')] = f'{all_bookings_by_user.values("bookable").distinct().count()}/{Bookable.objects.count()}'
+
         starts = [x.start for x in all_bookings_by_user]
         ends = [x.end for x in all_bookings_by_user]
         timebooked = timedelta(
             seconds=sum([(y-x).total_seconds() for x, y in zip(starts, ends)])
         )
-        stats[_('Total time booked')] = timebooked
+        timebooked_hours, reminder = divmod(timebooked.seconds, 3600)
+        stats[_('Total time booked')] = f'{timebooked_hours + 24*timebooked.days} hours {int(reminder/60)} minutes'
 
         future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
         ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
