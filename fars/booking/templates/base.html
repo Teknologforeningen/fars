@@ -25,6 +25,7 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
       <!-- TODO: Make navbar brand a block -->
+      <!-- BRAND -->
       {% if date %} <!-- Day view -->
         <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
       {% elif bookable %}<!-- Month view -->
@@ -32,11 +33,15 @@
       {% else %}<!-- Other -->
         <a href="{% url 'home' %}" class="navbar-brand">FARS</a>
       {% endif %}
+
+      <!-- If logged in, show buttons for profile and logout -->
       {% if user.is_authenticated %}
         <span class="nav-item">
-          <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{{user.get_full_name}}</a></span>
+          <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
           <a class="btn btn-outline-danger" id="toolbar-btn" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">{% trans "Logout" %}</a>
         </span>
+
+      <!-- If not logged in, show form for logging in -->
       {% else %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
