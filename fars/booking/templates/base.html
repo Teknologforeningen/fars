@@ -38,7 +38,7 @@
       {% if user.is_authenticated %}
         <span class="nav-item">
           <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
-          <a class="btn btn-outline-danger" id="toolbar-btn" href="{% url 'logout' %}?next={{ request.build_absolute_uri }}">{% trans "Logout" %}</a>
+          <a class="btn btn-outline-danger" id="toolbar-btn" href="{% url 'logout' %}">{% trans "Logout" %}</a>
         </span>
 
       <!-- If not logged in, show form for logging in -->
