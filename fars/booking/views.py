@@ -50,7 +50,7 @@ class ProfileView(View):
             seconds=sum([(y-x).total_seconds() for x, y in zip(starts, ends)])
         )
         timebooked_hours, reminder = divmod(timebooked.seconds, 3600)
-        stats[_('Total time booked')] = f'{timebooked_hours + 24*timebooked.days} hours {int(reminder/60)} minutes'
+        stats[_('Total time booked')] = _('{hours} hours {minutes} minutes').format(hours=timebooked_hours + 24*timebooked.days, minutes=int(reminder/60))
 
         future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
         ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
