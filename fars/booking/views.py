@@ -30,10 +30,12 @@ class HomeView(View):
 
 
 class ProfileView(View):
-
     template = 'profile.html'
 
     def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+
         all_bookings_by_user = Booking.objects.filter(user=request.user)
         context = {}
         stats = {}
