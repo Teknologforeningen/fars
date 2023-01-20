@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-20 15:18+0200\n"
+"POT-Creation-Date: 2023-01-20 15:22+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,27 +34,27 @@ msgstr "Gruppen har inte rätt att använda objektet"
 msgid "User has insufficient credits to use device"
 msgstr "Användaren har inte tillräckligt med krediter för att använda objektet"
 
-#: booking/forms.py:44 booking/templates/booking.html:52
+#: booking/forms.py:43 booking/templates/booking.html:52
 msgid "Private booking"
 msgstr "Privat bokning"
 
-#: booking/forms.py:75
+#: booking/forms.py:71
 msgid "You do not have permissions to book this bookable"
 msgstr "Du har inte rätt att boka detta bokningsobjekt"
 
-#: booking/forms.py:81
+#: booking/forms.py:77
 msgid "{} may not be booked more than {} days in advance"
 msgstr "{} kan inte bokas mer än {} dagar i förväg"
 
-#: booking/forms.py:89
+#: booking/forms.py:85
 msgid "{} may not be booked for longer than {} hours"
 msgstr "{} kan inte bokas för längre än {} timmar"
 
-#: booking/forms.py:95
+#: booking/forms.py:91
 msgid "Error: Requested booking is overlapping with the following bookings:"
 msgstr "Error: Den begärda bokningen överlappar följande bokningar:"
 
-#: booking/forms.py:120
+#: booking/forms.py:116
 msgid "Frequency of repetitions (in days)"
 msgstr "Repetitionsfrekvens (dagar)"
 
@@ -112,31 +112,31 @@ msgstr ""
 "Vid behov, ange en dörrkod med vilken dörren till humpsbadet kan öppnas "
 "under din bokning"
 
-#: booking/models.py:20
+#: booking/models.py:22
 msgid "Only alphanumeric characters are allowed."
 msgstr "Endast alfanumeriska tecken är tillåtna"
 
-#: booking/models.py:26
+#: booking/models.py:28
 msgid "Unique ID string used in the URL"
 msgstr "Unik ID som används i URLen"
 
-#: booking/models.py:33
+#: booking/models.py:35
 msgid "Hides the bookable in the home view"
 msgstr "Gömmer bokningsobjektet från home viewn"
 
-#: booking/models.py:36
+#: booking/models.py:38
 msgid "How far in the future bookings are allowed (zero means no limit)"
 msgstr "Hur långt in i framtiden bokningar tillåts (noll betyder obegränsat)"
 
-#: booking/models.py:39
+#: booking/models.py:41
 msgid "How long bookings are allowed to be (zero means no limit)"
 msgstr "Max tillåtna längd för bokningar (noll betyder obegränsat)"
 
-#: booking/models.py:43
+#: booking/models.py:45
 msgid "Groups that may be used to make group bookings for this bookable."
 msgstr "Grupper som tillåts göra gruppbokningar för detta bokningsobjekt"
 
-#: booking/models.py:47
+#: booking/models.py:49
 msgid ""
 "Bookings for this bookable are restricted to members of these groups. If no "
 "groups are defined, any authenticated user may book."
@@ -144,74 +144,74 @@ msgstr ""
 "Bokningar av detta bokningsobjekt begränsas till medlemmar av dessa grupper. "
 "Ifall inga grupper definierats får alla inloggade användare boka."
 
-#: booking/models.py:50
+#: booking/models.py:52
 msgid "Groups that have admin rights to this bookable."
 msgstr "Grupper med adminrättigheter till detta bokningsobjekt."
 
-#: booking/models.py:53
+#: booking/models.py:55
 msgid ""
 "BILL device ID if BILL check is needed. If empty no BILL check will be "
 "performed"
 msgstr ""
 "BILL objekt ID om kontroll emot BILL behövs. Ingen kontroll görs om tomt."
 
-#: booking/models.py:94
+#: booking/models.py:85
 msgid "Monday"
 msgstr "Måndag"
 
-#: booking/models.py:95
+#: booking/models.py:86
 msgid "Tuesday"
 msgstr "Tisdag"
 
-#: booking/models.py:96
+#: booking/models.py:87
 msgid "Wednesday"
 msgstr "Onsdag"
 
-#: booking/models.py:97
+#: booking/models.py:88
 msgid "Thursday"
 msgstr "Torsdag"
 
-#: booking/models.py:98
+#: booking/models.py:89
 msgid "Friday"
 msgstr "Fredag"
 
-#: booking/models.py:99
+#: booking/models.py:90
 msgid "Saturday"
 msgstr "Lördag"
 
-#: booking/models.py:100
+#: booking/models.py:91
 msgid "Sunday"
 msgstr "Söndag"
 
-#: booking/models.py:145
+#: booking/models.py:136
 msgid "start"
 msgstr "start"
 
-#: booking/models.py:146
+#: booking/models.py:137
 msgid "end"
 msgstr "slut"
 
-#: booking/models.py:147
+#: booking/models.py:138
 msgid "comment"
 msgstr "kommentar"
 
-#: booking/models.py:154
+#: booking/models.py:144
 msgid "Booking"
 msgstr "Bokning"
 
-#: booking/models.py:155 booking/views.py:45
+#: booking/models.py:145 booking/views.py:44
 msgid "Bookings"
 msgstr "Bokningar"
 
-#: booking/models.py:196
+#: booking/models.py:171
 msgid "Booking cannot end before it begins"
 msgstr "Bokningen kan inte sluta före den börjar"
 
-#: booking/models.py:209
+#: booking/models.py:184
 msgid "Booking end time is not according to the predefined booking timeslots."
 msgstr "Bokningens sluttid är inte överens med de fördefinierade tidsluckorna."
 
-#: booking/models.py:213
+#: booking/models.py:188
 msgid "Group booking is not allowed with the provided user and group"
 msgstr "Gruppbokning är inte tillåten med den angivna användaren och gruppen"
 
@@ -348,24 +348,24 @@ msgstr "Statistik"
 msgid "No data available"
 msgstr "Ingen data tillgänglig"
 
-#: booking/views.py:46
+#: booking/views.py:45
 msgid "Bookables used"
 msgstr "Använda bokningsobjekt"
 
-#: booking/views.py:54
+#: booking/views.py:53
 msgid "Total time booked"
 msgstr "Total tid bokad"
 
-#: booking/views.py:54
+#: booking/views.py:53
 #, python-brace-format
 msgid "{hours} hours {minutes} minutes"
 msgstr "{hours} timmar {minutes} minuter"
 
-#: booking/views.py:216
+#: booking/views.py:215
 msgid "Bookings in the past may not be unbooked"
 msgstr "Bokningar i det förflutna kan inte avbokas"
 
-#: booking/views.py:220
+#: booking/views.py:219
 msgid "Only the user or group that made the booking may unbook it"
 msgstr "Endast användaren som skapade bokningen kan avboka den"
 
