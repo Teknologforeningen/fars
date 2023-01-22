@@ -131,28 +131,27 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(request.POST, instance=booking)
         self.context['form'] = form
 
-        if form.is_valid():
-            booking = form.instance
-            booking.metadata = json.dumps(form.get_cleaned_metadata())
-
-            if request.POST.get('repeat') and _is_admin(request.user, booking.bookable):
-                repeatdata = {
-                    'frequency': request.POST.get('frequency'),
-                    'repeat_until': request.POST.get('repeat_until')
-                }
-                repeat_form = RepeatingBookingForm(repeatdata)
-                if repeat_form.is_valid():
-                    # Creates repeating bookings as specified, adding all created bookings to group
-                    skipped_bookings = repeat_form.save_repeating_booking_group(booking)
-                    return JsonResponse({'skipped_bookings': skipped_bookings})
-                else:
-                    return render(request, self.template, context=self.context, status=400)
-
-            else:
-                form.save()
-        else:
+        if not form.is_valid():
             return render(request, self.template, context=self.context, status=400)
 
+        booking = form.instance
+        booking.metadata = json.dumps(form.get_cleaned_metadata())
+
+        if request.POST.get('repeat') and _is_admin(request.user, booking.bookable):
+            repeatdata = {
+                'frequency': request.POST.get('frequency'),
+                'repeat_until': request.POST.get('repeat_until')
+            }
+            repeat_form = RepeatingBookingForm(repeatdata)
+            if not repeat_form.is_valid():
+                return render(request, self.template, context=self.context, status=400)
+
+            # Creates repeating bookings as specified, adding all created bookings to group
+            # No need to save this form on its own
+            skipped_bookings = repeat_form.save_repeating_booking_group(booking)
+            return JsonResponse({'skipped_bookings': skipped_bookings})
+
+        form.save()
         booking.bookable.notify_external_services()
 
         return HttpResponse()
