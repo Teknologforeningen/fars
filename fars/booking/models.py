@@ -5,7 +5,8 @@ from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
-from datetime import timedelta
+from datetime import timedelta, datetime
+import time
 
 import logging
 
@@ -63,6 +64,44 @@ class Bookable(models.Model):
         for service in ExternalService.objects.filter(bookable__id=self.id):
             service.notify(session)
 
+    def get_time_slots(self):
+        return Timeslot.objects.filter(bookable=self)
+
+
+def convert_time_to_closest_datetime(timestamp, datetimestamp):
+    # timestamp = time struct https://docs.python.org/3/library/time.html#time.struct_time
+    # datetimestamp = datetime object https://docs.python.org/3/library/datetime.html#datetime-objects
+    # This function returns a datetime object of the timeslot string regarding the received datetime object (dt)
+    # The converted datetime object has the same weekday, hour and minute as the time struct
+    return (datetimestamp + timedelta(timestamp.tm_wday - datetimestamp.weekday())).replace(hour=timestamp.tm_hour, minute=timestamp.tm_min)
+
+class Timeslot(models.Model):
+
+    def __str__(self):
+        return "{} {} - {} {}".format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
+
+    class Weekdays(models.TextChoices):
+        # ISO 8601
+        MON = '1', _('Monday')
+        TUE = '2', _('Tuesday')
+        WED = '3', _('Wednesday')
+        THU = '4', _('Thursday')
+        FRI = '5', _('Friday')
+        SAT = '6', _('Saturday')
+        SUN = '7', _('Sunday')
+        
+    bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
+    start_time = models.TimeField(auto_now=False, auto_now_add=False)
+    start_weekday = models.CharField(
+        max_length=1,
+        choices=Weekdays.choices,
+    )
+    end_time = models.TimeField(auto_now=False, auto_now_add=False)
+    end_weekday = models.CharField(
+        max_length=1,
+        choices=Weekdays.choices,
+    )
+
 
 class ExternalService(models.Model):
     name = models.CharField(max_length=64, null=False, blank=False)
@@ -78,11 +117,6 @@ class ExternalService(models.Model):
         except Exception as e:
             # Avoid crashes from this
             logger.error('Error notifying external service "{}" with URL {}: {}'.format(self.name, self.callback_url, str(e)))
-
-# class TimeSlot(models.Model):
-#     start = models.CharField(null=False)
-#     end = models.CharField(max_length=8, null=False)
-#     bookable = models.ForeignKey(max_length=8, Bookable, on_delete=models.CASCADE)
 
 
 class RepeatedBookingGroup(models.Model):
@@ -135,6 +169,19 @@ class Booking(models.Model):
         # Check that end is not earlier than start
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
+
+        # Check that the booking's start and end times match a defined booking slot if bookable has slots
+        timeslots = self.bookable.get_time_slots()
+        if timeslots.count() > 0:
+            timeslots = timeslots.filter(end_weekday=self.end.isoweekday(), end_time=self.end.time())
+            valid_slot_found = False
+            for slot in timeslots:
+                # Start time can be later than or equal to slot start time, which accounts for booking slots that have already started.
+                if self.start.time() >= slot.start_time:
+                    valid_slot_found = True
+                    break
+            if not valid_slot_found:
+                raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
 
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():

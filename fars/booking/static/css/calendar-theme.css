@@ -14,10 +14,10 @@ td.fc-day {
 td.fc-day:hover {
   background: #EEEEEE;
 }
-div.fc-slats td:not(.fc-time) {
+.fars-freeselect div.fc-slats td:not(.fc-time) {
   cursor: pointer;
 }
-div.fc-slats td:not(.fc-time):hover {
+.fars-freeselect div.fc-slats td:not(.fc-time):hover {
   background: #EEEEEE;
 }
 div.fc-month-view div.fc-content-skeleton {
@@ -255,6 +255,20 @@ thead th.fc-last {
   border-color: rgba(48, 104, 193, 0.5);
 }
 
+.fc-event.fars-timeslot {
+  background-color: #91e87b;
+  border-color: #40852e;
+  opacity: 0.6;
+}
+
+.fc-event.fars-timeslot * {
+  color: black;
+}
+
+.fc-event.fars-timeslot:hover {
+  opacity: 1;
+}
+
 a.fc-event, .fc-event-draggable {
   cursor: pointer; }
 
@@ -389,41 +403,3 @@ table.fc-border-separate {
 
 .fc-event-vert .ui-resizable-s {
   bottom: 0 !important; }
-
-.fc-toolbar .btn {
-  border-style: solid;
-  border-color: #cccccc #bbbbbb #aaaaaa;
-  background: #f3f3f3;
-  color: black;
-}
-
-.fc-toolbar .btn:hover {
-  border-color: #999999; }
-  .fc-toolbar .btn:hover .fc-button-inner {
-    border-color: #999999; }
-
-.fc-toolbar .btn:down {
-  border-color: #555555;
-  background: #777777; }
-  .fc-toolbar .btn:down .fc-button-inner {
-    border-color: #555555;
-    background: #777777; }
-
-.fc-toolbar .btn:active {
-  border-color: #555555;
-  background: #777777;
-  color: white; }
-  .fc-toolbar .btn:active .fc-button-inner {
-    border-color: #555555;
-    background: #777777;
-    color: white; }
-
-.fc-toolbar .btn:disabled {
-  color: #999999;
-  border-color: #dddddd;
-  cursor: default;
-}
-
-.fc-toolbar h2 {
-  line-height: 1.5;
-}

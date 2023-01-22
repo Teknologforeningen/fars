@@ -25,3 +25,8 @@ class NoMetaBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         exclude = ('metadata', )
+
+class TimeslotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Timeslot
+        fields = ('bookable', 'start_time', 'start_weekday', 'end_time', 'end_weekday', )
