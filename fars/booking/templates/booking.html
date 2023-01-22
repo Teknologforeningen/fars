@@ -1,7 +1,7 @@
 {% extends "modalcontent.html" %}
 {% load i18n %}
 {% block title %}
-{% blocktrans %} Unbooking {{ booking.bookable }} {% endblocktrans %}
+{% blocktrans with b=booking.bookable %} Booking of {{ b }} {% endblocktrans %}
 {% endblock %}
 {% block body %}
 <div class="container">
