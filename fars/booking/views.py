@@ -30,21 +30,27 @@ class HomeView(View):
 
 
 class ProfileView(View):
-
     template = 'profile.html'
 
     def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+
         all_bookings_by_user = Booking.objects.filter(user=request.user)
         context = {}
         stats = {}
         context['statistics'] = stats
+
+        stats[_('Bookings')] = all_bookings_by_user.count()
+        stats[_('Bookables used')] = f'{all_bookings_by_user.values("bookable").distinct().count()}/{Bookable.objects.count()}'
 
         starts = [x.start for x in all_bookings_by_user]
         ends = [x.end for x in all_bookings_by_user]
         timebooked = timedelta(
             seconds=sum([(y-x).total_seconds() for x, y in zip(starts, ends)])
         )
-        stats[_('Total time booked')] = timebooked
+        timebooked_hours, reminder = divmod(timebooked.seconds, 3600)
+        stats[_('Total time booked')] = _('{hours} hours {minutes} minutes').format(hours=timebooked_hours + 24*timebooked.days, minutes=int(reminder/60))
 
         future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
         ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
