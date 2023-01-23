@@ -10,14 +10,16 @@ import datetime
 
 
 class BookingFilter(filters.FilterSet):
-    bookable = filters.CharFilter(field_name='bookable__id_str')
+    # Custom filter fields
     before = filters.IsoDateTimeFilter(field_name='start', lookup_expr='lte')
     after = filters.IsoDateTimeFilter(field_name='end', lookup_expr='gte')
+    # Fields where the defualt filter type is overridden
+    username = filters.CharFilter(field_name='user__username')
     booking_group = filters.CharFilter(field_name='booking_group')
 
     class Meta:
         model = Booking
-        fields = ['bookable', 'before', 'after', 'booking_group']
+        fields = ['bookable', 'before', 'after', 'username', 'booking_group']
 
 class BookingsPagination(pagination.LimitOffsetPagination):
     default_limit = 5000
