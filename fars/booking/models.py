@@ -54,6 +54,17 @@ class Bookable(models.Model):
     # BILL device ID if BILL check is needed. If null no BILL check will be performed
     bill_device_id = models.PositiveIntegerField(null=True, blank=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
 
+    google_calendar_id = models.CharField(max_length=64, blank=True, default='', help_text=_('If provided, bookings will be added to the Google Calendar with this ID. Make sure that the Google service account used for FARS has access to this calendar.'))
+
+    google_calendar_event_location = models.CharField(max_length=128, blank=True, default='', help_text=_('The location to use for events created for the Google Calendar.'))
+
+    def __init__(self, *args, **kwargs):
+        super(Bookable, self).__init__(*args, **kwargs)
+        self.gcal = None
+        if self.google_calendar_id:
+            from .gcal import GoogleCalendar
+            self.gcal = GoogleCalendar(self.google_calendar_id)
+
     def __str__(self):
         return self.name
 
@@ -139,6 +150,8 @@ class Booking(models.Model):
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, blank=True, null=True, on_delete=models.CASCADE, default=None)
     metadata = models.CharField(max_length=256, blank=True, null=True, default=None)
     booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
+    google_calendar_event_id = models.CharField(max_length=64, blank=True, default='')
+    emails = []
 
     class Meta:
         verbose_name = _("Booking")
