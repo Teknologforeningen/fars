@@ -27,8 +27,8 @@ function createCalendar(calendar, date, bookable, locale, user, timezone, timesl
     aspectRatio: 2,
     // header
     header: {
-      left: '',
-      center: 'title',
+      left: 'today prev,next title',
+      center: '',
       right: ''
     },
     views: {},
@@ -42,7 +42,6 @@ function createCalendar(calendar, date, bookable, locale, user, timezone, timesl
     defaultView: 'agendaDay',
     defaultDate: date,
     allDaySlot: false,
-    themeSystem: 'bootstrap4',
     agendaEventMinHeight: 20,
     scrollTime: '08:00:00',
     businessHours: getBusinesshours(currentTime, date),

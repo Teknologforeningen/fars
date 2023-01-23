@@ -1,8 +1,8 @@
 from rest_framework import viewsets, generics, pagination
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
+from django.db.models import Q
 from booking.models import *
 from api.serializers import *
 from api.renderers import *
@@ -43,9 +43,37 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Booking.objects.all()
-        if not self.request.user.is_authenticated:
+        user = self.request.user
+
+        # Only show bookings for public bookables if not logged in
+        if not user.is_authenticated:
             queryset = queryset.filter(bookable__public=True)
-        
+        # Only show bookings on unhidden bookables to superusers and admins of the bookable
+        if not user.is_superuser:
+            q = Q(bookable__hidden=False)
+            for group in user.groups.all():
+                q |= Q(bookable__admin_groups__contains=group)
+            queryset = queryset.filter(q)
+
+        return queryset
+
+class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
+    serializer_class = BookableSerializer
+
+    def get_queryset(self):
+        queryset = Bookable.objects.all()
+        user = self.request.user
+
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            queryset = queryset.filter(public=True)
+        # Only show unhidden bookables to superusers and admins of the bookable
+        if not user.is_superuser:
+            q = Q(hidden=False)
+            for group in user.groups.all():
+                q |= Q(admin_groups__contains=group)
+            queryset = queryset.filter(q)
+
         return queryset
 
 # This class provides the view used by GeneriKey to get the list of bookings they need

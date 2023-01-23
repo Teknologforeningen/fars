@@ -18,10 +18,10 @@
       <div class="col-10 offset-1 profile-event text-center">
         <div class="row">
           <div class="col-6 font-weight-bold">
-              {% trans "Booking of:" %}
+              {% trans "Bookable:" %}
           </div>
           <div class="col-4">
-              {{ b.bookable }}
+            <a href="/booking/{{b.bookable.id_str}}">{{ b.bookable.name }}</a>
           </div>
         </div>
         <div class="row">
@@ -58,10 +58,10 @@
       <div class="col-10 offset-1 profile-event text-center">
         <div class="row">
           <div class="col-6 font-weight-bold">
-              {% trans "Booking of:" %}
+              {% trans "Bookable:" %}
           </div>
           <div class="col-4">
-              {{ b.bookable }}
+            <a href="/booking/{{b.bookable.id_str}}">{{ b.bookable.name }}</a>
           </div>
         </div>
         <div class="row">
