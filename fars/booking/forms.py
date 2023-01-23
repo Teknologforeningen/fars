@@ -123,17 +123,19 @@ class RepeatingBookingForm(forms.Form):
         group.save()
         booking.repeatgroup = group
         skipped_bookings = []
+        frequency = data.get('frequency')
+        repeat_until = data.get('repeat_until')
 
         # Copy booking for every repetition
-        while(booking.start.date() <= data.get('repeat_until')):
+        while(booking.start.date() <= repeat_until):
             overlapping = booking.get_overlapping_bookings()
             if overlapping:
                 skipped_bookings.append(str(booking))
             else:
                 booking.save()
             booking.pk = None
-            booking.start += timedelta(days=data.get('frequency'))
-            booking.end += timedelta(days=data.get('frequency'))
-            
+            booking.start += timedelta(days=frequency)
+            booking.end += timedelta(days=frequency)
+
         return skipped_bookings
 
