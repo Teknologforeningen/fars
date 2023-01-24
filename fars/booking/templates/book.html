@@ -30,6 +30,8 @@
     </div>
     {% bootstrap_field form.booking_group %}
     {% bootstrap_field form.comment layout="horizontal" %}
+
+    <!-- Metadata fields -->
     {% for metadata_field in form.metadata_fields %}
       {% bootstrap_field metadata_field %}
     {% endfor %}
@@ -39,6 +41,8 @@
       {% bootstrap_field form.emails %}
     {% endif %}
   </form>
+
+  <!-- Repeated bookings -->
   {% if repeatform and user|is_bookableadmin:bookable %}
     <div id="toggle-wrapper">
       <button id="repeat-toggle" class="btn btn-info" type="button" data-toggle="collapse" data-target="#repeat-form-wrapper" aria-expanded="false" aria-controls="repeat-form-wrapper">{% trans 'Make event repeating' %}</button>
@@ -55,6 +59,7 @@
           <div class="col-md-6">
             {% bootstrap_field repeatform.repeat_until %}
           </div>
+        </div>
       </form>
     </div>
   {% endif %}

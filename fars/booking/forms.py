@@ -1,12 +1,11 @@
 from django import forms
-from booking.models import Booking, RepeatedBookingGroup, Bookable
+from booking.models import Booking, RepeatedBookingGroup
 from django.contrib.auth.forms import AuthenticationForm
-from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
+from django.forms.widgets import PasswordInput, TextInput, DateInput
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from datetime import datetime, timedelta, date
 from django.utils.translation import gettext as _
-from django.db import transaction
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
@@ -31,7 +30,7 @@ class DateTimeField(forms.fields.MultiValueField):
         super(DateTimeField, self).__init__(list_fields, *args, **kwargs)
 
     def compress(self, values):
-        return datetime.strptime("{}T{}".format(*values), "%Y-%m-%dT%H:%M:%S")
+        return datetime.strptime('{}T{}'.format(*values), '%Y-%m-%dT%H:%M:%S')
 
 
 class BookingForm(forms.ModelForm):
@@ -82,22 +81,21 @@ class BookingForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        bookable = cleaned_data.get("bookable")
-        start = cleaned_data.get("start")
-        end = cleaned_data.get("end")
+        bookable = cleaned_data.get('bookable')
+        start = cleaned_data.get('start')
+        end = cleaned_data.get('end')
         user = cleaned_data.get('user')
-        group = cleaned_data.get('booking_group')
 
         # Check that user has permissions to book bookable
         restriction_groups = bookable.booking_restriction_groups.all()
         if not user.is_superuser and restriction_groups and not user.groups.filter(id__in=restriction_groups).exists():
-            raise forms.ValidationError(_("You do not have permissions to book this bookable"))
+            raise forms.ValidationError(_('You do not have permissions to book this bookable'))
 
         if bookable and start and end:
             # Check that booking does not violate bookable forward limit
             if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
                 raise forms.ValidationError(
-                    _("{} may not be booked more than {} days in advance").format(bookable.name, bookable.forward_limit_days)
+                    _('{} may not be booked more than {} days in advance').format(bookable.name, bookable.forward_limit_days)
                 )
 
             # Check that booking does not violate bookable length limit
@@ -105,13 +103,13 @@ class BookingForm(forms.ModelForm):
             booking_length_hours = booking_length.days * 24 + booking_length.seconds / 3600
             if bookable.length_limit_hours > 0 and booking_length_hours > bookable.length_limit_hours:
                 raise forms.ValidationError(
-                    _("{} may not be booked for longer than {} hours").format(bookable.name, bookable.length_limit_hours)
+                    _('{} may not be booked for longer than {} hours').format(bookable.name, bookable.length_limit_hours)
                 )
 
             # Check that booking does not overlap with previous bookings
             overlapping = Booking.objects.filter(bookable=bookable, start__lt=end, end__gt=start)
             if overlapping:
-                warning = _("Error: Requested booking is overlapping with the following bookings:")
+                warning = _('Error: Requested booking is overlapping with the following bookings:')
                 errors = [forms.ValidationError(warning)]
                 for booking in overlapping:
                     errors.append(forms.ValidationError('• ' + str(booking)))
@@ -166,4 +164,3 @@ class RepeatingBookingForm(forms.Form):
             booking.end += timedelta(days=frequency)
 
         return skipped_bookings
-

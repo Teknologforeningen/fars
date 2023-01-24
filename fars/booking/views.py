@@ -1,20 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
-from django.http import HttpResponse, JsonResponse, Http404
-from django.contrib.auth.models import User
-from booking.models import Booking, Bookable, Timeslot
-from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
+from django.http import HttpResponse, JsonResponse
+from booking.models import Booking, Bookable
+from booking.forms import RepeatingBookingForm
 from booking.metadata_forms import get_form_class
-from datetime import datetime, timedelta
-import time
-import dateutil.parser
 from django.utils.translation import gettext as _
 from django.db import transaction
-from django.forms import ValidationError
 from django.views import View
-import pytz
 from fars.settings import TIME_ZONE
-from django.contrib.auth import authenticate
-import json
+from datetime import datetime, timedelta
+import time, pytz, json, dateutil.parser
 
 class HomeView(View):
 
@@ -157,6 +151,7 @@ class BookView(View):
             # Creates repeating bookings as specified, adding all created bookings to group
             # No need to save this form on its own
             skipped_bookings = repeat_form.save_repeating_booking_group(booking)
+            # XXX: Button says "Boka" (probably "Submit" in English), which is wrong
             return JsonResponse({'skipped_bookings': skipped_bookings})
 
         form.save()
@@ -250,11 +245,11 @@ class BookingView(View):
 
     def _is_unbookable(self, user, booking):
         if booking.end < datetime.now(booking.start.tzinfo):
-            return False, _("Bookings in the past may not be unbooked")
+            return False, _('Bookings in the past may not be unbooked')
         if _is_admin(user, booking.bookable):
             return True, ''
         if user != booking.user and booking.booking_group not in user.groups.all():
-            return False, _("Only the user or group that made the booking may unbook it")
+            return False, _('Only the user or group that made the booking may unbook it')
         return True, ''
 
 # Returns whether user is admin for given bookable

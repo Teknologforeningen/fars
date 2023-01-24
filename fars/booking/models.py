@@ -2,13 +2,9 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from datetime import timedelta, datetime
-import time
-
-import logging
+import time, logging
 
 # These are the choices used in the bookable model.
 # Adding your metadata form here will make it available for bookables.
@@ -89,7 +85,7 @@ def convert_time_to_closest_datetime(timestamp, datetimestamp):
 class Timeslot(models.Model):
 
     def __str__(self):
-        return "{} {} - {} {}".format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
+        return '{} {} - {} {}'.format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
 
     class Weekdays(models.TextChoices):
         # ISO 8601
@@ -144,9 +140,9 @@ class RepeatedBookingGroup(models.Model):
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start = models.DateTimeField(_("start"))
-    end = models.DateTimeField(_("end"))
-    comment = models.CharField(_("comment"), max_length=128)
+    start = models.DateTimeField(_('start'))
+    end = models.DateTimeField(_('end'))
+    comment = models.CharField(_('comment'), max_length=128)
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, blank=True, null=True, on_delete=models.CASCADE, default=None)
     metadata = models.CharField(max_length=256, blank=True, null=True, default=None)
     booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
@@ -157,12 +153,12 @@ class Booking(models.Model):
     recurrence = None
 
     class Meta:
-        verbose_name = _("Booking")
-        verbose_name_plural = _("Bookings")
-        ordering = ["start"]
+        verbose_name = _('Booking')
+        verbose_name_plural = _('Bookings')
+        ordering = ['start']
 
     def __str__(self):
-        return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+        return '{}, {}'.format(self.comment, self.start.strftime('%Y-%m-%d %H:%M'))
 
     def get_booker_groups(self):
         allowed_groups = []
@@ -188,9 +184,9 @@ class Booking(models.Model):
         # XXX: How to get the event ID of the repeated events to the repeated bookings?
         if gcal and not is_repeated_booking:
             event = gcal.try_save_event(self)
-            self.google_calendar_event_id = event['id'] if event else ""
+            self.google_calendar_event_id = event['id'] if event else ''
         else:
-            self.google_calendar_event_id = ""
+            self.google_calendar_event_id = ''
 
         super(Booking, self).save(*args, **kwargs)
 
@@ -208,7 +204,7 @@ class Booking(models.Model):
     def clean(self):
         # Check that end is not earlier than start
         if self.end <= self.start:
-            raise ValidationError(_("Booking cannot end before it begins"))
+            raise ValidationError(_('Booking cannot end before it begins'))
 
         # Check that the booking's start and end times match a defined booking slot if bookable has slots
         timeslots = self.bookable.get_time_slots()
@@ -221,8 +217,8 @@ class Booking(models.Model):
                     valid_slot_found = True
                     break
             if not valid_slot_found:
-                raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
+                raise ValidationError(_('Booking end time is not according to the predefined booking timeslots.'))
 
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():
-            raise ValidationError(_("Group booking is not allowed with the provided user and group"))
+            raise ValidationError(_('Group booking is not allowed with the provided user and group'))

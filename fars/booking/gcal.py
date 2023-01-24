@@ -29,7 +29,7 @@ class GoogleCalendar:
         }
 
     def _create_event_description_footer(self, booking):
-        description = ""
+        description = ''
 
         name = booking.user.get_full_name() or booking.user.username
         description += f'<b>Booked by:</b> {name}'
@@ -38,7 +38,7 @@ class GoogleCalendar:
         if group:
             description += f'\n<b>Group:</b> {group}'
 
-        base_url = env("FARS_BASE_URL", "")
+        base_url = env('FARS_BASE_URL', '')
         if base_url:
             # XXX: Booking ID not available if it has not been inserted yet. Not that the page showing an individual booking is meant to be shown on its own anyway...
             if booking.id:
@@ -104,9 +104,9 @@ class GoogleCalendar:
         if 'recurrence' not in body and booking.recurrence:
             print(booking.recurrence)
             f = booking.recurrence['frequency']
-            date_str = booking.recurrence['repeat_until']
+            date_str = booking.recurrence['repeat_until'].replace('-', '')
             body['recurrence'] = [
-                f'RRULE:FREQ=DAILY;INTERVAL={f};UNTIL={date_str.replace("-", "")}T000000Z',
+                f'RRULE:FREQ=DAILY;INTERVAL={f};UNTIL={date_str}T000000Z',
             ]
 
         return body
