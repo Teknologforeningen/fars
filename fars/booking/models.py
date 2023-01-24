@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext as _
-from datetime import timedelta, datetime
+from datetime import timedelta
 import time, logging
 
 # These are the choices used in the bookable model.

@@ -6,9 +6,9 @@ from booking.metadata_forms import get_form_class
 from django.utils.translation import gettext as _
 from django.db import transaction
 from django.views import View
-from fars.settings import TIME_ZONE
 from datetime import datetime, timedelta
-import time, pytz, json, dateutil.parser
+import time, json, dateutil.parser
+from django.utils import timezone
 
 class HomeView(View):
 
@@ -46,8 +46,8 @@ class ProfileView(View):
         timebooked_hours, reminder = divmod(timebooked.seconds, 3600)
         stats[_('Total time booked')] = _('{hours} hours {minutes} minutes').format(hours=timebooked_hours + 24*timebooked.days, minutes=int(reminder/60))
 
-        future_bookings = all_bookings_by_user.filter(start__gt=datetime.now())
-        ongoing_bookings = all_bookings_by_user.filter(start__lt=datetime.now(), end__gt=datetime.now())
+        future_bookings = all_bookings_by_user.filter(start__gt=timezone.now())
+        ongoing_bookings = all_bookings_by_user.filter(start__lt=timezone.now(), end__gt=timezone.now())
         context['future_bookings'] = future_bookings
         context['ongoing_bookings'] = ongoing_bookings
         return render(request, self.template, context)
@@ -77,7 +77,7 @@ class DayView(View):
         if not bookable_obj.public and not request.user.is_authenticated:
             return redirect('{}?next={}'.format(reverse('login'), request.path_info))
         context = {
-            'date': datetime(year, month, day, 0, 0, 0, 0, pytz.timezone(TIME_ZONE)).isoformat(),
+            'date': timezone.make_aware(datetime(year, month, day, 0, 0, 0, 0)).isoformat(),
             'bookable': bookable_obj,
             'user': request.user
         }
@@ -102,7 +102,7 @@ class BookView(View):
 
     def get(self, request, bookable):
         booking = Booking()
-        booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else datetime.now()
+        booking.start = dateutil.parser.parse(request.GET['st']) if 'st' in request.GET else timezone.now()
         # Remove the seconds and microseconds if they are present
         booking.start = booking.start.replace(second=0, microsecond=0)
         booking.end = dateutil.parser.parse(request.GET['et']) if 'et' in request.GET else booking.start + timedelta(hours=1)
@@ -183,7 +183,7 @@ class BookingView(View):
         booking = self.context['booking']
         is_admin = _is_admin(request.user, booking.bookable)
         if is_admin or self.context['unbookable']:
-            now = datetime.now(booking.start.tzinfo)
+            now = timezone.now()
             removal_level = int(request.GET.get('repeat') or 0)
             if is_admin and booking.repeatgroup and removal_level >= 1:
                 # Removal of a repeating booking. There are 3 different levels of removal
@@ -244,7 +244,7 @@ class BookingView(View):
 
 
     def _is_unbookable(self, user, booking):
-        if booking.end < datetime.now(booking.start.tzinfo):
+        if booking.end < timezone.now():
             return False, _('Bookings in the past may not be unbooked')
         if _is_admin(user, booking.bookable):
             return True, ''

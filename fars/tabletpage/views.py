@@ -1,10 +1,8 @@
 from django.shortcuts import render
 from django.views import View
 from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.utils import timezone
 from booking.models import *
-import pytz
-from fars.settings import TIME_ZONE
-from datetime import datetime
 
 
 class TabletView(View):
@@ -20,7 +18,7 @@ class TabletView(View):
         return super().dispatch(request, bookable)
 
     def get(self, request, bookable):
-        now = pytz.timezone(TIME_ZONE).localize(datetime.now())
+        now = timezone.now()
         booking = Booking()
         booking.bookable = self.context['bookable']
         # self.context['bookform'] = BookingForm(instance=booking)

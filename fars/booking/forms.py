@@ -5,6 +5,7 @@ from django.forms.widgets import PasswordInput, TextInput, DateInput
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from datetime import datetime, timedelta, date
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 
@@ -64,9 +65,12 @@ class BookingForm(forms.ModelForm):
         }
 
     def clean_start(self):
-        start = self.cleaned_data['start']
+        start = timezone.make_aware(self.cleaned_data['start'])
         # If start is in the past, make it "now"
-        return datetime.now() if start < datetime.now() else start
+        return timezone.now() if start < timezone.now() else start
+
+    def clean_end(self):
+        return timezone.make_aware(self.cleaned_data['end'])
 
     def clean_emails(self):
         # Allow for various separators
@@ -93,7 +97,7 @@ class BookingForm(forms.ModelForm):
 
         if bookable and start and end:
             # Check that booking does not violate bookable forward limit
-            if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
+            if bookable.forward_limit_days > 0 and timezone.now() + timedelta(days=bookable.forward_limit_days) < end:
                 raise forms.ValidationError(
                     _('{} may not be booked more than {} days in advance').format(bookable.name, bookable.forward_limit_days)
                 )
