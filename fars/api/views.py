@@ -49,11 +49,14 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
         # Only show bookings for public bookables if not logged in
         if not user.is_authenticated:
             queryset = queryset.filter(bookable__public=True)
-        # Only show bookings on unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
+
+        # For ordinary users...
+        elif not user.is_superuser:
+            # ... show only bookings on unhidden bookables...
             q = Q(bookable__hidden=False)
-            for group in user.groups.all():
-                q |= Q(bookable__admin_groups__contains=group)
+            # ... and bookings on hidden bookables if the user is part of an admin group
+            q |= Q(bookable__admin_groups__in=user.groups.all())
+
             queryset = queryset.filter(q)
 
         return queryset
@@ -68,11 +71,14 @@ class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
         # Only show public bookables if not logged in
         if not user.is_authenticated:
             queryset = queryset.filter(public=True)
-        # Only show unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
+
+        # For ordinary users...
+        elif not user.is_superuser:
+            # ... show only unhidden bookables...
             q = Q(hidden=False)
-            for group in user.groups.all():
-                q |= Q(admin_groups__contains=group)
+            # ... and hidden bookables if the user is part of an admin group
+            q |= Q(admin_groups__in=user.groups.all())
+
             queryset = queryset.filter(q)
 
         return queryset
