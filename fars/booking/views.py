@@ -218,10 +218,32 @@ class BookingView(View):
         user = self.context['user']
         gcal = booking.bookable.gcal
 
-        # Show Google Calendar link only to the creator of the booking
-        if gcal and _is_creator(user, booking):
-            self.context['gevent_show'] = True
-            self.context['gevent_link'] = booking.get_gevent_link()
+        if not gcal or not _is_creator(user, booking):
+            return render(request, self.template, self.context)
+
+        self.context['gevent_show_row'] = True
+
+        # 0 = Booking has no event
+        # 1 = Event status unknown, need to fetch to find out
+        # 2 = Event exists
+        # 3 = Event is cancelled
+        # 4 = Event not found (removed or other error)
+        self.context['gevent_status'] = 1 if booking.google_calendar_event_id else 0
+        self.context['gevent_link'] = None
+
+        fetch_event = request.GET.get('gevent_fetch') != None
+        if fetch_event:
+            event = gcal.try_get_event(booking)
+            if not event:
+                # Could also choose to remove the event id from the Booking instance here
+                # But failing to fetch the event does not necessarily mean that the event does not exits...
+                self.context['gevent_status'] = 4
+            elif event['status'] == 'cancelled':
+                #...and cancelled/deleted events can still be restored for 30 days
+                self.context['gevent_status'] = 3
+            else:
+                self.context['gevent_status'] = 2
+                self.context['gevent_link'] = event['htmlLink']
 
         return render(request, self.template, self.context)
 

@@ -181,17 +181,6 @@ class Booking(models.Model):
             )
         return list(overlapping)
 
-    def get_gevent_link(self):
-        if not self.bookable.gcal or not self.google_calendar_event_id:
-            return None
-        event = self.bookable.gcal.try_get_event(self)
-        if not event or event['status'] == 'cancelled':
-            # Could also choose to remove the event id from the Booking instance here...
-            # But failing to fetch the event does not necessarily mean that the event does not exits
-            # And cancelled/deleted events can still be restored for 30 days
-            return None
-        return event['htmlLink']
-
     # Override save() method to be able to create Google Calendar events
     def save(self, is_repeated_booking=False, *args, **kwargs):
         gcal = self.bookable.gcal

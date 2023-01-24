@@ -51,24 +51,45 @@
           {% else %}
             {% trans "Private booking" %}
           {% endif %}
-          
         </div>
     </div>
 
-    <!-- Google Calendar-->
-    {% if gevent_show %}
+    <!-- Google Calendar event -->
+    {% if gevent_show_row %}
         <div class="row">
             <div class="col-3 font-weight-bold">
                 {% trans "GCal event:" %}
             </div>
             <div class="col-9">
-            {% if gevent_link %}
+            {% if gevent_link == 0 %}
+                {% trans "This booking has no event" %}
+                <!-- XXX: Could have a button that creates an event -->
+            {% elif gevent_status == 1 %}
+                <button id="geventbutton_fetch" class="btn btn-success m-0 px-1 py-0">Show link</button>
+            {% elif gevent_status == 2 %}
                 <a href={{gevent_link}}>{% trans "Event link" %}</a>
-            {% else %}
-                {% trans "No event found" %}
+                <!-- XXX: Could have a button that removes the event -->
+            {% elif gevent_status == 3 %}
+                {% trans "Event cancelled" %}
+                <!-- XXX: Could have a button that un-cancels the event -->
+            {% elif gevent_status == 4 %}
+                {% trans "Event no longer exists" %}
+                <!-- XXX: Could have a button that re-creates the event -->
             {% endif %}
             </div>
         </div>
+        <script>
+            $('#geventbutton_fetch').click(function(event) {
+                // Fetch the Google Calendar event by providing a query parameters, and then update the modal view
+                $.ajax({
+                url: '/booking/booking/{{booking.id}}?gevent_fetch=',
+                type: 'GET',
+                success: function(data) {
+                    $('#modalBox').find('.modal-content').html(data);
+                }
+                })
+            });
+        </script>
     {% endif %}
 </div>
 {% endblock %}
