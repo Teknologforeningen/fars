@@ -137,11 +137,19 @@ class BookView(View):
         booking = form.instance
         booking.metadata = json.dumps(form.get_cleaned_metadata())
 
+        # Add the emails from the form to the Booking instance so that the pre_save signal can get them
+        booking.emails = form.get_cleaned_emails()
+
+        # Handle recurring events
         if request.POST.get('repeat') and _is_admin(request.user, booking.bookable):
             repeatdata = {
                 'frequency': request.POST.get('frequency'),
                 'repeat_until': request.POST.get('repeat_until')
             }
+
+            # Add recurrance data to model instance so that is can be used when creating Google Calendar events
+            booking.recurrence = repeatdata
+
             repeat_form = RepeatingBookingForm(repeatdata)
             if not repeat_form.is_valid():
                 return render(request, self.template, context=self.context, status=400)
@@ -206,6 +214,15 @@ class BookingView(View):
 
 
     def get(self, request, booking_id):
+        booking = self.context['booking']
+        user = self.context['user']
+        gcal = booking.bookable.gcal
+
+        # Show Google Calendar link only to the creator of the booking
+        if gcal and _is_creator(user, booking):
+            self.context['gevent_show'] = True
+            self.context['gevent_link'] = booking.get_gevent_link()
+
         return render(request, self.template, self.context)
 
 
@@ -221,3 +238,7 @@ class BookingView(View):
 # Returns whether user is admin for given bookable
 def _is_admin(user, bookable):
     return user.is_superuser or user.groups.filter(id__in=bookable.admin_groups.all()).exists()
+
+# Returns whether a user is the creator of a booking
+def _is_creator(user, booking):
+    return user.is_superuser or booking.user.id == user.id

@@ -34,6 +34,10 @@
       {% bootstrap_field metadata_field %}
     {% endfor %}
 
+    <!-- Google Calendar fields -->
+    {% if form.emails %}
+      {% bootstrap_field form.emails %}
+    {% endif %}
   </form>
   {% if repeatform and user|is_bookableadmin:bookable %}
     <div id="toggle-wrapper">

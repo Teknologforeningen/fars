@@ -54,6 +54,22 @@
           
         </div>
     </div>
+
+    <!-- Google Calendar-->
+    {% if gevent_show %}
+        <div class="row">
+            <div class="col-3 font-weight-bold">
+                {% trans "GCal event:" %}
+            </div>
+            <div class="col-9">
+            {% if gevent_link %}
+                <a href={{gevent_link}}>{% trans "Event link" %}</a>
+            {% else %}
+                {% trans "No event found" %}
+            {% endif %}
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
 

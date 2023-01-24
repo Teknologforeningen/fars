@@ -2,6 +2,8 @@ from django import forms
 from booking.models import Booking, RepeatedBookingGroup, Bookable
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 from datetime import datetime, timedelta, date
 from django.utils.translation import gettext as _
 from django.db import transaction
@@ -42,6 +44,16 @@ class BookingForm(forms.ModelForm):
         self.fields['booking_group'].choices = \
             [(None, _('Private booking'))] + [(group.id, group.name) for group in allowed_booker_groups]
 
+        # Add a field for emails if the bookable is set up with a Google Calendar
+        if self.instance.bookable.gcal:
+            # XXX: Add event description too?
+            self.fields['emails'] = forms.CharField(
+                required=False,
+                widget=forms.Textarea,
+                label=_('Email address(es)'),
+                help_text=_('A Google Calendar event is automatically created for this booking, and an invitation will be sent to these emails. Write one email per line.'),
+            )
+
     class Meta:
         model = Booking
         fields = '__all__'
@@ -56,6 +68,17 @@ class BookingForm(forms.ModelForm):
         start = self.cleaned_data['start']
         # If start is in the past, make it "now"
         return datetime.now() if start < datetime.now() else start
+
+    def clean_emails(self):
+        # Allow for various separators
+        emails = self.cleaned_data['emails'].replace(',', '\n').replace(';', '\n').split('\n')
+        emails = map(lambda s: s.strip(), emails) # Strip whitespace from all emails
+        emails = filter(lambda s: s, emails) # Filter out empty rows
+        emails = list(emails)
+        validator = EmailValidator(message=_('Invalid mail address(es)'))
+        for email in emails:
+            validator(email)
+        return emails
 
     def clean(self):
         cleaned_data = super().clean()
@@ -106,6 +129,9 @@ class BookingForm(forms.ModelForm):
         metadata_field_names = self.get_metadata_field_names()
         return None if not metadata_field_names else {k: self.cleaned_data[k] for k in metadata_field_names}
 
+    def get_cleaned_emails(self):
+        return self.cleaned_data['emails'] if 'emails' in self.cleaned_data else []
+
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-2 col-8','placeholder': 'Username'}))
@@ -125,6 +151,7 @@ class RepeatingBookingForm(forms.Form):
         skipped_bookings = []
         frequency = data.get('frequency')
         repeat_until = data.get('repeat_until')
+        is_repetition = False
 
         # Copy booking for every repetition
         while(booking.start.date() <= repeat_until):
@@ -132,7 +159,8 @@ class RepeatingBookingForm(forms.Form):
             if overlapping:
                 skipped_bookings.append(str(booking))
             else:
-                booking.save()
+                booking.save(is_repeated_booking=is_repetition)
+                is_repetition = True
             booking.pk = None
             booking.start += timedelta(days=frequency)
             booking.end += timedelta(days=frequency)

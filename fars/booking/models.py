@@ -151,7 +151,10 @@ class Booking(models.Model):
     metadata = models.CharField(max_length=256, blank=True, null=True, default=None)
     booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
     google_calendar_event_id = models.CharField(max_length=64, blank=True, default='')
+
+    # For gcal integration only
     emails = []
+    recurrence = None
 
     class Meta:
         verbose_name = _("Booking")
@@ -177,6 +180,41 @@ class Booking(models.Model):
             end__gt=self.start
             )
         return list(overlapping)
+
+    def get_gevent_link(self):
+        if not self.bookable.gcal or not self.google_calendar_event_id:
+            return None
+        event = self.bookable.gcal.try_get_event(self)
+        if not event or event['status'] == 'cancelled':
+            # Could also choose to remove the event id from the Booking instance here...
+            # But failing to fetch the event does not necessarily mean that the event does not exits
+            # And cancelled/deleted events can still be restored for 30 days
+            return None
+        return event['htmlLink']
+
+    # Override save() method to be able to create Google Calendar events
+    def save(self, is_repeated_booking=False, *args, **kwargs):
+        gcal = self.bookable.gcal
+        # Do not create events for repeated bookings (only the first one in the series)
+        # XXX: How to get the event ID of the repeated events to the repeated bookings?
+        if gcal and not is_repeated_booking:
+            event = gcal.try_save_event(self)
+            self.google_calendar_event_id = event['id'] if event else ""
+        else:
+            self.google_calendar_event_id = ""
+
+        super(Booking, self).save(*args, **kwargs)
+
+    # Override delete() method to remove Google Calendar events
+    # XXX: Deleting many events at once (for example through admin panel) might be very slow if all of them have events
+    # XXX: Is this even the correct place to do this?
+    def delete(self, *args, **kwargs):
+        super(Booking, self).delete(*args, **kwargs)
+
+        gcal = self.bookable.gcal
+        if not self.pk and gcal:
+            # XXX: Recurring events will not be deleted unless this is the first booking in the series (the repeated bookings do not contain any event IDs)
+            gcal.try_delete_event(self)
 
     def clean(self):
         # Check that end is not earlier than start
