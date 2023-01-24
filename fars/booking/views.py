@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 from django.views import View
 from datetime import datetime, timedelta
-import time, json, dateutil.parser
+import json, dateutil.parser
 from django.utils import timezone
 
 class HomeView(View):

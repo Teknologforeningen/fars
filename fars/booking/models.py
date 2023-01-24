@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext as _
 from datetime import timedelta
-import time, logging
+import logging
 
 # These are the choices used in the bookable model.
 # Adding your metadata form here will make it available for bookables.
@@ -75,15 +75,7 @@ class Bookable(models.Model):
         return Timeslot.objects.filter(bookable=self)
 
 
-def convert_time_to_closest_datetime(timestamp, datetimestamp):
-    # timestamp = time struct https://docs.python.org/3/library/time.html#time.struct_time
-    # datetimestamp = datetime object https://docs.python.org/3/library/datetime.html#datetime-objects
-    # This function returns a datetime object of the timeslot string regarding the received datetime object (dt)
-    # The converted datetime object has the same weekday, hour and minute as the time struct
-    return (datetimestamp + timedelta(timestamp.tm_wday - datetimestamp.weekday())).replace(hour=timestamp.tm_hour, minute=timestamp.tm_min)
-
 class Timeslot(models.Model):
-
     def __str__(self):
         return '{} {} - {} {}'.format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
 
