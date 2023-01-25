@@ -23,10 +23,10 @@ class BookingFilter(filters.FilterSet):
         fields = ['bookable', 'before', 'after', 'username', 'booking_group']
 
 class BookingsPagination(pagination.LimitOffsetPagination):
-    default_limit = 5000
+    default_limit = 500
     limit_query_param = 'limit'
     offset_query_param = 'offset'
-    max_limit = 50000
+    max_limit = 5000
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
 
