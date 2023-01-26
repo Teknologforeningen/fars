@@ -1,7 +1,7 @@
 {% extends "modalcontent.html" %}
 {% load i18n %}
 {% block title %}
-{% blocktrans with b=booking.bookable %} Booking of {{ b }} {% endblocktrans %}
+{% blocktranslate with b=booking.bookable %}Booking of {{ b }}{% endblocktranslate %}
 {% endblock %}
 {% block body %}
 <div class="container">
