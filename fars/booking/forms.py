@@ -161,7 +161,7 @@ class RepeatingBookingForm(forms.Form):
             if overlapping:
                 skipped_bookings.append(str(booking))
             else:
-                booking.save(is_repeated_booking=is_repetition)
+                booking.save(skip_gcal=is_repetition)
                 is_repetition = True
             booking.pk = None
             booking.start += timedelta(days=frequency)

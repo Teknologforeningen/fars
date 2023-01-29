@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext as _
 from datetime import timedelta
+from .gcal import GCalCreateEventThread, GCalUpdateEventThread, GCalDeleteEventThread
+from copy import deepcopy
 import logging
 
 # These are the choices used in the bookable model.
@@ -163,17 +165,24 @@ class Booking(models.Model):
         return list(overlapping)
 
     # Override save() method to be able to create Google Calendar events
-    def save(self, is_repeated_booking=False, *args, **kwargs):
-        gcal_id = self.bookable.google_calendar_id
-        # Do not create events for repeated bookings (only the first one in the series)
-        # XXX: How to get the event ID of the repeated events to the repeated bookings?
-        if gcal_id and not is_repeated_booking:
-            event = GoogleCalendar(gcal_id).try_save_event(self)
-            self.google_calendar_event_id = event['id'] if event else ''
-        else:
-            self.google_calendar_event_id = ''
-
+    def save(self, skip_gcal=False, *args, **kwargs):
         super(Booking, self).save(*args, **kwargs)
+
+        # Skip Google Calendar event handling if:
+        #  - Bookable is not set up with GCal
+        #  - If Booking is a repeated Booking
+        #  - If the save comes from the GCal handling itself (from saving the event id)
+        # XXX: How to get the event ID of the repeated events to the repeated bookings?
+        if skip_gcal or not self.bookable.google_calendar_id:
+            return
+
+        # Since the GCal event handling happens in another thead, create a copy of this Booking to be sure the thread view is constant. For example creation of repeated Bookings reuse the same Bookings object for all repetitions, which would mess everything up for the other threads.
+        booking_copy = deepcopy(self)
+
+        if booking_copy.google_calendar_event_id:
+            GCalUpdateEventThread(booking_copy).start()
+        else:
+            GCalCreateEventThread(booking_copy).start()
 
     # Override delete() method to remove Google Calendar events
     # XXX: Deleting many events at once (for example through admin panel) might be very slow if all of them have events
@@ -181,10 +190,9 @@ class Booking(models.Model):
     def delete(self, *args, **kwargs):
         super(Booking, self).delete(*args, **kwargs)
 
-        gcal = self.bookable.gcal
-        if not self.pk and gcal:
+        if not self.pk and self.bookable.google_calendar_id:
             # XXX: Recurring events will not be deleted unless this is the first booking in the series (the repeated bookings do not contain any event IDs)
-            gcal.try_delete_event(self)
+            GCalDeleteEventThread(self).start()
 
     def clean(self):
         # Check that end is not earlier than start

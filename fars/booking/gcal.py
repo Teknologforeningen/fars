@@ -4,6 +4,7 @@ from django.utils import timezone
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 from googleapiclient.errors import HttpError
+from threading import Thread
 import logging, json
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ class GoogleCalendar:
 
         return body
 
-    def _try_create_event(self, booking):
+    def try_create_event(self, booking):
         try:
             return gcal_service.events().insert(
                 calendarId=self.calendar_id,
@@ -122,7 +123,7 @@ class GoogleCalendar:
 
         return None
 
-    def _try_update_event(self, booking):
+    def try_update_event(self, booking):
         try:
             event = self.try_get_event(booking)
 
@@ -154,36 +155,13 @@ class GoogleCalendar:
         return None
 
     '''
-    Create a new Google Calendar event for a booking.
-    If the booking already has an event, update it instead.
-    '''
-    def try_save_event(self, booking):
-        # Update event if it already exists and return if successful
-        if booking.google_calendar_event_id:
-            event = self._try_update_event(booking)
-            if event:
-                return event
-
-        # Otherwise create a new event
-        return self._try_create_event(booking)
-
-    '''
     Delete the Google Calendar event for a booking, if it exist.
     '''
     def try_delete_event(self, booking):
-        event_id = booking.google_calendar_event_id
-        if not event_id:
-            return True
-
-        # If the event has ended or already started, do nothing (preserve all old events)
-        # XXX: Is this a good idea?
-        if booking.start < timezone.now():
-            return False
-
         try:
             gcal_service.events().delete(
                 calendarId=self.calendar_id,
-                eventId=event_id
+                eventId=booking.google_calendar_event_id
             ).execute()
             return True
 
@@ -196,3 +174,43 @@ class GoogleCalendar:
             logger.error(e)
 
         return False
+
+
+class GCalCreateEventThread(Thread):
+    def __init__(self, booking):
+        self.booking = booking
+        self.gcal = GoogleCalendar(booking.bookable.google_calendar_id)
+        Thread.__init__(self)
+
+    def run(self):
+        if self.booking.google_calendar_event_id:
+            raise Exception(f'Booking already has a Google Calendar event')
+        event = self.gcal.try_create_event(self.booking)
+        if event:
+            self.booking.google_calendar_event_id = event['id']
+            self.booking.save(skip_gcal=True, update_fields=['google_calendar_event_id'])
+
+
+class GCalUpdateEventThread(Thread):
+    def __init__(self, booking):
+        self.booking = booking
+        self.gcal = GoogleCalendar(booking.bookable.google_calendar_id)
+        Thread.__init__(self)
+
+    def run(self):
+        if not self.booking.google_calendar_event_id:
+            raise Exception(f'Booking does not have a Google Calendar event')
+        self.gcal.try_update_event(self.booking)
+
+
+class GCalDeleteEventThread(Thread):
+    def __init__(self, booking):
+        self.booking = booking
+        self.gcal = GoogleCalendar(booking.bookable.google_calendar_id)
+        Thread.__init__(self)
+
+    def run(self):
+        # If the event has ended or already started, do nothing (preserve all old events)
+        if not self.booking.google_calendar_event_id or self.booking.start < timezone.now():
+            return
+        self.gcal.try_delete_event(self.booking)
