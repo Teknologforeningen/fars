@@ -54,13 +54,6 @@ class Bookable(models.Model):
 
     google_calendar_event_location = models.CharField(max_length=128, blank=True, default='', help_text=_('The location to use for events created for the Google Calendar.'))
 
-    def __init__(self, *args, **kwargs):
-        super(Bookable, self).__init__(*args, **kwargs)
-        self.gcal = None
-        if self.google_calendar_id:
-            from .gcal import GoogleCalendar
-            self.gcal = GoogleCalendar(self.google_calendar_id)
-
     def __str__(self):
         return self.name
 
@@ -171,11 +164,11 @@ class Booking(models.Model):
 
     # Override save() method to be able to create Google Calendar events
     def save(self, is_repeated_booking=False, *args, **kwargs):
-        gcal = self.bookable.gcal
+        gcal_id = self.bookable.google_calendar_id
         # Do not create events for repeated bookings (only the first one in the series)
         # XXX: How to get the event ID of the repeated events to the repeated bookings?
-        if gcal and not is_repeated_booking:
-            event = gcal.try_save_event(self)
+        if gcal_id and not is_repeated_booking:
+            event = GoogleCalendar(gcal_id).try_save_event(self)
             self.google_calendar_event_id = event['id'] if event else ''
         else:
             self.google_calendar_event_id = ''

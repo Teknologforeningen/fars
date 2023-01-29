@@ -45,7 +45,7 @@ class BookingForm(forms.ModelForm):
             [(None, _('Private booking'))] + [(group.id, group.name) for group in allowed_booker_groups]
 
         # Add a field for emails if the bookable is set up with a Google Calendar
-        if self.instance.bookable.gcal:
+        if self.instance.bookable.google_calendar_id:
             # XXX: Add event description too?
             self.fields['emails'] = forms.CharField(
                 required=False,

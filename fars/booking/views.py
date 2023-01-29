@@ -6,6 +6,7 @@ from booking.metadata_forms import get_form_class
 from django.utils.translation import gettext as _
 from django.db import transaction
 from django.views import View
+from .gcal import GoogleCalendar
 from datetime import datetime, timedelta
 import json, dateutil.parser
 from django.utils import timezone
@@ -211,9 +212,9 @@ class BookingView(View):
     def get(self, request, booking_id):
         booking = self.context['booking']
         user = self.context['user']
-        gcal = booking.bookable.gcal
+        gcal_id = booking.bookable.google_calendar_id
 
-        if not gcal or not _is_creator(user, booking):
+        if not gcal_id or not _is_creator(user, booking):
             return render(request, self.template, self.context)
 
         self.context['gevent_show_row'] = True
@@ -228,7 +229,7 @@ class BookingView(View):
 
         fetch_event = request.GET.get('gevent_fetch') != None
         if fetch_event:
-            event = gcal.try_get_event(booking)
+            event = GoogleCalendar(gcal_id).try_get_event(booking)
             if not event:
                 # Could also choose to remove the event id from the Booking instance here
                 # But failing to fetch the event does not necessarily mean that the event does not exits...
