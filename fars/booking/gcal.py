@@ -102,11 +102,10 @@ class GoogleCalendar:
                 'email': booking.user.email,
             },
         if 'recurrence' not in body and booking.recurrence:
-            print(booking.recurrence)
             f = booking.recurrence['frequency']
             date_str = booking.recurrence['repeat_until'].replace('-', '')
             body['recurrence'] = [
-                f'RRULE:FREQ=DAILY;INTERVAL={f};UNTIL={date_str}T000000Z',
+                f'RRULE:FREQ=DAILY;INTERVAL={f};UNTIL={date_str}T235959Z',
             ]
 
         return body

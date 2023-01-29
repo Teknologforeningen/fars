@@ -61,7 +61,7 @@
                 {% trans "GCal event:" %}
             </div>
             <div class="col-9">
-            {% if gevent_link == 0 %}
+            {% if gevent_status == 0 %}
                 {% trans "This booking has no event" %}
                 <!-- XXX: Could have a button that creates an event -->
             {% elif gevent_status == 1 %}

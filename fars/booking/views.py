@@ -4,7 +4,6 @@ from booking.models import Booking, Bookable
 from booking.forms import RepeatingBookingForm
 from booking.metadata_forms import get_form_class
 from django.utils.translation import gettext as _
-from django.db import transaction
 from django.views import View
 from .gcal import GoogleCalendar
 from datetime import datetime, timedelta

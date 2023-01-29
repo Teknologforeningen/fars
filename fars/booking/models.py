@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext as _
-from datetime import timedelta
 from .gcal import GCalCreateEventThread, GCalUpdateEventThread, GCalDeleteEventThread
 from copy import deepcopy
 import logging
