@@ -217,18 +217,19 @@ class BookingView(View):
             return render(request, self.template, self.context)
 
         self.context['gevent_show_row'] = True
+        gcalevent = booking.get_gcalevent()
 
         # 0 = Booking has no event
         # 1 = Event status unknown, need to fetch to find out
         # 2 = Event exists
         # 3 = Event is cancelled
         # 4 = Event not found (removed or other error)
-        self.context['gevent_status'] = 1 if booking.google_calendar_event_id else 0
+        self.context['gevent_status'] = 1 if gcalevent else 0
         self.context['gevent_link'] = None
 
         fetch_event = request.GET.get('gevent_fetch') != None
-        if fetch_event:
-            event = GoogleCalendar(gcal_id).try_get_event(booking)
+        if fetch_event and gcalevent:
+            event = GoogleCalendar(gcal_id).try_get_event_by_id(gcalevent.event_id)
             if not event:
                 # Could also choose to remove the event id from the Booking instance here
                 # But failing to fetch the event does not necessarily mean that the event does not exits...

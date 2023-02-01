@@ -123,13 +123,13 @@ class GoogleCalendar:
 
         return None
 
-    def try_update_event(self, booking):
+    def try_update_event_by_id(self, event_id, booking):
         try:
-            event = self.try_get_event(booking)
+            event = self.try_get_event_by_id(event_id)
 
             return self.service.events().update(
                 calendarId=self.calendar_id,
-                eventId=booking.google_calendar_event_id,
+                eventId=event_id,
                 body=self._create_event_body(booking, event),
             ).execute()
 
@@ -141,11 +141,11 @@ class GoogleCalendar:
     """
     Get the Google Calendar event that corresponds to a certain booking.
     """
-    def try_get_event(self, booking):
+    def try_get_event_by_id(self, event_id):
         try:
             event = self.service.events().get(
                 calendarId=self.calendar_id,
-                eventId=booking.google_calendar_event_id,
+                eventId=event_id,
             ).execute()
             return event
 
@@ -157,11 +157,11 @@ class GoogleCalendar:
     '''
     Delete the Google Calendar event for a booking, if it exist.
     '''
-    def try_delete_event(self, booking):
+    def try_delete_event_by_id(self, event_id):
         try:
             self.service.events().delete(
                 calendarId=self.calendar_id,
-                eventId=booking.google_calendar_event_id
+                eventId=event_id
             ).execute()
             return True
 
@@ -179,38 +179,36 @@ class GoogleCalendar:
 class GCalCreateEventThread(Thread):
     def __init__(self, booking):
         self.booking = booking
-        self.gcal = GoogleCalendar(booking.bookable.google_calendar_id)
+        self.calendar_id = booking.bookable.google_calendar_id
         Thread.__init__(self)
 
     def run(self):
-        if self.booking.google_calendar_event_id:
+        if self.booking.get_gcalevent():
             raise Exception(f'Booking already has a Google Calendar event')
-        event = self.gcal.try_create_event(self.booking)
+        event = GoogleCalendar(self.calendar_id).try_create_event(self.booking)
         if event:
-            self.booking.google_calendar_event_id = event['id']
-            self.booking.save(skip_gcal=True, update_fields=['google_calendar_event_id'])
+            from .models import GCalEvent
+            gcalevent = GCalEvent.objects.create(booking=self.booking, event_id=event['id'])
+            gcalevent.save()
 
 
 class GCalUpdateEventThread(Thread):
-    def __init__(self, booking):
-        self.booking = booking
-        self.gcal = GoogleCalendar(booking.bookable.google_calendar_id)
+    def __init__(self, gcalevent):
+        self.event_id = gcalevent.event_id
+        self.calendar_id = gcalevent.get_calendar_id()
+        self.booking = gcalevent.booking
         Thread.__init__(self)
 
     def run(self):
-        if not self.booking.google_calendar_event_id:
-            raise Exception(f'Booking does not have a Google Calendar event')
-        self.gcal.try_update_event(self.booking)
+        GoogleCalendar(self.calendar_id).try_update_event_by_id(self.event_id, self.booking)
 
 
 class GCalDeleteEventThread(Thread):
-    def __init__(self, booking):
-        self.booking = booking
-        self.gcal = GoogleCalendar(booking.bookable.google_calendar_id)
+    def __init__(self, gcalevent):
+        self.event_id = gcalevent.event_id
+        # Important to store calendar id already here, since event->booking->bookable->calendar_id is not accessible once the thread gets around to it if the Booking is already deleted
+        self.calendar_id = gcalevent.get_calendar_id()
         Thread.__init__(self)
 
     def run(self):
-        # If the event has ended or already started, do nothing (preserve all old events)
-        if not self.booking.google_calendar_event_id or self.booking.start < timezone.now():
-            return
-        self.gcal.try_delete_event(self.booking)
+        GoogleCalendar(self.calendar_id).try_delete_event_by_id(self.event_id)
