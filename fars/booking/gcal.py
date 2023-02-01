@@ -9,18 +9,19 @@ import logging, json
 
 logger = logging.getLogger(__name__)
 
-gcal_service = build(
-    'calendar',
-    'v3',
-    credentials=Credentials.from_service_account_file(
-        env('GOOGLE_SERVICE_ACCOUNT_FILE'),
-        scopes=['https://www.googleapis.com/auth/calendar'],
-    )
-)
+# XXX: Translations?
 
 class GoogleCalendar:
     def __init__(self, calendar_id):
         self.calendar_id = calendar_id
+        self.service = build(
+            'calendar',
+            'v3',
+            credentials=Credentials.from_service_account_file(
+                env('GOOGLE_SERVICE_ACCOUNT_FILE'),
+                scopes=['https://www.googleapis.com/auth/calendar'],
+            )
+        )
 
     def _create_event_timestamp(self, date):
         return {
@@ -112,7 +113,7 @@ class GoogleCalendar:
 
     def try_create_event(self, booking):
         try:
-            return gcal_service.events().insert(
+            return self.service.events().insert(
                 calendarId=self.calendar_id,
                 body=self._create_event_body(booking),
             ).execute()
@@ -126,7 +127,7 @@ class GoogleCalendar:
         try:
             event = self.try_get_event(booking)
 
-            return gcal_service.events().update(
+            return self.service.events().update(
                 calendarId=self.calendar_id,
                 eventId=booking.google_calendar_event_id,
                 body=self._create_event_body(booking, event),
@@ -142,7 +143,7 @@ class GoogleCalendar:
     """
     def try_get_event(self, booking):
         try:
-            event = gcal_service.events().get(
+            event = self.service.events().get(
                 calendarId=self.calendar_id,
                 eventId=booking.google_calendar_event_id,
             ).execute()
@@ -158,7 +159,7 @@ class GoogleCalendar:
     '''
     def try_delete_event(self, booking):
         try:
-            gcal_service.events().delete(
+            self.service.events().delete(
                 calendarId=self.calendar_id,
                 eventId=booking.google_calendar_event_id
             ).execute()
