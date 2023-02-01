@@ -145,6 +145,12 @@ class Booking(models.Model):
     def __str__(self):
         return '{}, {}'.format(self.comment, self.start.strftime('%Y-%m-%d %H:%M'))
 
+    def copy(self):
+        booking = Booking.objects.get(pk=self.pk)
+        booking.emails = self.emails
+        booking.recurrence = self.recurrence
+        return booking
+
     def get_booker_groups(self):
         allowed_groups = []
         if self.bookable_id is not None:
@@ -179,7 +185,7 @@ class Booking(models.Model):
         gcalevent = self.get_gcalevent()
         if not gcalevent:
             # Can not pass this Booking directly because it is not thread-safe. For example creation of repeated Bookings reuse the same Bookings object for each repetition, which could mess everything up for the other thread.
-            GCalCreateEventThread(Booking.objects.get(pk=self.pk)).start()
+            GCalCreateEventThread(self.copy()).start()
         else:
             GCalUpdateEventThread(gcalevent).start()
 
