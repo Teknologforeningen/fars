@@ -184,7 +184,8 @@ class GCalCreateEventThread(Thread):
 
     def run(self):
         if self.booking.get_gcalevent():
-            raise Exception(f'Booking already has a Google Calendar event')
+            logger.error(f'Booking "{self.booking}" already has a Google Calendar event')
+            return
         event = GoogleCalendar(self.calendar_id).try_create_event(self.booking)
         if event:
             from .models import GCalEvent
