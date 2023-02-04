@@ -194,22 +194,26 @@ class GCalCreateEventThread(Thread):
 
 
 class GCalUpdateEventThread(Thread):
-    def __init__(self, gcalevent):
-        self.event_id = gcalevent.event_id
-        self.calendar_id = gcalevent.get_calendar_id()
-        self.booking = gcalevent.booking
+    def __init__(self, gcalevent, booking):
+        self.gcalevent = gcalevent
+        self.booking = booking
+        self.calendar_id = booking.bookable.google_calendar_id
         Thread.__init__(self)
 
     def run(self):
-        GoogleCalendar(self.calendar_id).try_update_event_by_id(self.event_id, self.booking)
+        GoogleCalendar(self.calendar_id).try_update_event_by_id(self.gcalevent.event_id, self.booking)
+        if self.gcalevent.booking != self.booking:
+            self.gcalevent.booking = self.booking
+            self.gcalevent.save()
 
 
 class GCalDeleteEventThread(Thread):
     def __init__(self, gcalevent):
-        self.event_id = gcalevent.event_id
+        self.gcalevent = gcalevent
         # Important to store calendar id already here, since event->booking->bookable->calendar_id is not accessible once the thread gets around to it if the Booking is already deleted
         self.calendar_id = gcalevent.get_calendar_id()
         Thread.__init__(self)
 
     def run(self):
-        GoogleCalendar(self.calendar_id).try_delete_event_by_id(self.event_id)
+        if GoogleCalendar(self.calendar_id).try_delete_event_by_id(self.gcalevent.event_id):
+            self.gcalevent.delete()

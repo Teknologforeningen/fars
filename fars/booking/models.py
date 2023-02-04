@@ -187,7 +187,7 @@ class Booking(models.Model):
             # Can not pass this Booking directly because it is not thread-safe. For example creation of repeated Bookings reuse the same Bookings object for each repetition, which could mess everything up for the other thread.
             GCalCreateEventThread(self.copy()).start()
         else:
-            GCalUpdateEventThread(gcalevent).start()
+            GCalUpdateEventThread(gcalevent, self.copy()).start()
 
     # Override delete() method to remove Google Calendar events
     def delete(self, *args, **kwargs):
@@ -222,8 +222,8 @@ class Booking(models.Model):
             raise ValidationError(_('Group booking is not allowed with the provided user and group'))
 
 class GCalEvent(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, primary_key=True)
-    event_id = models.CharField(max_length=64, blank=False)
+    event_id = models.CharField(max_length=64, primary_key=True)
+    booking = models.OneToOneField(Booking, on_delete=models.SET_NULL, null=True)
 
     def get_calendar_id(self):
-        return self.booking.bookable.google_calendar_id or None
+        return self.booking.bookable.google_calendar_id if self.booking else None
