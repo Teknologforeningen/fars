@@ -14,6 +14,7 @@ class BookingFilter(filters.FilterSet):
     before = filters.IsoDateTimeFilter(field_name='start', lookup_expr='lte')
     after = filters.IsoDateTimeFilter(field_name='end', lookup_expr='gte')
     # Fields where the defualt filter type is overridden
+    bookable = filters.CharFilter(field_name='bookable__id_str')
     username = filters.CharFilter(field_name='user__username')
     booking_group = filters.CharFilter(field_name='booking_group')
 
