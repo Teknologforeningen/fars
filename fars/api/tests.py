@@ -107,7 +107,7 @@ class BookingsAPITest(BaseAPITest):
             url += f'?bookable={bookable.id_str}'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        return response.json()
+        return response.json()['results']
 
     def test_for_anonymous_users(self):
         # Should see bookings on the two public bookables
@@ -142,3 +142,13 @@ class BookingsAPITest(BaseAPITest):
         self.assertEqual(6*N, len(self.get_bookings()))
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
+
+    def test_pagination(self):
+        self.login_superuser()
+        response = self.client.get('/api/bookings?limit=1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json = response.json()
+        self.assertEqual(6*N, json['count'])
+        self.assertEqual(1, len(json['results']))
+        self.assertEqual(None, json['previous'])
+

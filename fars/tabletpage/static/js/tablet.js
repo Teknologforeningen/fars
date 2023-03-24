@@ -29,13 +29,14 @@ function updateBookings() {
       bookable: bookable,
       after: now.toISOString(),
       before: eod.toISOString(),
+      limit: 5000,
     },
-    success: function(data) {
+    success: function({ results }) {
       $('#bookingbox').html('');
       var vacant = true;
-      for(booking in data) {
-        $('#bookingbox').append(createBooking(data[booking]));
-        if(moment(data[booking].start) <= now && moment(data[booking].end) >= now) {
+      for(booking of results) {
+        $('#bookingbox').append(createBooking(booking));
+        if(moment(booking.start) <= now && moment(booking.end) >= now) {
           vacant = false;
         }
       }

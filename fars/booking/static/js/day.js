@@ -103,10 +103,15 @@ function createCalendar(calendar, date, bookable, locale, user, timezone, timesl
       // Add bookings
       $.get(
         '/api/bookings',
-        {bookable: bookable, after: start.toISOString(), before: end.toISOString()},
-        function(bookings) {
+        {
+          bookable: bookable,
+          after: start.toISOString(),
+          before: end.toISOString(),
+          limit: 5000,
+        },
+        function({ results }) {
           let bookingEvents = [];
-          bookings.forEach(function(booking) {
+          results.forEach(function(booking) {
             let bookingEvent = {
               id: booking.id,
               title: booking.comment,

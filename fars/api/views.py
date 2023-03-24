@@ -23,10 +23,10 @@ class BookingFilter(filters.FilterSet):
         fields = ['bookable', 'before', 'after', 'username', 'booking_group']
 
 class BookingsPagination(pagination.LimitOffsetPagination):
-    default_limit = 5000
+    default_limit = 100
     limit_query_param = 'limit'
     offset_query_param = 'offset'
-    max_limit = 50000
+    max_limit = 5000
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
@@ -36,10 +36,6 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     ordering_fields = ['start', 'end', 'id']
     ordering = ['start', 'end']
     pagination_class = BookingsPagination
-
-    # Override default pagination response
-    def get_paginated_response(self, data):
-        return Response(data)
 
     def get_queryset(self):
         queryset = Booking.objects.all()

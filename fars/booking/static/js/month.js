@@ -60,10 +60,11 @@ function createCalendar(calendar, bookable, locale, user, timezone, timeslots) {
           bookable: bookable,
           after: start.toISOString() + 'T00:00:00',
           before: end.toISOString() + 'T23:59:59',
+          limit: 5000,
         },
-        function(bookings) {
+        function({ results }) {
           let bookingEvents = [];
-          bookings.forEach(function(booking) {
+          results.forEach(function(booking) {
             let bookingEvent = {
               id: booking.id,
               title: booking.comment,
