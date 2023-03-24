@@ -152,3 +152,35 @@ class BookingsAPITest(BaseAPITest):
         self.assertEqual(1, len(json['results']))
         self.assertEqual(None, json['previous'])
 
+class GenerikeyAPITest(BaseAPITest):
+    def get_bookings(self, bookable=None):
+        url = '/api/gkey'
+        if bookable:
+            url += f'?bookable={bookable.id_str}'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.content.decode("utf-8").split()
+
+    def test_for_anonymous_users(self):
+        # Should see bookings on the two public bookables
+        self.assertEqual(6*N, len(self.get_bookings()))
+        for bookable in Bookable.objects.all():
+            self.assertEqual(N, len(self.get_bookings(bookable)))
+
+    def test_booking_format(self):
+        username, group, start, end, special, code = self.get_bookings()[0].split(':')
+        self.assertEqual("svakar", username)
+        self.assertEqual("0", group)
+        int(start)
+        int(end)
+        self.assertEqual("0", special)
+        self.assertEqual("0", code)
+
+    def test_booking_format_booking_group(self):
+        username, group, start, end, special, code = self.get_bookings()[1].split(':')
+        self.assertEqual("svatta", username)
+        self.assertEqual("group", group)
+        int(start)
+        int(end)
+        self.assertEqual("0", special)
+        self.assertEqual("0", code)
