@@ -57,6 +57,10 @@ The top-level admins are able to access the admin site where they manage bookabl
 
 Logged in users can view the different bookables in the system and make bookings for them. They can also unbook their own bookings.
 
+Bookables can however be configured to be restricted to a certain group, in which case only users part of that group (and administrators of course) can make bookings for it. Other authenticated users can still view the bookings.
+
+Bookables can also be configured to be hidden, in which case only users that are allowed to make bookings for it can view the bookings. This only comes into play if a bookable is restricted to a certain group, since normally every logged in user can make bookings for all bookables.
+
 ### Non-authenticated users
 
 Users that haven't logged into the site can only view the bookables that are public. All other functionality requires them to log in.
