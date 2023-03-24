@@ -29,7 +29,6 @@ class BookingsPagination(pagination.LimitOffsetPagination):
     max_limit = 50000
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
-
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
     filter_class = BookingFilter
@@ -46,17 +45,21 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
         queryset = Booking.objects.all()
         user = self.request.user
 
-        # Only show bookings for public bookables if not logged in
-        if not user.is_authenticated:
-            queryset = queryset.filter(bookable__public=True)
-        # Only show bookings on unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
-            q = Q(bookable__hidden=False)
-            for group in user.groups.all():
-                q |= Q(bookable__admin_groups__contains=group)
-            queryset = queryset.filter(q)
+        # Show all bookings to staff
+        if user.is_staff:
+            return queryset
 
-        return queryset
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return queryset.filter(bookable__public=True)
+
+        # For authenticated users, show bookings on unhidden bookables and on those bookables that the user can make bookings on (part of restriction or admin group)
+        return queryset.filter(
+            Q(bookable__hidden=False) |
+            Q(bookable__booking_restriction_groups__isnull=True) |
+            Q(bookable__booking_restriction_groups__in=user.groups.all()) |
+            Q(bookable__admin_groups__in=user.groups.all())
+        )
 
 class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
     serializer_class = BookableSerializer
@@ -65,17 +68,21 @@ class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
         queryset = Bookable.objects.all()
         user = self.request.user
 
+        # Show all bookables to staff
+        if user.is_staff:
+            return queryset
+
         # Only show public bookables if not logged in
         if not user.is_authenticated:
-            queryset = queryset.filter(public=True)
-        # Only show unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
-            q = Q(hidden=False)
-            for group in user.groups.all():
-                q |= Q(admin_groups__contains=group)
-            queryset = queryset.filter(q)
+            return queryset.filter(public=True)
 
-        return queryset
+        # For authenticated users, show unhidden bookables and those that the user can make bookings on (part of restriction or admin group)
+        return queryset.filter(
+            Q(hidden=False) |
+            Q(booking_restriction_groups__isnull=True) |
+            Q(booking_restriction_groups__in=user.groups.all()) |
+            Q(admin_groups__in=user.groups.all())
+        )
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
