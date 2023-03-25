@@ -70,7 +70,7 @@
         </select>
       {% endif %}
       <button id="unbookbutton" class="btn btn-warning m-1">
-      {% if user|is_bookableadmin:booking.bookable %}
+      {% if is_admin %}
         {% trans "Admin unbook" %}
       {% else %}
         {% trans "Unbook" %}

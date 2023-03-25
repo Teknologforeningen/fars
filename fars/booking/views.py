@@ -97,6 +97,7 @@ class BookView(View):
         self.context['url'] = request.path
         self.context['bookable'] = bookable_obj
         self.context['user'] = request.user
+        self.context['is_admin'] = bookable_obj.is_user_admin(request.user)
 
         return super().dispatch(request, bookable)
 
@@ -112,7 +113,7 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form
 
-        if booking.bookable.is_user_admin(request.user):
+        if self.context['is_admin']:
             self.context['repeatform'] = RepeatingBookingForm()
 
         return render(request, self.template, context=self.context)
@@ -128,7 +129,7 @@ class BookView(View):
             booking = form.instance
             booking.metadata = json.dumps(form.get_cleaned_metadata())
 
-            if request.POST.get('repeat') and booking.bookable.is_user_admin(request.user):
+            if request.POST.get('repeat') and self.context['is_admin']:
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
                     'repeat_until': request.POST.get('repeat_until')
@@ -166,6 +167,7 @@ class BookingView(View):
 
         self.context['url']        = request.path
         self.context['user']       = request.user
+        self.context['is_admin']   = booking.bookable.is_user_admin(request.user)
         self.context['booking']    = booking
         self.context['unbookable'] = is_unbookable
         self.context['warning']    = warning
@@ -174,11 +176,10 @@ class BookingView(View):
 
     def delete(self, request, _):
         booking = self.context['booking']
-        is_admin = booking.bookable.is_user_admin(request.user)
-        if is_admin or self.context['unbookable']:
+        if self.context['is_admin'] or self.context['unbookable']:
             now = datetime.now(booking.start.tzinfo)
             removal_level = int(request.GET.get('repeat') or 0)
-            if is_admin and booking.repeatgroup and removal_level >= 1:
+            if self.context['is_admin'] and booking.repeatgroup and removal_level >= 1:
                 # Removal of a repeating booking. There are 3 different levels of removal
                 # of a repeating booking:
                 # 0 : Delete only this booking
