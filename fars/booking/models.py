@@ -75,6 +75,42 @@ class Bookable(models.Model):
             Q(admin_groups__in=user.groups.all())
         )
 
+    '''
+    Check if this bookable is readable (can see bookings) for a certain user.
+    '''
+    def is_readable_for_user(self, user):
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return self.public
+
+        if not self.hidden:
+            return True
+
+        return self.is_writable_for_user(user)
+
+    '''
+    Check if this bookable is writable (can make bookings) for a certain user.
+    '''
+    def is_writable_for_user(self, user):
+        # Show all bookings to staff
+        if user.is_staff:
+            return True
+
+        # Non-authenticated users can not make any bookings
+        if not user.is_authenticated:
+            return False
+
+        # Authenticated users can make bookings on bookables with no restriction groups...
+        if not self.booking_restriction_groups.count():
+            return True
+
+        # ...and on bookables where the user is part of restriction or admin group
+        for group in user.groups.all():
+            if group in self.booking_restriction_groups.all() or group in self.admin_groups.all():
+                return True
+
+        return False
+
     def __str__(self):
         return self.name
 
