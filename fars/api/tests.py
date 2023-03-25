@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from booking.models import Bookable, Booking
 from rest_framework import status
 from rest_framework.test import APITestCase
-from django.utils import timezone
+from django.utils import timezone, translation
 
 def plus_one_day(d):
     return d.replace(day=d.day + 1)
@@ -15,6 +15,8 @@ N = 4
 
 class BaseAPITest(APITestCase):
     def setUp(self):
+        translation.activate('en')
+
         # Create two users
         self.user1 = User.objects.create_user(username='svakar', password='teknolog')
         self.user2 = User.objects.create_user(username='svatta', password='teknolog')

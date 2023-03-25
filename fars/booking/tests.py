@@ -213,21 +213,28 @@ class BookViewTest(BaseAPITest):
                 self.assertTemplateUsed(response, 'modals/forbidden.html')
             else:
                 self.assert_response(response)
+                self.assertContains(response, 'Make event repeating', 0)
 
     def test_for_user_part_of_restriction_group(self):
         self.login_user_part_of_restriction_group()
         for bookable in Bookable.objects.all():
-            self.assert_response(self.go_to_book_view(bookable))
+            response = self.go_to_book_view(bookable)
+            self.assert_response(response)
+            self.assertContains(response, 'Make event repeating', 0)
 
     def test_for_user_part_of_admin_group(self):
         self.login_user_part_of_admin_group()
         for bookable in Bookable.objects.all():
-            self.assert_response(self.go_to_book_view(bookable))
+            response = self.go_to_book_view(bookable)
+            self.assert_response(response)
+            self.assertContains(response, 'Make event repeating', 1)
 
     def test_for_superuser(self):
         self.login_superuser()
         for bookable in Bookable.objects.all():
-            self.assert_response(self.go_to_book_view(bookable))
+            response = self.go_to_book_view(bookable)
+            self.assert_response(response)
+            self.assertContains(response, 'Make event repeating', 1)
 
 
 class BookingViewTest(BaseAPITest):
@@ -236,7 +243,7 @@ class BookingViewTest(BaseAPITest):
 
     def go_to_booking_view(self, bookable):
         b = Booking.objects.filter(bookable=bookable).first()
-        return self.client.get(self.url(b.id), follow=True)
+        return self.client.get(self.url(b.id), follow=True), b
 
     def assert_response(self, response):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -253,34 +260,42 @@ class BookingViewTest(BaseAPITest):
 
     def test_for_anonymous_users(self):
         for bookable in Bookable.objects.all():
-            response = self.go_to_booking_view(bookable)
+            response, _ = self.go_to_booking_view(bookable)
             if not bookable.public:
                 self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
                 self.assertTemplateUsed(response, 'modals/forbidden_login.html')
             else:
                 self.assert_response(response)
+                self.assertContains(response, 'Unbook', 0)
 
     def test_for_user(self):
         self.login_user()
         for bookable in Bookable.objects.all():
-            response = self.go_to_booking_view(bookable)
+            response, booking = self.go_to_booking_view(bookable)
             if bookable.hidden and bookable.booking_restriction_groups.count():
                 self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
                 self.assertTemplateUsed(response, 'modals/forbidden.html')
             else:
                 self.assert_response(response)
+                self.assertContains(response, 'Unbook', 1 if booking.user == self.user1 else 0)
 
     def test_for_user_part_of_restriction_group(self):
         self.login_user_part_of_restriction_group()
         for bookable in Bookable.objects.all():
-            self.assert_response(self.go_to_booking_view(bookable))
+            response, booking = self.go_to_booking_view(bookable)
+            self.assert_response(response)
+            self.assertContains(response, 'Unbook', 1 if booking.user == self.user2 else 0)
 
     def test_for_user_part_of_admin_group(self):
         self.login_user_part_of_admin_group()
         for bookable in Bookable.objects.all():
-            self.assert_response(self.go_to_booking_view(bookable))
+            response, booking = self.go_to_booking_view(bookable)
+            self.assert_response(response)
+            self.assertContains(response, 'Admin unbook')
 
     def test_for_superuser(self):
         self.login_superuser()
         for bookable in Bookable.objects.all():
-            self.assert_response(self.go_to_booking_view(bookable))
+            response, booking = self.go_to_booking_view(bookable)
+            self.assert_response(response)
+            self.assertContains(response, 'Admin unbook')
