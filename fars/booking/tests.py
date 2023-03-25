@@ -241,9 +241,8 @@ class BookingViewTest(BaseAPITest):
     def url(self, booking_id):
         return f'/booking/booking/{booking_id}'
 
-    def go_to_booking_view(self, bookable):
-        b = Booking.objects.filter(bookable=bookable).first()
-        return self.client.get(self.url(b.id), follow=True), b
+    def go_to_booking_view(self, booking):
+        return self.client.get(self.url(booking.id), follow=True)
 
     def assert_response(self, response):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -259,9 +258,9 @@ class BookingViewTest(BaseAPITest):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_for_anonymous_users(self):
-        for bookable in Bookable.objects.all():
-            response, _ = self.go_to_booking_view(bookable)
-            if not bookable.public:
+        for booking in Booking.objects.all():
+            response = self.go_to_booking_view(booking)
+            if not booking.bookable.public:
                 self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
                 self.assertTemplateUsed(response, 'modals/forbidden_login.html')
             else:
@@ -270,9 +269,9 @@ class BookingViewTest(BaseAPITest):
 
     def test_for_user(self):
         self.login_user()
-        for bookable in Bookable.objects.all():
-            response, booking = self.go_to_booking_view(bookable)
-            if bookable.hidden and bookable.booking_restriction_groups.count():
+        for booking in Booking.objects.all():
+            response = self.go_to_booking_view(booking)
+            if booking.bookable.hidden and booking.bookable.booking_restriction_groups.count():
                 self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
                 self.assertTemplateUsed(response, 'modals/forbidden.html')
             else:
@@ -281,21 +280,21 @@ class BookingViewTest(BaseAPITest):
 
     def test_for_user_part_of_restriction_group(self):
         self.login_user_part_of_restriction_group()
-        for bookable in Bookable.objects.all():
-            response, booking = self.go_to_booking_view(bookable)
+        for booking in Booking.objects.all():
+            response = self.go_to_booking_view(booking)
             self.assert_response(response)
-            self.assertContains(response, 'Unbook', 1 if booking.user == self.user2 else 0)
+            self.assertContains(response, 'Unbook', 1 if booking.user == self.user2 or booking.booking_group == self.common_group else 0)
 
     def test_for_user_part_of_admin_group(self):
         self.login_user_part_of_admin_group()
-        for bookable in Bookable.objects.all():
-            response, booking = self.go_to_booking_view(bookable)
+        for booking in Booking.objects.all():
+            response = self.go_to_booking_view(booking)
             self.assert_response(response)
             self.assertContains(response, 'Admin unbook')
 
     def test_for_superuser(self):
         self.login_superuser()
-        for bookable in Bookable.objects.all():
-            response, booking = self.go_to_booking_view(bookable)
+        for booking in Booking.objects.all():
+            response = self.go_to_booking_view(booking)
             self.assert_response(response)
             self.assertContains(response, 'Admin unbook')

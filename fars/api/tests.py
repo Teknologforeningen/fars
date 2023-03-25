@@ -23,8 +23,13 @@ class BaseAPITest(APITestCase):
         self.admin = User.objects.create_user(username='admin', password='teknolog')
         self.superuser = User.objects.create_superuser(username='superuser', password='teknolog')
 
+        # Create a common group for user1 and user2
+        self.common_group = Group.objects.create(name='common')
+        self.common_group.user_set.add(self.user1)
+        self.common_group.user_set.add(self.user2)
+
         # Create a group used for restricting booking access to
-        self.restriction_group = Group.objects.create(name='group')
+        self.restriction_group = Group.objects.create(name='restriction')
         self.restriction_group.user_set.add(self.user2)
 
         # Create a group used for admin access
@@ -38,10 +43,11 @@ class BaseAPITest(APITestCase):
         Bookable.objects.create(public=True, hidden=False, id_str='publicrestricted').booking_restriction_groups.set([self.restriction_group])
 
         # Normal bookable
-        Bookable.objects.create(public=False, hidden=False, id_str='normal')
+        b = Bookable.objects.create(public=False, hidden=False, id_str='normal')
+        b.allowed_booker_groups.set([self.common_group])
 
         # Restricted normal bookable
-        Bookable.objects.create(public=False, hidden=False, id_str='normalrestricted').booking_restriction_groups.set([self.restriction_group])
+        b = Bookable.objects.create(public=False, hidden=False, id_str='normalrestricted').booking_restriction_groups.set([self.restriction_group])
 
         # Hidden bookable
         Bookable.objects.create(public=False, hidden=True, id_str='hidden')
@@ -53,8 +59,8 @@ class BaseAPITest(APITestCase):
             # Add admin group to all bookables
             bookable.admin_groups.set([self.admin_group])
             # Create one booking per user per bookable
-            Booking.objects.create(bookable=bookable, user=self.user1, start=t1, end=t2)
-            Booking.objects.create(bookable=bookable, user=self.user2, start=t1, end=t2, booking_group=self.restriction_group)
+            Booking.objects.create(bookable=bookable, user=self.user1, start=t1, end=t2, booking_group=self.common_group)
+            Booking.objects.create(bookable=bookable, user=self.user2, start=t1, end=t2)
             Booking.objects.create(bookable=bookable, user=self.admin, start=t1, end=t2)
             Booking.objects.create(bookable=bookable, user=self.superuser, start=t1, end=t2)
 
@@ -169,19 +175,18 @@ class GenerikeyAPITest(BaseAPITest):
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
 
-    def test_booking_format(self):
+    def test_booking_format_booking(self):
         username, group, start, end, special, code = self.get_bookings()[0].split(':')
         self.assertEqual("svakar", username)
-        self.assertEqual("0", group)
+        self.assertEqual("common", group)
         int(start)
         int(end)
         self.assertEqual("0", special)
         self.assertEqual("0", code)
 
-    def test_booking_format_booking_group(self):
         username, group, start, end, special, code = self.get_bookings()[1].split(':')
         self.assertEqual("svatta", username)
-        self.assertEqual("group", group)
+        self.assertEqual("0", group)
         int(start)
         int(end)
         self.assertEqual("0", special)
