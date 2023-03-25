@@ -3,11 +3,8 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
 from django.utils.translation import gettext as _
-from datetime import timedelta, datetime
-import time
+from datetime import timedelta
 
 import logging
 

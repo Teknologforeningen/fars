@@ -1,8 +1,6 @@
 from rest_framework import viewsets, generics, pagination
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.response import Response
 from django_filters import rest_framework as filters
-from django.db.models import Q
 from booking.models import *
 from api.serializers import *
 from api.renderers import *
