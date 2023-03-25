@@ -178,6 +178,11 @@ class BookingView(View):
 
     def dispatch(self, request, booking_id):
         booking = get_object_or_404(Booking, id=booking_id)
+
+        if not booking.bookable.is_readable_for_user(request.user):
+            # Non-authenticated users can only look at public bookables, otherwise redirect to login
+            return render(request, 'modals/forbidden.html' if request.user.is_authenticated else 'modals/forbidden_login.html', status=403)
+
         is_unbookable, warning = self._is_unbookable(request.user, booking)
 
         self.context['url']        = request.path
