@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib.auth.models import User
 from booking.models import Booking, Bookable, Timeslot
 from booking.forms import BookingForm, RepeatingBookingForm, CustomLoginForm
@@ -65,8 +65,13 @@ class MonthView(View):
 
     def get(self, request, bookable):
         bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-        if not bookable_obj.public and not request.user.is_authenticated:
-            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+
+        # Users must have read access to the bookable
+        if not bookable_obj.is_readable_for_user(request.user):
+            if not request.user.is_authenticated:
+                return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+            return HttpResponseForbidden()
+
         context = {
             'bookable': bookable_obj,
             'user': request.user
@@ -80,8 +85,13 @@ class DayView(View):
 
     def get(self, request, bookable, year, month, day):
         bookable_obj = get_object_or_404(Bookable, id_str=bookable)
-        if not bookable_obj.public and not request.user.is_authenticated:
-            return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+
+        # Users must have read access to the bookable
+        if not bookable_obj.is_readable_for_user(request.user):
+            if not request.user.is_authenticated:
+                return redirect('{}?next={}'.format(reverse('login'), request.path_info))
+            return HttpResponseForbidden()
+
         context = {
             'date': datetime(year, month, day, 0, 0, 0, 0, pytz.timezone(TIME_ZONE)).isoformat(),
             'bookable': bookable_obj,
