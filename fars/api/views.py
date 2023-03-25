@@ -44,11 +44,17 @@ class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
     def get_queryset(self):
         return Bookable.get_readable_bookables_for_user(self.request.user)
 
+class GenerikeyBookingFilter(filters.FilterSet):
+    bookable = filters.CharFilter(field_name='bookable__id_str')
+    class Meta:
+        model = Booking
+        fields = ['bookable']
+
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     queryset = Booking.objects.filter(end__gt=datetime.datetime.now())
     serializer_class = BookingSerializer
-    filter_class = BookingFilter
+    filter_class = GenerikeyBookingFilter
     renderer_classes = (GeneriKeyBookingRenderer, )
 
 class TimeslotFilter(filters.FilterSet):
