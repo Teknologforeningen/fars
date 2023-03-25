@@ -112,7 +112,7 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form
 
-        if _is_admin(request.user, booking.bookable):
+        if booking.bookable.is_user_admin(request.user):
             self.context['repeatform'] = RepeatingBookingForm()
 
         return render(request, self.template, context=self.context)
@@ -128,7 +128,7 @@ class BookView(View):
             booking = form.instance
             booking.metadata = json.dumps(form.get_cleaned_metadata())
 
-            if request.POST.get('repeat') and _is_admin(request.user, booking.bookable):
+            if request.POST.get('repeat') and booking.bookable.is_user_admin(request.user):
                 repeatdata = {
                     'frequency': request.POST.get('frequency'),
                     'repeat_until': request.POST.get('repeat_until')
@@ -162,7 +162,7 @@ class BookingView(View):
             # Non-authenticated users can only look at public bookables, otherwise redirect to login
             return render(request, 'modals/forbidden.html' if request.user.is_authenticated else 'modals/forbidden_login.html', status=403)
 
-        is_unbookable, warning = self._is_unbookable(request.user, booking)
+        is_unbookable, warning = booking.is_unbookable_by_user(request.user)
 
         self.context['url']        = request.path
         self.context['user']       = request.user
@@ -174,7 +174,7 @@ class BookingView(View):
 
     def delete(self, request, _):
         booking = self.context['booking']
-        is_admin = _is_admin(request.user, booking.bookable)
+        is_admin = booking.bookable.is_user_admin(request.user)
         if is_admin or self.context['unbookable']:
             now = datetime.now(booking.start.tzinfo)
             removal_level = int(request.GET.get('repeat') or 0)
@@ -202,17 +202,3 @@ class BookingView(View):
 
     def get(self, request, _):
         return render(request, self.template, self.context)
-
-    def _is_unbookable(self, user, booking):
-        if booking.end < datetime.now(booking.start.tzinfo):
-            return False, _("Bookings in the past may not be unbooked")
-        if _is_admin(user, booking.bookable):
-            return True, ''
-        if user != booking.user and booking.booking_group not in user.groups.all():
-            return False, _("Only the user or group that made the booking may unbook it")
-        return True, ''
-
-
-# Returns whether user is admin for given bookable
-def _is_admin(user, bookable):
-    return user.is_staff or user.groups.filter(id__in=bookable.admin_groups.all()).exists()

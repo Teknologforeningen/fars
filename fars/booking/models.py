@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
 from django.utils.translation import gettext as _
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import logging
 
@@ -51,6 +51,9 @@ class Bookable(models.Model):
 
     # BILL device ID if BILL check is needed. If null no BILL check will be performed
     bill_device_id = models.PositiveIntegerField(null=True, blank=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
+
+    def __str__(self):
+        return self.name
 
     @staticmethod
     def get_readable_bookables_for_user(user):
@@ -108,8 +111,8 @@ class Bookable(models.Model):
 
         return False
 
-    def __str__(self):
-        return self.name
+    def is_user_admin(self, user):
+        return user.is_staff or user.groups.filter(id__in=self.admin_groups.all()).exists()
 
     # It would be better if this was non-blocking
     def notify_external_services(self):
@@ -221,6 +224,21 @@ class Booking(models.Model):
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+
+    '''
+    Check if a certain user can unbook this booking. Unbookable if the user
+     - made the booking,
+     - is part of the group that made the booking, or
+     - is admin for the bookable,
+     unless
+     - the booking has ended.
+    '''
+    def is_unbookable_by_user(self, user):
+        if self.end < datetime.now(self.start.tzinfo):
+            return False, _("Bookings in the past may not be unbooked")
+        if self.bookable.is_user_admin(user) or user == self.user or self.booking_group in user.groups.all():
+            return True, ''
+        return False, _("Only the user or group that made the booking may unbook it")
 
     def get_booker_groups(self):
         allowed_groups = []
