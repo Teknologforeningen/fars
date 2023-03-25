@@ -106,11 +106,13 @@ class BookView(View):
     context = {}
 
     def dispatch(self, request, bookable):
-        if not request.user.is_authenticated:
-            return render(request, 'modals/forbidden.html', status=403)
+        bookable_obj = get_object_or_404(Bookable, id_str=bookable)
+
+        if not bookable_obj.is_writable_for_user(request.user):
+            return render(request, 'modals/forbidden.html' if request.user.is_authenticated else 'modals/forbidden_login.html', status=403)
 
         self.context['url'] = request.path
-        self.context['bookable'] = get_object_or_404(Bookable, id_str=bookable)
+        self.context['bookable'] = bookable_obj
         self.context['user'] = request.user
 
         return super().dispatch(request, bookable)
