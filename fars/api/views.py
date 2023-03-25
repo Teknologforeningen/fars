@@ -38,47 +38,13 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     pagination_class = BookingsPagination
 
     def get_queryset(self):
-        queryset = Booking.objects.all()
-        user = self.request.user
-
-        # Show all bookings to staff
-        if user.is_staff:
-            return queryset
-
-        # Only show public bookables if not logged in
-        if not user.is_authenticated:
-            return queryset.filter(bookable__public=True)
-
-        # For authenticated users, show bookings on unhidden bookables and on those bookables that the user can make bookings on (part of restriction or admin group)
-        return queryset.filter(
-            Q(bookable__hidden=False) |
-            Q(bookable__booking_restriction_groups__isnull=True) |
-            Q(bookable__booking_restriction_groups__in=user.groups.all()) |
-            Q(bookable__admin_groups__in=user.groups.all())
-        )
+        return Booking.get_readable_bookings_for_user(self.request.user)
 
 class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
     serializer_class = BookableSerializer
 
     def get_queryset(self):
-        queryset = Bookable.objects.all()
-        user = self.request.user
-
-        # Show all bookables to staff
-        if user.is_staff:
-            return queryset
-
-        # Only show public bookables if not logged in
-        if not user.is_authenticated:
-            return queryset.filter(public=True)
-
-        # For authenticated users, show unhidden bookables and those that the user can make bookings on (part of restriction or admin group)
-        return queryset.filter(
-            Q(hidden=False) |
-            Q(booking_restriction_groups__isnull=True) |
-            Q(booking_restriction_groups__in=user.groups.all()) |
-            Q(admin_groups__in=user.groups.all())
-        )
+        return Bookable.get_readable_bookables_for_user(self.request.user)
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):

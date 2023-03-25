@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
+from django.db.models import Q
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext as _
@@ -53,6 +54,26 @@ class Bookable(models.Model):
 
     # BILL device ID if BILL check is needed. If null no BILL check will be performed
     bill_device_id = models.PositiveIntegerField(null=True, blank=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
+
+    @staticmethod
+    def get_readable_bookables_for_user(user):
+        bookables = Bookable.objects.all()
+
+        # Show all bookables to staff
+        if user.is_staff:
+            return bookables
+
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return bookables.filter(public=True)
+
+        # For authenticated users, show unhidden bookables and those that the user can make bookings on (part of restriction or admin group)
+        return bookables.filter(
+            Q(hidden=False) |
+            Q(booking_restriction_groups__isnull=True) |
+            Q(booking_restriction_groups__in=user.groups.all()) |
+            Q(admin_groups__in=user.groups.all())
+        )
 
     def __str__(self):
         return self.name
@@ -144,6 +165,26 @@ class Booking(models.Model):
         verbose_name = _("Booking")
         verbose_name_plural = _("Bookings")
         ordering = ["start"]
+
+    @staticmethod
+    def get_readable_bookings_for_user(user):
+        bookings = Booking.objects.all()
+
+        # Show all bookings to staff
+        if user.is_staff:
+            return bookings
+
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return bookings.filter(bookable__public=True)
+
+        # For authenticated users, show bookings on unhidden bookables and on those bookables that the user can make bookings on (part of restriction or admin group)
+        return bookings.filter(
+            Q(bookable__hidden=False) |
+            Q(bookable__booking_restriction_groups__isnull=True) |
+            Q(bookable__booking_restriction_groups__in=user.groups.all()) |
+            Q(bookable__admin_groups__in=user.groups.all())
+        )
 
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
