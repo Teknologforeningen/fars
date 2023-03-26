@@ -1,8 +1,6 @@
 from rest_framework import viewsets, generics, pagination
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.response import Response
 from django_filters import rest_framework as filters
-from django.db.models import Q
 from booking.models import *
 from api.serializers import *
 from api.renderers import *
@@ -23,13 +21,12 @@ class BookingFilter(filters.FilterSet):
         fields = ['bookable', 'before', 'after', 'username', 'booking_group']
 
 class BookingsPagination(pagination.LimitOffsetPagination):
-    default_limit = 5000
+    default_limit = 100
     limit_query_param = 'limit'
     offset_query_param = 'offset'
-    max_limit = 50000
+    max_limit = 5000
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
-
     serializer_class = NoMetaBookingSerializer # Exclude metadata to hide doorcode in this API
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
     filter_class = BookingFilter
@@ -38,51 +35,26 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     ordering = ['start', 'end']
     pagination_class = BookingsPagination
 
-    # Override default pagination response
-    def get_paginated_response(self, data):
-        return Response(data)
-
     def get_queryset(self):
-        queryset = Booking.objects.all()
-        user = self.request.user
-
-        # Only show bookings for public bookables if not logged in
-        if not user.is_authenticated:
-            queryset = queryset.filter(bookable__public=True)
-        # Only show bookings on unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
-            q = Q(bookable__hidden=False)
-            for group in user.groups.all():
-                q |= Q(bookable__admin_groups__contains=group)
-            queryset = queryset.filter(q)
-
-        return queryset
+        return Booking.get_readable_bookings_for_user(self.request.user)
 
 class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
     serializer_class = BookableSerializer
 
     def get_queryset(self):
-        queryset = Bookable.objects.all()
-        user = self.request.user
+        return Bookable.get_readable_bookables_for_user(self.request.user)
 
-        # Only show public bookables if not logged in
-        if not user.is_authenticated:
-            queryset = queryset.filter(public=True)
-        # Only show unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
-            q = Q(hidden=False)
-            for group in user.groups.all():
-                q |= Q(admin_groups__contains=group)
-            queryset = queryset.filter(q)
-
-        return queryset
+class GenerikeyBookingFilter(filters.FilterSet):
+    bookable = filters.CharFilter(field_name='bookable__id_str')
+    class Meta:
+        model = Booking
+        fields = ['bookable']
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
     queryset = Booking.objects.filter(end__gt=datetime.datetime.now())
     serializer_class = BookingSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_class = BookingFilter
+    filter_class = GenerikeyBookingFilter
     renderer_classes = (GeneriKeyBookingRenderer, )
 
 class TimeslotFilter(filters.FilterSet):
@@ -94,7 +66,6 @@ class TimeslotFilter(filters.FilterSet):
 
 class TimeslotsList(viewsets.ViewSetMixin, generics.ListAPIView):
     serializer_class = TimeslotSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
     filter_class = TimeslotFilter
 
     def get_queryset(self):

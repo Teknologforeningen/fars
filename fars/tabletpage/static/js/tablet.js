@@ -29,13 +29,14 @@ function updateBookings() {
       bookable: bookable,
       after: now.toISOString(),
       before: eod.toISOString(),
+      limit: 5000,
     },
-    success: function(data) {
+    success: function({ results }) {
       $('#bookingbox').html('');
       var vacant = true;
-      for(booking in data) {
-        $('#bookingbox').append(createBooking(data[booking]));
-        if(moment(data[booking].start) <= now && moment(data[booking].end) >= now) {
+      for(booking of results) {
+        $('#bookingbox').append(createBooking(booking));
+        if(moment(booking.start) <= now && moment(booking.end) >= now) {
           vacant = false;
         }
       }
@@ -44,7 +45,7 @@ function updateBookings() {
       } else {
         $('#vacancyindicator').addClass('vacant').removeClass('occupied');
       }
-      updateBookformInfo(now, data);
+      updateBookformInfo(now, results);
     }
   });
 }
@@ -53,7 +54,6 @@ function updateBookformInfo(now, bookings) {
   const today = now.format('YYYY-MM-DD');
 
   // TODO change to 1h or till next booking starts
-  var defaultTimes = findDefaultTime(bookings);
   $('#id_start_0').val(today);
   $('#id_start_1').val(now.format('HH:mm'));
   $('#id_end_0').val(today);

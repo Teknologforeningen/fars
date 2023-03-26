@@ -35,7 +35,7 @@
     {% endfor %}
 
   </form>
-  {% if repeatform and user|is_bookableadmin:bookable %}
+  {% if repeatform and is_admin %}
     <div id="toggle-wrapper">
       <button id="repeat-toggle" class="btn btn-info" type="button" data-toggle="collapse" data-target="#repeat-form-wrapper" aria-expanded="false" aria-controls="repeat-form-wrapper">{% trans 'Make event repeating' %}</button>
     </div>

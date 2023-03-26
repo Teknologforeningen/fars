@@ -1,10 +1,9 @@
 from django import forms
-from booking.models import Booking, RepeatedBookingGroup, Bookable
+from booking.models import Booking, RepeatedBookingGroup
 from django.contrib.auth.forms import AuthenticationForm
-from django.forms.widgets import PasswordInput, TextInput, NumberInput, DateInput
+from django.forms.widgets import PasswordInput, TextInput, DateInput
 from datetime import datetime, timedelta, date
 from django.utils.translation import gettext as _
-from django.db import transaction
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):

@@ -2,11 +2,9 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+from django.db.models import Q
 from django.utils.translation import gettext as _
 from datetime import timedelta, datetime
-import time
 
 import logging
 
@@ -56,6 +54,65 @@ class Bookable(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def get_readable_bookables_for_user(user):
+        bookables = Bookable.objects.all()
+
+        # Show all bookables to staff
+        if user.is_staff:
+            return bookables
+
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return bookables.filter(public=True)
+
+        # For authenticated users, show unhidden bookables and those that the user can make bookings on (part of restriction or admin group)
+        return bookables.filter(
+            Q(hidden=False) |
+            Q(booking_restriction_groups__isnull=True) |
+            Q(booking_restriction_groups__in=user.groups.all()) |
+            Q(admin_groups__in=user.groups.all())
+        )
+
+    '''
+    Check if this bookable is readable (can see bookings) for a certain user.
+    '''
+    def is_readable_for_user(self, user):
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return self.public
+
+        if not self.hidden:
+            return True
+
+        return self.is_writable_for_user(user)
+
+    '''
+    Check if this bookable is writable (can make bookings) for a certain user.
+    '''
+    def is_writable_for_user(self, user):
+        # Show all bookings to staff
+        if user.is_staff:
+            return True
+
+        # Non-authenticated users can not make any bookings
+        if not user.is_authenticated:
+            return False
+
+        # Authenticated users can make bookings on bookables with no restriction groups...
+        if not self.booking_restriction_groups.count():
+            return True
+
+        # ...and on bookables where the user is part of restriction or admin group
+        for group in user.groups.all():
+            if group in self.booking_restriction_groups.all() or group in self.admin_groups.all():
+                return True
+
+        return False
+
+    def is_user_admin(self, user):
+        return user.is_staff or user.groups.filter(id__in=self.admin_groups.all()).exists()
 
     # It would be better if this was non-blocking
     def notify_external_services(self):
@@ -145,8 +202,43 @@ class Booking(models.Model):
         verbose_name_plural = _("Bookings")
         ordering = ["start"]
 
+    @staticmethod
+    def get_readable_bookings_for_user(user):
+        bookings = Booking.objects.all()
+
+        # Show all bookings to staff
+        if user.is_staff:
+            return bookings
+
+        # Only show public bookables if not logged in
+        if not user.is_authenticated:
+            return bookings.filter(bookable__public=True)
+
+        # For authenticated users, show bookings on unhidden bookables and on those bookables that the user can make bookings on (part of restriction or admin group)
+        return bookings.filter(
+            Q(bookable__hidden=False) |
+            Q(bookable__booking_restriction_groups__isnull=True) |
+            Q(bookable__booking_restriction_groups__in=user.groups.all()) |
+            Q(bookable__admin_groups__in=user.groups.all())
+        )
+
     def __str__(self):
         return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+
+    '''
+    Check if a certain user can unbook this booking. Unbookable if the user
+     - made the booking,
+     - is part of the group that made the booking, or
+     - is admin for the bookable,
+     unless
+     - the booking has ended.
+    '''
+    def is_unbookable_by_user(self, user):
+        if self.end < datetime.now(self.start.tzinfo):
+            return False, _("Bookings in the past may not be unbooked")
+        if self.bookable.is_user_admin(user) or user == self.user or self.booking_group in user.groups.all():
+            return True, ''
+        return False, _("Only the user or group that made the booking may unbook it")
 
     def get_booker_groups(self):
         allowed_groups = []

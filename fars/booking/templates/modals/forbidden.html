@@ -4,8 +4,5 @@
 {% trans "Not logged in" %}
 {% endblock %}
 {% block body %}
-<div class="alert alert-warning">{% trans "You need to log in to perform this action." %}</div>
-{% endblock %}
-{% block footer %}
-<a class="btn btn-light" href="/login">{% trans "Login" %}</a>
+<div class="alert alert-warning">{% trans "You are not allowed to perform this action." %}</div>
 {% endblock %}
