@@ -45,7 +45,7 @@ function updateBookings() {
       } else {
         $('#vacancyindicator').addClass('vacant').removeClass('occupied');
       }
-      updateBookformInfo(now, data);
+      updateBookformInfo(now, results);
     }
   });
 }
@@ -54,7 +54,6 @@ function updateBookformInfo(now, bookings) {
   const today = now.format('YYYY-MM-DD');
 
   // TODO change to 1h or till next booking starts
-  var defaultTimes = findDefaultTime(bookings);
   $('#id_start_0').val(today);
   $('#id_start_1').val(now.format('HH:mm'));
   $('#id_end_0').val(today);
