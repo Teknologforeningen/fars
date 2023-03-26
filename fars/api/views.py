@@ -6,7 +6,7 @@ from django.db.models import Q
 from booking.models import *
 from api.serializers import *
 from api.renderers import *
-import datetime
+from django.utils import timezone
 
 
 class BookingFilter(filters.FilterSet):
@@ -23,10 +23,10 @@ class BookingFilter(filters.FilterSet):
         fields = ['bookable', 'before', 'after', 'username', 'booking_group']
 
 class BookingsPagination(pagination.LimitOffsetPagination):
-    default_limit = 5000
+    default_limit = 500
     limit_query_param = 'limit'
     offset_query_param = 'offset'
-    max_limit = 50000
+    max_limit = 5000
 
 class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
 
@@ -49,11 +49,14 @@ class BookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
         # Only show bookings for public bookables if not logged in
         if not user.is_authenticated:
             queryset = queryset.filter(bookable__public=True)
-        # Only show bookings on unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
+
+        # For ordinary users...
+        elif not user.is_superuser:
+            # ... show only bookings on unhidden bookables...
             q = Q(bookable__hidden=False)
-            for group in user.groups.all():
-                q |= Q(bookable__admin_groups__contains=group)
+            # ... and bookings on hidden bookables if the user is part of an admin group
+            q |= Q(bookable__admin_groups__in=user.groups.all())
+
             queryset = queryset.filter(q)
 
         return queryset
@@ -68,18 +71,21 @@ class BookablesList(viewsets.ViewSetMixin, generics.ListAPIView):
         # Only show public bookables if not logged in
         if not user.is_authenticated:
             queryset = queryset.filter(public=True)
-        # Only show unhidden bookables to superusers and admins of the bookable
-        if not user.is_superuser:
+
+        # For ordinary users...
+        elif not user.is_superuser:
+            # ... show only unhidden bookables...
             q = Q(hidden=False)
-            for group in user.groups.all():
-                q |= Q(admin_groups__contains=group)
+            # ... and hidden bookables if the user is part of an admin group
+            q |= Q(admin_groups__in=user.groups.all())
+
             queryset = queryset.filter(q)
 
         return queryset
 
 # This class provides the view used by GeneriKey to get the list of bookings they need
 class GeneriKeyBookingsList(viewsets.ViewSetMixin, generics.ListAPIView):
-    queryset = Booking.objects.filter(end__gt=datetime.datetime.now())
+    queryset = Booking.objects.filter(end__gt=timezone.now())
     serializer_class = BookingSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filter_class = BookingFilter

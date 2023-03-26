@@ -7,7 +7,7 @@ from .models import Bookable, Timeslot
 
 class TimeslotInline(admin.TabularInline):
     model = Timeslot
-    fields = ("start_weekday", "start_time", "end_weekday", "end_time",)
+    fields = ('start_weekday', 'start_time', 'end_weekday', 'end_time',)
 
 
 class BookableAdmin(admin.ModelAdmin):

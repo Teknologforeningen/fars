@@ -60,12 +60,12 @@ class PiSaunaMetadataForm(BookingForm):
     )
 
     def get_metadata_field_names(self):
-        return ("disable_sauna_heating", "restrict_keys", "doorcode")
+        return ('disable_sauna_heating', 'restrict_keys', 'doorcode')
 
     def clean(self):
         cleaned_data = super().clean()
         # Perform BILL check unless sauna heating is disabled
-        if not cleaned_data["disable_sauna_heating"]:
+        if not cleaned_data['disable_sauna_heating']:
             from .bill import BILLChecker, NotAllowedException, BILLException
             user = cleaned_data['user']
             group = cleaned_data['booking_group']
@@ -103,7 +103,7 @@ class HumpsSaunaMetadataForm(BookingForm):
     )
 
     def get_metadata_field_names(self):
-        return ("unlock_door", "doorcode")
+        return ('unlock_door', 'doorcode')
 
 
 # This is the mapping from choice string stored in DB to a real class.

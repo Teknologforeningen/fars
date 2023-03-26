@@ -31,7 +31,7 @@ SECRET_KEY = env('SECRET_KEY', 'secret_key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG', True)
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', 'localhost').split(" ")
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', 'localhost').split(' ')
 
 # Application definition
 
@@ -76,6 +76,8 @@ TEMPLATES = [
         },
     },
 ]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Logging
 if not DEBUG:
@@ -162,31 +164,31 @@ REST_FRAMEWORK = {
 # LDAP stuff
 
 # Baseline configuration.
-AUTH_LDAP_SERVER_URI = env("LDAP_SERVER_URI", "ldaps://localhost:45671")
+AUTH_LDAP_SERVER_URI = env('LDAP_SERVER_URI', 'ldaps://localhost:45671')
 
-AUTH_LDAP_USER_DN_TEMPLATE = env("LDAP_USER_DN_TEMPLATE", "uid=%(user)s,dc=example,dc=com")
+AUTH_LDAP_USER_DN_TEMPLATE = env('LDAP_USER_DN_TEMPLATE', 'uid=%(user)s,dc=example,dc=com')
 
 # Set up the basic group parameters.
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
-    env("LDAP_GROUP_DN", "ou=group,dc=example,dc=com"),
+    env('LDAP_GROUP_DN', 'ou=group,dc=example,dc=com'),
     ldap.SCOPE_SUBTREE,
-    "(objectClass=posixGroup)"
+    '(objectClass=posixGroup)'
 )
-AUTH_LDAP_GROUP_TYPE = PosixGroupType(name_attr="cn")
+AUTH_LDAP_GROUP_TYPE = PosixGroupType(name_attr='cn')
 
 # Populate the Django user from the LDAP directory.
 AUTH_LDAP_USER_ATTR_MAP = {
-    "username": "uid",
-    "first_name": "givenName",
-    "last_name": "sn",
-    "email": "mail"
+    'username': 'uid',
+    'first_name': 'givenName',
+    'last_name': 'sn',
+    'email': 'mail'
 }
 
 # Map LDAP group to is_staff property in Member model
 # this restricts all is_staff required views to those that are members of the specified LDAP group
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    "is_staff": env("LDAP_SUPERUSER_GROUP_DN", "cn=superuser,ou=group,dc=example,dc=com"),
-    "is_superuser": env("LDAP_SUPERUSER_GROUP_DN", "cn=superuser,ou=group,dc=example,dc=com"),
+    'is_staff': env('LDAP_SUPERUSER_GROUP_DN', 'cn=superuser,ou=group,dc=example,dc=com'),
+    'is_superuser': env('LDAP_SUPERUSER_GROUP_DN', 'cn=superuser,ou=group,dc=example,dc=com'),
 }
 
 # This is the default, but I like to be explicit.

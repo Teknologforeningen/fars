@@ -8,6 +8,10 @@ thead.fc-head {
 .fc-time {
   font-weight: bold;
 }
+.fc-month-view {
+  /* The month calendar can get a bit too close to the bottom of the page in some cases */
+  padding-bottom: 30px;
+}
 td.fc-past {
   color: #999;
 }

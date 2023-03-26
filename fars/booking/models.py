@@ -2,12 +2,9 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
 from django.utils.translation import gettext as _
-from datetime import timedelta, datetime
-import time
-
+from .gcal import GCalCreateEventThread, GCalUpdateEventThread, GCalDeleteEventThread
+from copy import deepcopy
 import logging
 
 # These are the choices used in the bookable model.
@@ -54,6 +51,10 @@ class Bookable(models.Model):
     # BILL device ID if BILL check is needed. If null no BILL check will be performed
     bill_device_id = models.PositiveIntegerField(null=True, blank=True, default=None, help_text=_('BILL device ID if BILL check is needed. If empty no BILL check will be performed'))
 
+    google_calendar_id = models.CharField(max_length=64, blank=True, default='', help_text=_('If provided, bookings will be added to the Google Calendar with this ID. Make sure that the Google service account used for FARS has access to this calendar.'))
+
+    google_calendar_event_location = models.CharField(max_length=128, blank=True, default='', help_text=_('The location to use for events created for the Google Calendar.'))
+
     def __str__(self):
         return self.name
 
@@ -68,17 +69,9 @@ class Bookable(models.Model):
         return Timeslot.objects.filter(bookable=self)
 
 
-def convert_time_to_closest_datetime(timestamp, datetimestamp):
-    # timestamp = time struct https://docs.python.org/3/library/time.html#time.struct_time
-    # datetimestamp = datetime object https://docs.python.org/3/library/datetime.html#datetime-objects
-    # This function returns a datetime object of the timeslot string regarding the received datetime object (dt)
-    # The converted datetime object has the same weekday, hour and minute as the time struct
-    return (datetimestamp + timedelta(timestamp.tm_wday - datetimestamp.weekday())).replace(hour=timestamp.tm_hour, minute=timestamp.tm_min)
-
 class Timeslot(models.Model):
-
     def __str__(self):
-        return "{} {} - {} {}".format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
+        return '{} {} - {} {}'.format(self.start_weekday, self.start_time, self.end_weekday, self.end_time)
 
     class Weekdays(models.TextChoices):
         # ISO 8601
@@ -133,20 +126,30 @@ class RepeatedBookingGroup(models.Model):
 class Booking(models.Model):
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    start = models.DateTimeField(_("start"))
-    end = models.DateTimeField(_("end"))
-    comment = models.CharField(_("comment"), max_length=128)
+    start = models.DateTimeField(_('start'))
+    end = models.DateTimeField(_('end'))
+    comment = models.CharField(_('comment'), max_length=128)
     repeatgroup = models.ForeignKey(RepeatedBookingGroup, blank=True, null=True, on_delete=models.CASCADE, default=None)
     metadata = models.CharField(max_length=256, blank=True, null=True, default=None)
     booking_group = models.ForeignKey(Group, blank=True, null=True, on_delete=models.SET_NULL)
 
+    # For gcal integration only
+    emails = []
+    recurrence = None
+
     class Meta:
-        verbose_name = _("Booking")
-        verbose_name_plural = _("Bookings")
-        ordering = ["start"]
+        verbose_name = _('Booking')
+        verbose_name_plural = _('Bookings')
+        ordering = ['start']
 
     def __str__(self):
-        return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+        return '{}, {}'.format(self.comment, self.start.strftime('%Y-%m-%d %H:%M'))
+
+    def copy(self):
+        booking = Booking.objects.get(pk=self.pk)
+        booking.emails = self.emails
+        booking.recurrence = self.recurrence
+        return booking
 
     def get_booker_groups(self):
         allowed_groups = []
@@ -165,10 +168,41 @@ class Booking(models.Model):
             )
         return list(overlapping)
 
+    def get_gcalevent(self):
+        return self.gcalevent if hasattr(self, 'gcalevent') else None
+
+    # Override save() method to be able to create Google Calendar events
+    def save(self, is_repetition=False, *args, **kwargs):
+        super(Booking, self).save(*args, **kwargs)
+
+        # Skip Google Calendar event handling if:
+        #  - Bookable is not set up with GCal
+        #  - If Booking is a repeated Booking
+        # XXX: How to get the event ID of the repeated events to the repeated bookings?
+        if is_repetition or not self.bookable.google_calendar_id:
+            return
+
+        gcalevent = self.get_gcalevent()
+        if not gcalevent:
+            # Can not pass this Booking directly because it is not thread-safe. For example creation of repeated Bookings reuse the same Bookings object for each repetition, which could mess everything up for the other thread.
+            GCalCreateEventThread(self.copy()).start()
+        else:
+            GCalUpdateEventThread(gcalevent, self.copy()).start()
+
+    # Override delete() method to remove Google Calendar events
+    def delete(self, *args, **kwargs):
+        gcalevent = self.get_gcalevent()
+        if gcalevent:
+            # XXX: Recurring events will not be deleted unless this is the first booking in the series (the repeated bookings do not refer to any GCalEvent)
+            GCalDeleteEventThread(gcalevent).start()
+
+        super(Booking, self).delete(*args, **kwargs)
+
+
     def clean(self):
         # Check that end is not earlier than start
         if self.end <= self.start:
-            raise ValidationError(_("Booking cannot end before it begins"))
+            raise ValidationError(_('Booking cannot end before it begins'))
 
         # Check that the booking's start and end times match a defined booking slot if bookable has slots
         timeslots = self.bookable.get_time_slots()
@@ -181,8 +215,15 @@ class Booking(models.Model):
                     valid_slot_found = True
                     break
             if not valid_slot_found:
-                raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
+                raise ValidationError(_('Booking end time is not according to the predefined booking timeslots.'))
 
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():
-            raise ValidationError(_("Group booking is not allowed with the provided user and group"))
+            raise ValidationError(_('Group booking is not allowed with the provided user and group'))
+
+class GCalEvent(models.Model):
+    event_id = models.CharField(max_length=64, primary_key=True)
+    booking = models.OneToOneField(Booking, on_delete=models.SET_NULL, null=True)
+
+    def get_calendar_id(self):
+        return self.booking.bookable.google_calendar_id if self.booking else None
