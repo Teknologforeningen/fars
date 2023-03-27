@@ -70,7 +70,11 @@
           </a>
         </div>
         {% empty %}
-          {% trans "There are no bookables, add some through the admin interface." %}
+          {% if user.is_authenticated %}
+            {% trans "There are no bookables, add some through the admin interface." %}
+          {% else %}
+            {% trans "There are no public bookables, more bookables may be visible after logging in." %}
+          {% endif %}
         {% endfor %}
       </div>
     </div>

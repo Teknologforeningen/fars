@@ -223,9 +223,13 @@ msgstr "Logga ut"
 msgid "Login"
 msgstr "Logga in"
 
-#: booking/templates/base.html:68
+#: booking/templates/base.html:74
 msgid "There are no bookables, add some through the admin interface."
 msgstr "Det finns inga bokningsobjekt, skapa dem i admin interfacen"
+
+#: booking/templates/base.html:76
+msgid "There are no public bookables, more bookables may be visible after logging in."
+msgstr "Det finns inga allmänna bokningsobjekt, fler objekt kan vara synliga efter inloggning."
 
 #: booking/templates/book.html:9 booking/templates/book.html:11
 #, python-format
