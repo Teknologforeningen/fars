@@ -14,7 +14,7 @@ class BookingFilter(filters.FilterSet):
     # Fields where the defualt filter type is overridden
     bookable = filters.CharFilter(field_name='bookable__id_str')
     username = filters.CharFilter(field_name='user__username')
-    booking_group = filters.CharFilter(field_name='booking_group')
+    booking_group = filters.CharFilter(field_name='booking_group__name')
 
     class Meta:
         model = Booking
