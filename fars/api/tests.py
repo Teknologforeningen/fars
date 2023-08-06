@@ -39,7 +39,7 @@ class BaseAPITest(APITestCase):
         self.admin_group.user_set.add(self.admin)
 
         # Public bookable
-        Bookable.objects.create(public=True, hidden=False, id_str='public')
+        self.bookable = Bookable.objects.create(public=True, hidden=False, id_str='public')
 
         # Restricted public bookable
         Bookable.objects.create(public=True, hidden=False, id_str='publicrestricted').booking_restriction_groups.set([self.restriction_group])
@@ -109,6 +109,12 @@ class BookablesAPITest(BaseAPITest):
         # Should see all bookables
         self.assertEqual(M, len(self.get_bookables()))
 
+    def test_post(self):
+        # Should not be able to POST using the API
+        self.login_superuser()
+        response = self.client.post('/api/bookables', {'name': 'My Bookable'})
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED, response.data)
+
 
 class BookingsAPITest(BaseAPITest):
     def get_bookings(self, bookable=None, booking_group=''):
@@ -150,6 +156,12 @@ class BookingsAPITest(BaseAPITest):
         self.assertEqual(M*N, len(self.get_bookings()))
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
+
+    def test_post(self):
+        # Should not be able to POST using the API
+        self.login_superuser()
+        response = self.client.post('/api/bookings', {'bookable': self.bookable.id, 'user': self.user2.id, 'start': t2, 'end': plus_one_day(t2)})
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED, response.data)
 
     def test_pagination(self):
         self.login_superuser()
