@@ -10,6 +10,8 @@ def plus_one_day(d):
 t1 = plus_one_day(timezone.now())
 t2 = plus_one_day(t1)
 
+# Number of bookables
+M = 6
 # Bookings per bookable
 N = 4
 
@@ -95,24 +97,22 @@ class BookablesAPITest(BaseAPITest):
     def test_for_user_part_of_restriction_group(self):
         self.login_user_part_of_restriction_group()
         # Should see all bookables
-        self.assertEqual(6, len(self.get_bookables()))
+        self.assertEqual(M, len(self.get_bookables()))
 
     def test_for_user_part_of_admin_group(self):
         self.login_user_part_of_admin_group()
         # Should see all bookables
-        self.assertEqual(6, len(self.get_bookables()))
+        self.assertEqual(M, len(self.get_bookables()))
 
     def test_for_superuser(self):
         self.login_superuser()
         # Should see all bookables
-        self.assertEqual(6, len(self.get_bookables()))
+        self.assertEqual(M, len(self.get_bookables()))
 
 
 class BookingsAPITest(BaseAPITest):
-    def get_bookings(self, bookable=None):
-        url = '/api/bookings'
-        if bookable:
-            url += f'?bookable={bookable.id_str}'
+    def get_bookings(self, bookable=None, booking_group=''):
+        url = f'/api/bookings?bookable={bookable.id_str if bookable else ""}&booking_group={booking_group}'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()['results']
@@ -133,21 +133,21 @@ class BookingsAPITest(BaseAPITest):
     def test_for_user_part_of_restriction_group(self):
         self.login_user_part_of_restriction_group()
         # Should see all bookings
-        self.assertEqual(6*N, len(self.get_bookings()))
+        self.assertEqual(M*N, len(self.get_bookings()))
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
 
     def test_for_user_part_of_admin_group(self):
         self.login_user_part_of_admin_group()
         # Should see all bookings
-        self.assertEqual(6*N, len(self.get_bookings()))
+        self.assertEqual(M*N, len(self.get_bookings()))
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
 
     def test_for_superuser(self):
         self.login_superuser()
         # Should see all bookings
-        self.assertEqual(6*N, len(self.get_bookings()))
+        self.assertEqual(M*N, len(self.get_bookings()))
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
 
@@ -156,9 +156,15 @@ class BookingsAPITest(BaseAPITest):
         response = self.client.get('/api/bookings?limit=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         json = response.json()
-        self.assertEqual(6*N, json['count'])
+        self.assertEqual(M*N, json['count'])
         self.assertEqual(1, len(json['results']))
         self.assertEqual(None, json['previous'])
+
+    def test_booking_group_filter(self):
+        self.login_superuser()
+        self.assertEqual(0, len(self.get_bookings(booking_group='invalid')))
+        self.assertEqual(M, len(self.get_bookings(booking_group='common')))
+
 
 class GenerikeyAPITest(BaseAPITest):
     def get_bookings(self, bookable=None):
@@ -171,7 +177,7 @@ class GenerikeyAPITest(BaseAPITest):
 
     def test_for_anonymous_users(self):
         # Should see bookings on the two public bookables
-        self.assertEqual(6*N, len(self.get_bookings()))
+        self.assertEqual(M*N, len(self.get_bookings()))
         for bookable in Bookable.objects.all():
             self.assertEqual(N, len(self.get_bookings(bookable)))
 
