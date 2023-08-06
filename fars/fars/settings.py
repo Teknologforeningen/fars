@@ -103,6 +103,26 @@ if not DEBUG:
             },
         },
     }
+'''
+else:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            }
+        },
+        'loggers': {
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+            },
+        },
+    }
+'''
+
 
 WSGI_APPLICATION = 'fars.wsgi.application'
 
