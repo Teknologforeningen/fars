@@ -88,7 +88,7 @@ if not DEBUG:
             'file': {
                 'level': 'INFO',
                 'class': 'logging.FileHandler',
-                'filename': '/var/log/fars/info.log',
+                'filename': env('LOG_FILE', '/var/log/fars/info.log'),
             },
         },
         'loggers': {
