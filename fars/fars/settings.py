@@ -174,7 +174,7 @@ DATETIME_FORMAT = 'Y-m-d, H:i'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR,'booking/static')
+STATIC_ROOT = env('STATIC_ROOT', None)
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
