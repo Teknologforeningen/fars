@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from rest_framework import viewsets, generics, pagination
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters import rest_framework as filters
@@ -9,12 +10,12 @@ import datetime
 
 class BookingFilter(filters.FilterSet):
     # Custom filter fields
-    before = filters.IsoDateTimeFilter(field_name='start', lookup_expr='lte')
-    after = filters.IsoDateTimeFilter(field_name='end', lookup_expr='gte')
+    before = filters.IsoDateTimeFilter(field_name='start', lookup_expr='lte', label=_('Booking starts before'))
+    after = filters.IsoDateTimeFilter(field_name='end', lookup_expr='gte', label=_('Booking ends after'))
     # Fields where the defualt filter type is overridden
-    bookable = filters.CharFilter(field_name='bookable__id_str')
-    username = filters.CharFilter(field_name='user__username')
-    booking_group = filters.CharFilter(field_name='booking_group__name')
+    bookable = filters.CharFilter(field_name='bookable__id_str', label=_('Bookable id_str is'))
+    username = filters.CharFilter(field_name='user__username', label=_('User username is'))
+    booking_group = filters.CharFilter(field_name='booking_group__name', label=_('Booking group name is'))
 
     class Meta:
         model = Booking
