@@ -20,8 +20,10 @@ jobs:
     - name: Install latest pip
       run: python -m pip install --upgrade pip
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+        sudo apt install libsasl2-dev python3-dev libldap2-dev libssl-dev
+        pip install -r requirements.txt
     - name: Apply migrations
-      run: python teknologr/manage.py migrate
+      run: python fars/manage.py migrate
     - name: Run tests
-      run: python teknologr/manage.py test teknologr
+      run: python fars/manage.py test fars
