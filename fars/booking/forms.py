@@ -1,9 +1,9 @@
 from django import forms
-from booking.models import Booking, RepeatedBookingGroup
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms.widgets import PasswordInput, TextInput, DateInput
-from datetime import datetime, timedelta, date
+from django.utils import timezone
 from django.utils.translation import gettext as _
+from booking.models import Booking, RepeatedBookingGroup
 
 
 class DateTimeWidget(forms.widgets.MultiWidget):
@@ -28,7 +28,7 @@ class DateTimeField(forms.fields.MultiValueField):
         super(DateTimeField, self).__init__(list_fields, *args, **kwargs)
 
     def compress(self, values):
-        return datetime.strptime("{}T{}".format(*values), "%Y-%m-%dT%H:%M:%S")
+        return timezone.datetime.strptime("{}T{}".format(*values), "%Y-%m-%dT%H:%M:%S")
 
 
 class BookingForm(forms.ModelForm):
@@ -52,9 +52,13 @@ class BookingForm(forms.ModelForm):
         }
 
     def clean_start(self):
-        start = self.cleaned_data['start']
+        start = timezone.make_aware(self.cleaned_data['start'])
+        now = timezone.now()
         # If start is in the past, make it "now"
-        return datetime.now() if start < datetime.now() else start
+        return now if start < now else start
+
+    def clean_end(self):
+        return timezone.make_aware(self.cleaned_data['end'])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -62,7 +66,6 @@ class BookingForm(forms.ModelForm):
         start = cleaned_data.get("start")
         end = cleaned_data.get("end")
         user = cleaned_data.get('user')
-        group = cleaned_data.get('booking_group')
 
         # Check that user has permissions to book bookable
         restriction_groups = bookable.booking_restriction_groups.all()
@@ -71,7 +74,7 @@ class BookingForm(forms.ModelForm):
 
         if bookable and start and end:
             # Check that booking does not violate bookable forward limit
-            if bookable.forward_limit_days > 0 and datetime.now() + timedelta(days=bookable.forward_limit_days) < end:
+            if bookable.forward_limit_days > 0 and timezone.now() + timezone.timedelta(days=bookable.forward_limit_days) < end:
                 raise forms.ValidationError(
                     _("{} may not be booked more than {} days in advance").format(bookable.name, bookable.forward_limit_days)
                 )
@@ -113,7 +116,7 @@ class CustomLoginForm(AuthenticationForm):
 
 class RepeatingBookingForm(forms.Form):
     frequency = forms.IntegerField(label=_('Frequency of repetitions (in days)'), initial=7)
-    repeat_until = forms.DateField(initial=date.today() + timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
+    repeat_until = forms.DateField(initial=timezone.now().date() + timezone.timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
 
     # creates all bookings in a repeated booking
     def save_repeating_booking_group(self, booking):
@@ -131,8 +134,8 @@ class RepeatingBookingForm(forms.Form):
             else:
                 booking.save()
             booking.pk = None
-            booking.start += timedelta(days=data.get('frequency'))
-            booking.end += timedelta(days=data.get('frequency'))
+            booking.start += timezone.timedelta(days=data.get('frequency'))
+            booking.end += timezone.timedelta(days=data.get('frequency'))
             
         return skipped_bookings
 
