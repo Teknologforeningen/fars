@@ -188,6 +188,13 @@ class RepeatedBookingGroup(models.Model):
 
 
 class Booking(models.Model):
+    class BookingsManager(models.Manager):
+        def get_queryset(self):
+            # Let's just always select the related objects as well
+            return super().get_queryset().select_related('bookable', 'user')
+
+    objects = BookingsManager()
+
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start = models.DateTimeField(_("start"))

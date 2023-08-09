@@ -88,7 +88,7 @@ if not DEBUG:
             'file': {
                 'level': 'INFO',
                 'class': 'logging.FileHandler',
-                'filename': '/var/log/fars/info.log',
+                'filename': env('LOG_FILE', '/var/log/fars/info.log'),
             },
         },
         'loggers': {
@@ -103,6 +103,26 @@ if not DEBUG:
             },
         },
     }
+'''
+else:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            }
+        },
+        'loggers': {
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+            },
+        },
+    }
+'''
+
 
 WSGI_APPLICATION = 'fars.wsgi.application'
 
@@ -154,7 +174,7 @@ DATETIME_FORMAT = 'Y-m-d, H:i'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR,'booking/static')
+STATIC_ROOT = env('STATIC_ROOT', None)
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
