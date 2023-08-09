@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
 from django.utils.translation import gettext as _
-from datetime import timedelta, datetime
 
 import logging
 
@@ -125,13 +124,6 @@ class Bookable(models.Model):
         return Timeslot.objects.filter(bookable=self)
 
 
-def convert_time_to_closest_datetime(timestamp, datetimestamp):
-    # timestamp = time struct https://docs.python.org/3/library/time.html#time.struct_time
-    # datetimestamp = datetime object https://docs.python.org/3/library/datetime.html#datetime-objects
-    # This function returns a datetime object of the timeslot string regarding the received datetime object (dt)
-    # The converted datetime object has the same weekday, hour and minute as the time struct
-    return (datetimestamp + timedelta(timestamp.tm_wday - datetimestamp.weekday())).replace(hour=timestamp.tm_hour, minute=timestamp.tm_min)
-
 class Timeslot(models.Model):
 
     def __str__(self):
@@ -241,7 +233,7 @@ class Booking(models.Model):
      - the booking has ended.
     '''
     def is_unbookable_by_user(self, user):
-        if self.end < datetime.now(self.start.tzinfo):
+        if self.end < self.start:
             return False, _("Bookings in the past may not be unbooked")
         if self.bookable.is_user_admin(user) or user == self.user or self.booking_group in user.groups.all():
             return True, ''
