@@ -1,100 +1,101 @@
 {% extends "modalcontent.html" %}
 {% load i18n %}
+
 {% block title %}
 {% blocktrans %} Booking of {{ booking.bookable }} {% endblocktrans %}
 {% endblock %}
+
 {% block body %}
 <div class="container">
-    <div class="row">
-        <div class="col-3 font-weight-bold">
-            {% trans "Booked by:" %}
-        </div>
-        <div class="col-9">
-            {% if booking.user.first_name and booking.user.last_name %}
-                {{booking.user.first_name}} {{booking.user.last_name}}
-            {% else %}
-                {{booking.user.username}}
-            {% endif %}
-        </div>
+  <div class="row">
+    <div class="col-3 font-weight-bold">
+      {% trans "Booked by:" %}
     </div>
-    <div class="row">
-        <div class="col-3 font-weight-bold">
-            {% trans "Start:" %}
-        </div>
-        <div class="col-9">
-            {{booking.start}}
-        </div>
+    <div class="col-9">
+      {% if booking.user.first_name and booking.user.last_name %}
+        {{booking.user.first_name}} {{booking.user.last_name}}
+      {% else %}
+        {{booking.user.username}}
+      {% endif %}
     </div>
-    <div class="row">
-        <div class="col-3 font-weight-bold">
-            {% trans "End:" %}
-        </div>
-        <div class="col-9">
-            {{booking.end}}
-        </div>
+  </div>
+  <div class="row">
+    <div class="col-3 font-weight-bold">
+      {% trans "Start:" %}
     </div>
-    <div class="row">
-        <div class="col-3 font-weight-bold">
-            {% trans "Comment:" %}
-        </div>
-        <div class="col-9">
-            {{booking.comment}}
-        </div>
+    <div class="col-9">
+      {{booking.start}}
     </div>
-    <div class="row">
-        <div class="col-3 font-weight-bold">
-            {% trans "Group:" %}
-        </div>
-        <div class="col-9">
-          {% if booking.booking_group %}
-            {{booking.booking_group}}
-          {% else %}
-            {% trans "Private booking" %}
-          {% endif %}
-          
-        </div>
+  </div>
+  <div class="row">
+    <div class="col-3 font-weight-bold">
+      {% trans "End:" %}
     </div>
+    <div class="col-9">
+      {{booking.end}}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-3 font-weight-bold">
+      {% trans "Comment:" %}
+    </div>
+    <div class="col-9">
+      {{booking.comment}}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-3 font-weight-bold">
+      {% trans "Group:" %}
+    </div>
+    <div class="col-9">
+      {% if booking.booking_group %}
+        {{booking.booking_group}}
+      {% else %}
+        {% trans "Private booking" %}
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block footer %}
-  {% if unbookable %}
-    {% load tags %}
-    <div class="form-inline">
-      {% if booking.repeatgroup %}
-        <label for="repeat-select" class="m-1">{% trans "Unbook repeated booking:" %}</label>
-        <select id="repeat-select" class="form-control m-1">
-          <option value="0">{% trans "This event only" %}</option>
-          <option value="1">{% trans "This event and subsequent events in series" %}</option>
-          <option value="2">{% trans "All events in this series" %}</option>
-        </select>
-      {% endif %}
-      <button id="unbookbutton" class="btn btn-warning m-1">
+{% if unbookable %}
+  {% load tags %}
+  <div class="form-inline">
+    {% if booking.repeatgroup %}
+      <label for="repeat-select" class="m-1">{% trans "Unbook repeated booking:" %}</label>
+      <select id="repeat-select" class="form-control m-1">
+        <option value="0">{% trans "This event only" %}</option>
+        <option value="1">{% trans "This event and subsequent events in series" %}</option>
+        <option value="2">{% trans "All events in this series" %}</option>
+      </select>
+    {% endif %}
+    <button id="unbookbutton" class="btn btn-warning m-1">
       {% if is_admin %}
         {% trans "Admin unbook" %}
       {% else %}
         {% trans "Unbook" %}
       {% endif %}
-      </button>
-    </div>
-    <script type="text/javascript">
-      $('#unbookbutton').click(function(event) {
-        var data = {}
-        var repeatSelect = $('#repeat-select');
-        if (repeatSelect.length) {
-          data.repeat = repeatSelect.val();
+    </button>
+  </div>
+  <script type="text/javascript">
+    $('#unbookbutton').click(function (event) {
+      var data = {}
+      var repeatSelect = $('#repeat-select');
+      if (repeatSelect.length) {
+        data.repeat = repeatSelect.val();
+      }
+      $.ajax({
+        url: '{{url}}' + '?' + $.param(data),
+        type: 'DELETE',
+        success: function (data) {
+          $('#calendar').fullCalendar('refetchEvents');
+          $('#modalBox').modal('hide');
         }
-        $.ajax({
-          url: '{{url}}' + '?' + $.param(data),
-          type: 'DELETE',
-          success: function(data) {
-            $('#calendar').fullCalendar('refetchEvents');
-            $('#modalBox').modal('hide');
-          }
-        })
-      });
-    </script>
-  {% else %}
-    <div class="alert alert-warning">{{warning}}</div>
-  {% endif %}
+      })
+    });
+  </script>
+{% else %}
+  <div class="alert alert-warning">{{warning}}</div>
+{% endif %}
 {% endblock %}
