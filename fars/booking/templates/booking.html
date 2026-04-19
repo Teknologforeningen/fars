@@ -55,6 +55,18 @@
       {% endif %}
     </div>
   </div>
+  <div class="row">
+    <div class="col-3 font-weight-bold">
+      {% trans "Repeating:" %}
+    </div>
+    <div class="col-9">
+      {% if booking.repeatgroup %}
+        {% trans "Yes" %}, {{ booking.repeatgroup.count }} {% trans "booking(s)" %}
+      {% else %} 
+        {% trans "No" %}
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
 

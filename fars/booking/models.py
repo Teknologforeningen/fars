@@ -174,6 +174,9 @@ class RepeatedBookingGroup(models.Model):
     def __str__(self):
         return self.name
 
+    def count(self):
+        return self.booking_set.count()
+
     def delete_from_date_forward(self, date):
         bookings = self.booking_set.filter(start__gte=date)
         bookings.delete()
