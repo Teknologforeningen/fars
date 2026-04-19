@@ -60,7 +60,6 @@
 
 {% block footer %}
 {% if unbookable %}
-  {% load tags %}
   <div class="form-inline">
     {% if booking.repeatgroup %}
       <label for="repeat-select" class="m-1">{% trans "Unbook repeated booking:" %}</label>
