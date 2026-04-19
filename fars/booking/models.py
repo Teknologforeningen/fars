@@ -222,7 +222,7 @@ class Booking(models.Model):
         )
 
     def __str__(self):
-        return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+        return f"{self.start.strftime('%Y-%m-%d %H:%M')}: {self.comment}"
 
     '''
     Check if a certain user can unbook this booking. Unbookable if the user

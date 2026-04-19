@@ -23,24 +23,57 @@ $(document).ready(function() {
     );
   });
   $('#bookform').submit(function(event) {
+    let repeating = false;
     if($('#repeat-form-wrapper').hasClass('show')) {
+      repeating = true;
       var postdata = $(this).serialize()+'&repeat=1&'+$('#repeatform').serialize();
     } else {
       var postdata = $(this).serialize();
     }
     $.post($(this).data('url'), postdata)
       .done(function(data) {
+        // XXX: Return HTML directly instead of JSON?
+        // XXX: Translations?
+
         $('#calendar').fullCalendar('refetchEvents');
-        if (data.hasOwnProperty('skipped_bookings') && data.skipped_bookings.length > 0) {
-          $('#modalBox').find('.modal-title').html(
-            '<strong>Booking succeeded with the following exceptions:</strong>'
-          );
-          $('#modalBox').find('.modal-body').html(
-            'Following bookings were skipped because of overlaps:'
-          );
-          $('#modalBox').find('.modal-body').append(makeUL(data.skipped_bookings));
+        const modal = $('#modalBox');
+
+        if (!repeating) {
+          modal.modal('hide');
+          return;
+        }
+
+        // Possible outcomes when creating repeating bookings:
+        //  1. All repetitions were created
+        //  2. Some repetitions were created, but not all
+        //  3. No repetitions were created (should be impossible since the first should always succeed)
+        //  4. No repetitions were created, but none were created either (XXX: currently not impossible, but should eventually be once the form validation is fixed)
+        const created = data.created_bookings || [];
+        const skipped = data.skipped_bookings || [];
+
+        if (created.length && !skipped.length) {
+            // 1.
+            modal.modal('hide');
+            return;
+        }
+
+        const title = modal.find('.modal-title');
+        const body =  modal.find('.modal-body');
+
+        if (created.length) {
+          // 2.
+          title.html('<strong>Booking succeeded with exceptions</strong>');
+          body.html(`<p>Successfully created ${created.length} repeating booking(s).</p>`);
         } else {
-          $('#modalBox').modal('hide');
+          // 3. or 4.
+          title.html('<strong>Booking failed</strong>');
+          body.html('<p>No repeating bookings were created.</p>');
+        }
+
+        if (skipped.length) {
+          // 2. or 3.
+          body.append(`<p>The following ${skipped.length} repetition(s) could not be created due to overlapping with existing bookings:</p>`);
+          body.append(makeUL(skipped));
         }
       }).fail(function(data){
         $('#modalBox').find('.modal-content').html(data.responseText);

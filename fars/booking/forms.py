@@ -109,25 +109,32 @@ class RepeatingBookingForm(forms.Form):
     frequency = forms.IntegerField(label=_('Frequency of repetitions (in days)'), initial=7)
     repeat_until = forms.DateField(initial=timezone.now().date() + timezone.timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
 
-    # creates all bookings in a repeated booking
-    def save_repeating_booking_group(self, booking):
+    def save_repeating_booking_group(self, booking: Booking):
+        """
+        Creates repetitions of the given booking, according to the interval set in the form. The given Booking is assumed to not yet be saved.
+
+        Returns:
+          - list of strings of bookings that were successfully created
+          - list of strings of bookings that could not be created due to overlapping bookings
+        """
         data = self.cleaned_data
         group = RepeatedBookingGroup.objects.create(name=booking.comment)
         group.save()
         booking.repeatgroup = group
+        created_bookings = []
         skipped_bookings = []
 
-        # Copy booking for every repetition
+        # Reuse the same Booking object for all repetitions
         while(booking.start.date() <= data.get('repeat_until')):
             try:
                 booking.full_clean()
                 booking.save()
+                created_bookings.append(str(booking))
             except forms.ValidationError as e:
                 skipped_bookings.append(str(booking))
 
             booking.pk = None
             booking.start += timezone.timedelta(days=data.get('frequency'))
             booking.end += timezone.timedelta(days=data.get('frequency'))
-            
-        return skipped_bookings
 
+        return created_bookings, skipped_bookings
