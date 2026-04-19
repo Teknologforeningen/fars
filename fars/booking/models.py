@@ -248,18 +248,25 @@ class Booking(models.Model):
 
         return allowed_groups
 
-    def get_overlapping_bookings(self):
-        overlapping = Booking.objects.filter(
+    def get_overlapping_bookings_q(self):
+        q = Booking.objects.filter(
             bookable=self.bookable,
             start__lt=self.end,
-            end__gt=self.start
-            )
-        return list(overlapping)
+            end__gt=self.start,
+        )
+        if self.pk:
+            q = q.exclude(pk=self.pk)
+        return q
 
     def clean(self):
         # Check that end is not earlier than start
         if self.end <= self.start:
             raise ValidationError(_("Booking cannot end before it begins"))
+
+        # XXX: Would also make sense to check that the booking does not start in the past here, but there would be a few complications with that:
+        #  - If a user wants to start a booking right now, this check would always execute a bit later than the set start time, which would make it always fail
+        #  - The admin interface also executes clean() when creating new objects, and for testing/debugging purposes it is nice to be able to create past bookings
+        #  - Updating past or ongoing bookings through the admin interface (or through the public UI at some point?) would become impossible too
 
         # Check that the booking's start and end times match a defined booking slot if bookable has slots
         timeslots = self.bookable.get_time_slots()
@@ -277,3 +284,7 @@ class Booking(models.Model):
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():
             raise ValidationError(_("Group booking is not allowed with the provided user and group"))
+
+        overlaps_q = self.get_overlapping_bookings_q()
+        if overlaps_q.exists():
+            raise ValidationError(_("Booking overlaps with existing booking(s)") + f": [{', '.join([str(b) for b in overlaps_q])}]")

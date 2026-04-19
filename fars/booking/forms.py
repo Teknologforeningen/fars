@@ -87,15 +87,6 @@ class BookingForm(forms.ModelForm):
                     _("{} may not be booked for longer than {} hours").format(bookable.name, bookable.length_limit_hours)
                 )
 
-            # Check that booking does not overlap with previous bookings
-            overlapping = Booking.objects.filter(bookable=bookable, start__lt=end, end__gt=start)
-            if overlapping:
-                warning = _("Error: Requested booking is overlapping with the following bookings:")
-                errors = [forms.ValidationError(warning)]
-                for booking in overlapping:
-                    errors.append(forms.ValidationError('• ' + str(booking)))
-                raise forms.ValidationError(errors)
-
         return cleaned_data
 
     def get_metadata_field_names(self):
@@ -128,11 +119,12 @@ class RepeatingBookingForm(forms.Form):
 
         # Copy booking for every repetition
         while(booking.start.date() <= data.get('repeat_until')):
-            overlapping = booking.get_overlapping_bookings()
-            if overlapping:
-                skipped_bookings.append(str(booking))
-            else:
+            try:
+                booking.full_clean()
                 booking.save()
+            except forms.ValidationError as e:
+                skipped_bookings.append(str(booking))
+
             booking.pk = None
             booking.start += timezone.timedelta(days=data.get('frequency'))
             booking.end += timezone.timedelta(days=data.get('frequency'))
