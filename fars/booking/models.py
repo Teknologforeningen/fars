@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 import logging
@@ -178,8 +179,10 @@ class RepeatedBookingGroup(models.Model):
         return self.booking_set.count()
 
     def delete_from_date_forward(self, date):
-        bookings = self.booking_set.filter(start__gte=date)
-        bookings.delete()
+        # Do not delete past bookings, and only end ongoing bookings
+        date.replace(hour=0, minute=0, second=0, microsecond=0)
+        for b in self.booking_set.filter(start__gte=date):
+            b.unbook()
 
 
 class Booking(models.Model):
@@ -236,11 +239,15 @@ class Booking(models.Model):
      - the booking has ended.
     '''
     def is_unbookable_by_user(self, user):
-        if self.end < self.start:
+        if self.end <= timezone.now():
             return False, _("Bookings in the past may not be unbooked")
         if self.bookable.is_user_admin(user) or user == self.user or self.booking_group in user.groups.all():
             return True, ''
         return False, _("Only the user or group that made the booking may unbook it")
+
+    def is_ongoing(self):
+        now = timezone.now()
+        return self.start < now and self.end > now
 
     def get_booker_groups(self):
         allowed_groups = []
@@ -291,3 +298,16 @@ class Booking(models.Model):
         overlaps_q = self.get_overlapping_bookings_q()
         if overlaps_q.exists():
             raise ValidationError(_("Booking overlaps with existing booking(s)") + f": [{', '.join([str(b) for b in overlaps_q])}]")
+
+    def unbook(self):
+        """
+        Unbook this booking. If the booking is ongoing, end it immediately, and if the booking is in the future, delete it. Do not touch past bookings.
+        """
+        now = timezone.now()
+        if self.end <= now:
+            return
+        if self.start < now:
+            self.end = now
+            self.save()
+        else:
+            self.delete()

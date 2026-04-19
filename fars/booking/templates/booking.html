@@ -17,6 +17,9 @@
       {% else %}
         {{booking.user.username}}
       {% endif %}
+      {% if is_owner %}
+        {% trans "(you)" %}
+      {% endif %}
     </div>
   </div>
   <div class="row">
@@ -81,11 +84,24 @@
         <option value="2">{% trans "All events in this series" %}</option>
       </select>
     {% endif %}
-    <button id="unbookbutton" class="btn btn-warning m-1">
-      {% if is_admin %}
-        {% trans "Admin unbook" %}
+    <button
+      id="unbookbutton"
+      class="btn btn-warning m-1"
+      {% if not unbookable %}
+        disabled
+        title="{{warning}}"
+      {% endif %}
+    >
+      {% if is_ongoing %}
+        {% trans "End" %}
+        {% if is_admin and not is_owner %}
+          {% trans "(admin)" %}
+        {% endif %}
       {% else %}
         {% trans "Unbook" %}
+        {% if is_admin and not is_owner %}
+          {% trans "(admin)" %}
+        {% endif %}
       {% endif %}
     </button>
   </div>
@@ -106,7 +122,5 @@
       })
     });
   </script>
-{% else %}
-  <div class="alert alert-warning">{{warning}}</div>
 {% endif %}
 {% endblock %}
