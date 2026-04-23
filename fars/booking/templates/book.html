@@ -32,13 +32,23 @@
     {% for metadata_field in form.metadata_fields %}
       {% bootstrap_field metadata_field %}
     {% endfor %}
-
   </form>
-  {% if repeatform and is_admin %}
+
+  {% if repeatform %}
     <div id="toggle-wrapper">
-      <button id="repeat-toggle" class="btn btn-info" type="button" data-toggle="collapse" data-target="#repeat-form-wrapper" aria-expanded="false" aria-controls="repeat-form-wrapper">{% trans 'Make event repeating' %}</button>
+      <button
+        id="repeat-toggle"
+        class="btn btn-info"
+        type="button"
+        data-toggle="collapse"
+        data-target="#repeat-form-wrapper"
+        data-on="{% trans 'Event is repeating' %}"
+        data-off="{% trans 'Make event repeating' %}"
+        aria-expanded="{% if repeatform_show %}true{% else %}false{% endif %}"
+        aria-controls="repeat-form-wrapper"
+      ></button>
     </div>
-    <div id="repeat-form-wrapper" class="collapse">
+    <div id="repeat-form-wrapper" class="collapse {% if repeatform_show %}show{% endif %}">
       <form id="repeatform">
         {% csrf_token %}
         {% bootstrap_form_errors repeatform %}

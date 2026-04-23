@@ -106,8 +106,19 @@ class CustomLoginForm(AuthenticationForm):
 
 
 class RepeatingBookingForm(forms.Form):
-    frequency = forms.IntegerField(label=_('Frequency of repetitions (in days)'), initial=7)
-    repeat_until = forms.DateField(initial=timezone.now().date() + timezone.timedelta(days=365), widget=DateInput(attrs={'type': 'date'}))
+    frequency = forms.IntegerField(label=_('Frequency of repetitions (in days)'), initial=7, min_value=1)
+    repeat_until = forms.DateField(label=_('Repeat until'), widget=DateInput(attrs={'type': 'date'}))
+
+    def __init__(self, booking: Booking, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.booking = booking
+        self.fields['repeat_until'].initial = self.booking.start.date() + timezone.timedelta(days=365)
+
+    def clean_repeat_until(self):
+        repeat_until = self.cleaned_data['repeat_until']
+        if repeat_until < self.booking.start.date():
+            raise forms.ValidationError(_('Repeat until date cannot be before start date of the booking'))
+        return repeat_until
 
     def save_repeating_booking_group(self, booking: Booking):
         """

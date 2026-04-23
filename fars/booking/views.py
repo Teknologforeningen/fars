@@ -97,6 +97,7 @@ class BookView(View):
         self.context['bookable'] = bookable_obj
         self.context['user'] = request.user
         self.context['is_admin'] = bookable_obj.is_user_admin(request.user)
+        self.context['repeatform_show'] = False
 
         return super().dispatch(request, bookable)
 
@@ -112,8 +113,9 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form
 
+        # Add form for repeating bookings for admins of the bookable object
         if self.context['is_admin']:
-            self.context['repeatform'] = RepeatingBookingForm()
+            self.context['repeatform'] = RepeatingBookingForm(booking)
 
         return render(request, self.template, context=self.context)
 
@@ -124,27 +126,26 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(request.POST, instance=booking)
         self.context['form'] = form
 
-        if form.is_valid():
-            booking = form.instance
-            booking.metadata = json.dumps(form.get_cleaned_metadata())
-
-            if request.POST.get('repeat') and self.context['is_admin']:
-                repeatdata = {
-                    'frequency': request.POST.get('frequency'),
-                    'repeat_until': request.POST.get('repeat_until')
-                }
-                repeat_form = RepeatingBookingForm(repeatdata)
-                if repeat_form.is_valid():
-                    # Creates repeating bookings as specified, adding all created bookings to group
-                    skipped_bookings = repeat_form.save_repeating_booking_group(booking)
-                    return JsonResponse({'skipped_bookings': skipped_bookings})
-                else:
-                    return render(request, self.template, context=self.context, status=400)
-
-            else:
-                form.save()
-        else:
+        if not form.is_valid():
             return render(request, self.template, context=self.context, status=400)
+
+        booking = form.instance
+        booking.metadata = json.dumps(form.get_cleaned_metadata())
+
+        # Allow only bookable admins to create repeating bookings
+        if request.POST.get('repeat') and self.context['is_admin']:
+            self.context['repeatform_show'] = True
+            repeat_form = self.context['repeatform'] = RepeatingBookingForm(booking, request.POST)
+
+            if not repeat_form.is_valid():
+                return render(request, self.template, context=self.context, status=400)
+
+            # Creates repeating bookings as specified, adding all created bookings to group
+            created, skipped = repeat_form.save_repeating_booking_group(booking)
+            return JsonResponse({'created_bookings': created, 'skipped_bookings': skipped})
+
+        else:
+            form.save()
 
         booking.bookable.notify_external_services()
 

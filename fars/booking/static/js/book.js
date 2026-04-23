@@ -16,20 +16,36 @@ function makeUL(array) {
 
 
 $(document).ready(function() {
-  $('#repeat-toggle').click(function(){
-    $(this).toggleClass('btn-info').toggleClass('btn-success');
-    $(this).text(
-      ($(this).text() == 'Make event repeating') ? 'Event is repeating' : 'Make event repeating'
-    );
+  function isRepeating() {
+    return $('#repeat-form-wrapper').hasClass('show');
+  }
+
+  function setRepeatToggle(on) {
+    const btn = $('#repeat-toggle');
+    btn.toggleClass('btn-success', on);
+    btn.toggleClass('btn-info', !on);
+    btn.text(on ? btn.data('on') : btn.data('off'));
+  }
+
+  // Keep track of the repeat toggle state separately
+  setRepeatToggle(isRepeating());
+
+  // Toggle class and text of button when clicked
+  $('#repeat-toggle').click(() => {
+    // Prevent toggling during collapsing animation
+    if ($('#repeat-form-wrapper').hasClass('collapsing'))
+      return;
+
+    setRepeatToggle(!isRepeating());
   });
+
+  // Do POST request when submitting
   $('#bookform').submit(function(event) {
-    let repeating = false;
-    if($('#repeat-form-wrapper').hasClass('show')) {
-      repeating = true;
-      var postdata = $(this).serialize()+'&repeat=1&'+$('#repeatform').serialize();
-    } else {
-      var postdata = $(this).serialize();
-    }
+    const repeating = isRepeating();
+
+    let postdata = $(this).serialize();
+    if (repeating) postdata += '&repeat=1&' + $('#repeatform').serialize();
+
     $.post($(this).data('url'), postdata)
       .done(function(data) {
         // XXX: Return HTML directly instead of JSON?
@@ -80,6 +96,7 @@ $(document).ready(function() {
       });
     event.preventDefault();
   });
+
   $('#nowbutton').click(function() {
     let now = moment();
     $('#id_start_0').val(now.format('YYYY-MM-DD'));
