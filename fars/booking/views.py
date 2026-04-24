@@ -6,6 +6,7 @@ from django.views import View
 from booking.models import Booking, Bookable
 from booking.forms import RepeatingBookingForm
 from booking.metadata_forms import get_form_class
+from booking.gcal import create_gcal_url
 import dateutil.parser
 import json
 
@@ -173,6 +174,7 @@ class BookingView(View):
         self.context['unbookable'] = is_unbookable
         self.context['is_ongoing'] = booking.is_ongoing()
         self.context['warning']    = warning
+        self.context['gcal']       = create_gcal_url(booking)
 
         return super().dispatch(request, booking_id)
 
