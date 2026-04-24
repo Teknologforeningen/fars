@@ -241,9 +241,13 @@ class Booking(models.Model):
     def is_unbookable_by_user(self, user):
         if self.end <= timezone.now():
             return False, _("Bookings in the past may not be unbooked")
-        if self.bookable.is_user_admin(user) or user == self.user or self.booking_group in user.groups.all():
+        if self.bookable.is_user_admin(user):
             return True, ''
-        return False, _("Only the user or group that made the booking may unbook it")
+        if user != self.user and self.booking_group not in user.groups.all():
+            return False, _("Only the user or group that made the booking may unbook it")
+        if self.repeatgroup:
+            return False, _("Only admins can unbook repeating bookings")
+        return True, ''
 
     def is_ongoing(self):
         now = timezone.now()

@@ -74,48 +74,61 @@
 {% endblock %}
 
 {% block footer %}
-{% if unbookable %}
-  <div class="form-inline">
-    {% if booking.repeatgroup %}
-      <label for="repeat-select" class="m-1">{% trans "Unbook repeated booking:" %}</label>
-      <select id="repeat-select" class="form-control m-1">
+<div class="form d-flex">
+  {% if booking.repeatgroup %}
+    <div>
+      <label for="repeat-select" class="ml-1">
+        {% trans "Unbook repeating booking:" %}
+      </label>
+      <select
+        id="repeat-select"
+        class="form-control m-1"
+        {% if not unbookable %}
+          disabled
+          title="{{warning}}"
+        {% endif %}
+      >
         <option value="0">{% trans "This event only" %}</option>
         <option value="1">{% trans "This event and subsequent events in series" %}</option>
         <option value="2">{% trans "All events in this series" %}</option>
       </select>
+    </div>
+  {% endif %}
+
+  <button
+    id="unbookbutton"
+    class="btn btn-warning m-1 align-self-end"
+    {% if not unbookable %}
+      disabled
+      title="{{warning}}"
     {% endif %}
-    <button
-      id="unbookbutton"
-      class="btn btn-warning m-1"
-      {% if not unbookable %}
-        disabled
-        title="{{warning}}"
+  >
+    {% if is_ongoing %}
+      {% trans "End" %}
+      {% if is_admin and not is_owner %}
+        {% trans "(admin)" %}
       {% endif %}
-    >
-      {% if is_ongoing %}
-        {% trans "End" %}
-        {% if is_admin and not is_owner %}
-          {% trans "(admin)" %}
-        {% endif %}
-      {% else %}
-        {% trans "Unbook" %}
-        {% if is_admin and not is_owner %}
-          {% trans "(admin)" %}
-        {% endif %}
+    {% else %}
+      {% trans "Unbook" %}
+      {% if is_admin and not is_owner %}
+        {% trans "(admin)" %}
       {% endif %}
-    </button>
-  </div>
-  <script type="text/javascript">
-    $('#unbookbutton').click(function (event) {
-      var data = {}
-      var repeatSelect = $('#repeat-select');
+    {% endif %}
+  </button>
+</div>
+
+{% if unbookable %}
+  <script>
+    $('#unbookbutton').click(() => {
+      const data = {};
+      const repeatSelect = $('#repeat-select');
       if (repeatSelect.length) {
         data.repeat = repeatSelect.val();
       }
       $.ajax({
         url: '{{url}}' + '?' + $.param(data),
         type: 'DELETE',
-        success: function (data) {
+        success: () => {
           $('#calendar').fullCalendar('refetchEvents');
           $('#modalBox').modal('hide');
         }
