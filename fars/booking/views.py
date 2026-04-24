@@ -98,6 +98,7 @@ class BookView(View):
         self.context['bookable'] = bookable_obj
         self.context['user'] = request.user
         self.context['is_admin'] = bookable_obj.is_user_admin(request.user)
+        self.context['repeatform'] = None
         self.context['repeatform_show'] = False
 
         return super().dispatch(request, bookable)

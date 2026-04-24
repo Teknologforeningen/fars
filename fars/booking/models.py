@@ -17,6 +17,10 @@ METADATA_FORM_OPTIONS = (
     ('HB', 'Humpsbadet'),
 )
 
+UNBOOK_WARNING_IN_PAST   = _("Bookings in the past may not be unbooked")
+UNBOOK_WARNING_NOT_OWNER = _("Only the user or group that made the booking may unbook it")
+UNBOOK_WARNING_REPEATING = _("Only admins can unbook repeating bookings")
+
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 logger = logging.getLogger(__name__)
 
@@ -240,13 +244,13 @@ class Booking(models.Model):
     '''
     def is_unbookable_by_user(self, user):
         if self.end <= timezone.now():
-            return False, _("Bookings in the past may not be unbooked")
+            return False, UNBOOK_WARNING_IN_PAST
         if self.bookable.is_user_admin(user):
             return True, ''
         if user != self.user and self.booking_group not in user.groups.all():
-            return False, _("Only the user or group that made the booking may unbook it")
+            return False, UNBOOK_WARNING_NOT_OWNER
         if self.repeatgroup:
-            return False, _("Only admins can unbook repeating bookings")
+            return False, UNBOOK_WARNING_REPEATING
         return True, ''
 
     def is_ongoing(self):

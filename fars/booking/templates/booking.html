@@ -111,14 +111,16 @@
     {% endif %}
   >
     {% if is_ongoing %}
-      {% trans "End" %}
       {% if is_admin and not is_owner %}
-        {% trans "(admin)" %}
+        {% trans "End (admin)" %}
+      {% else %}
+        {% trans "End" %}
       {% endif %}
     {% else %}
-      {% trans "Unbook" %}
       {% if is_admin and not is_owner %}
-        {% trans "(admin)" %}
+        {% trans "Unbook (admin)" %}
+      {% else %}
+        {% trans "Unbook" %}
       {% endif %}
     {% endif %}
   </button>

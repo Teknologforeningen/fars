@@ -67,16 +67,20 @@ class BaseAPITest(APITestCase):
             Booking.objects.create(bookable=bookable, user=self.superuser, start=t1, end=t2)
 
     def login_user(self):
-        self.client.login(username='svakar', password='teknolog')
+        self.assertTrue(self.client.login(username='svakar', password='teknolog'))
+        return self.user1
 
     def login_user_part_of_restriction_group(self):
-        self.client.login(username='svatta', password='teknolog')
+        self.assertTrue(self.client.login(username='svatta', password='teknolog'))
+        return self.user2
 
     def login_user_part_of_admin_group(self):
-        self.client.login(username='admin', password='teknolog')
+        self.assertTrue(self.client.login(username='admin', password='teknolog'))
+        return self.admin
 
     def login_superuser(self):
-        self.client.login(username='superuser', password='teknolog')
+        self.assertTrue(self.client.login(username='superuser', password='teknolog'))
+        return self.superuser
 
 
 class BookablesAPITest(BaseAPITest):
