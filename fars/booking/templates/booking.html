@@ -64,7 +64,7 @@
     </div>
     <div class="col-9">
       {% if booking.repeatgroup %}
-        {% trans "Yes" %}, {{ booking.repeatgroup.count }} {% trans "booking(s)" %}
+        {% trans "Yes, booking" %} {{ booking.get_repeatgroup_index }}/{{ booking.repeatgroup.count }}
       {% else %} 
         {% trans "No" %}
       {% endif %}

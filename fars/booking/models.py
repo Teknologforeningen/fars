@@ -272,6 +272,11 @@ class Booking(models.Model):
             q = q.exclude(pk=self.pk)
         return q
 
+    def get_repeatgroup_index(self):
+        if not self.repeatgroup:
+            return 0
+        return self.repeatgroup.booking_set.filter(start__lte=self.start).count()
+
     def clean(self):
         # Check that end is not earlier than start
         if self.end <= self.start:
