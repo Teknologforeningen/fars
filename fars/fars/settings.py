@@ -33,6 +33,10 @@ DEBUG = env('DEBUG', True)
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS', 'localhost').split(" ")
 
+if env('IS_BEHIND_PROXY', False):
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 FARS_BASE_URL = env('FARS_BASE_URL')
 
 # Application definition
