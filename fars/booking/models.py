@@ -3,7 +3,8 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
-from django.utils.translation import gettext as _
+from django.utils import timezone
+from django.utils.translation import gettext, gettext_lazy as _
 
 import logging
 
@@ -15,6 +16,10 @@ METADATA_FORM_OPTIONS = (
     ('PI', 'Pi sauna'),
     ('HB', 'Humpsbadet'),
 )
+
+UNBOOK_WARNING_IN_PAST   = gettext("Bookings in the past may not be unbooked")
+UNBOOK_WARNING_NOT_OWNER = gettext("Only the user or group that made the booking may unbook it")
+UNBOOK_WARNING_REPEATING = gettext("Only admins can unbook repeating bookings")
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', _('Only alphanumeric characters are allowed.'))
 logger = logging.getLogger(__name__)
@@ -30,17 +35,17 @@ class Bookable(models.Model):
 
     # Hides the bookable in the home view
     hidden = models.BooleanField(default=False, help_text=_('Hides the bookable in the home view'))
-    
+
     # How far in the future bookings are allowed (zero means no limit)
     forward_limit_days = models.PositiveIntegerField(default = 0, help_text=_('How far in the future bookings are allowed (zero means no limit)'))
-    
+
     # How long bookings are allowed to be (zero means no limit)
     length_limit_hours = models.PositiveIntegerField(default = 0, help_text=_('How long bookings are allowed to be (zero means no limit)'))
     metadata_form = models.CharField(max_length=2, null=True, blank=True, default=None, choices=METADATA_FORM_OPTIONS)
-    
+
     # Groups that may be used to make group bookings for this bookable
     allowed_booker_groups = models.ManyToManyField(Group, blank=True, related_name='groupbooking', help_text=_('Groups that may be used to make group bookings for this bookable.'))
-    
+
     # Bookings for this bookable are restricted to members of these groups. 
     # If no groups are defined, any authenticated user may book.
     booking_restriction_groups = models.ManyToManyField(Group, blank=True, related_name='restricted', help_text=_('Bookings for this bookable are restricted to members of these groups. If no groups are defined, any authenticated user may book.'))
@@ -138,7 +143,7 @@ class Timeslot(models.Model):
         FRI = '5', _('Friday')
         SAT = '6', _('Saturday')
         SUN = '7', _('Sunday')
-        
+
     bookable = models.ForeignKey(Bookable, on_delete=models.CASCADE)
     start_time = models.TimeField(auto_now=False, auto_now_add=False)
     start_weekday = models.CharField(
@@ -174,9 +179,14 @@ class RepeatedBookingGroup(models.Model):
     def __str__(self):
         return self.name
 
+    def count(self):
+        return self.booking_set.count()
+
     def delete_from_date_forward(self, date):
-        bookings = self.booking_set.filter(start__gte=date)
-        bookings.delete()
+        # Do not delete past bookings, and only end ongoing bookings
+        date.replace(hour=0, minute=0, second=0, microsecond=0)
+        for b in self.booking_set.filter(start__gte=date):
+            b.unbook()
 
 
 class Booking(models.Model):
@@ -222,7 +232,7 @@ class Booking(models.Model):
         )
 
     def __str__(self):
-        return "{}, {}".format(self.comment, self.start.strftime("%Y-%m-%d %H:%M"))
+        return f"{self.start.strftime('%Y-%m-%d %H:%M')}: {self.comment}"
 
     '''
     Check if a certain user can unbook this booking. Unbookable if the user
@@ -233,11 +243,19 @@ class Booking(models.Model):
      - the booking has ended.
     '''
     def is_unbookable_by_user(self, user):
-        if self.end < self.start:
-            return False, _("Bookings in the past may not be unbooked")
-        if self.bookable.is_user_admin(user) or user == self.user or self.booking_group in user.groups.all():
+        if self.end <= timezone.now():
+            return False, UNBOOK_WARNING_IN_PAST
+        if self.bookable.is_user_admin(user):
             return True, ''
-        return False, _("Only the user or group that made the booking may unbook it")
+        if user != self.user and self.booking_group not in user.groups.all():
+            return False, UNBOOK_WARNING_NOT_OWNER
+        if self.repeatgroup:
+            return False, UNBOOK_WARNING_REPEATING
+        return True, ''
+
+    def is_ongoing(self):
+        now = timezone.now()
+        return self.start < now and self.end > now
 
     def get_booker_groups(self):
         allowed_groups = []
@@ -248,18 +266,30 @@ class Booking(models.Model):
 
         return allowed_groups
 
-    def get_overlapping_bookings(self):
-        overlapping = Booking.objects.filter(
+    def get_overlapping_bookings_q(self):
+        q = Booking.objects.filter(
             bookable=self.bookable,
             start__lt=self.end,
-            end__gt=self.start
-            )
-        return list(overlapping)
+            end__gt=self.start,
+        )
+        if self.pk:
+            q = q.exclude(pk=self.pk)
+        return q
+
+    def get_repeatgroup_index(self):
+        if not self.repeatgroup:
+            return 0
+        return self.repeatgroup.booking_set.filter(start__lte=self.start).count()
 
     def clean(self):
         # Check that end is not earlier than start
         if self.end <= self.start:
-            raise ValidationError(_("Booking cannot end before it begins"))
+            raise ValidationError(gettext("Booking cannot end before it begins"))
+
+        # XXX: Would also make sense to check that the booking does not start in the past here, but there would be a few complications with that:
+        #  - If a user wants to start a booking right now, this check would always execute a bit later than the set start time, which would make it always fail
+        #  - The admin interface also executes clean() when creating new objects, and for testing/debugging purposes it is nice to be able to create past bookings
+        #  - Updating past or ongoing bookings through the admin interface (or through the public UI at some point?) would become impossible too
 
         # Check that the booking's start and end times match a defined booking slot if bookable has slots
         timeslots = self.bookable.get_time_slots()
@@ -272,8 +302,25 @@ class Booking(models.Model):
                     valid_slot_found = True
                     break
             if not valid_slot_found:
-                raise ValidationError(_("Booking end time is not according to the predefined booking timeslots."))
+                raise ValidationError(gettext("Booking end time is not according to the predefined booking timeslots."))
 
         # Check that booking group is allowed
         if self.booking_group and self.booking_group not in self.get_booker_groups():
-            raise ValidationError(_("Group booking is not allowed with the provided user and group"))
+            raise ValidationError(gettext("Group booking is not allowed with the provided user and group"))
+
+        overlaps_q = self.get_overlapping_bookings_q()
+        if overlaps_q.exists():
+            raise ValidationError(gettext("Booking overlaps with existing booking(s)") + f": [{', '.join([str(b) for b in overlaps_q])}]")
+
+    def unbook(self):
+        """
+        Unbook this booking. If the booking is ongoing, end it immediately, and if the booking is in the future, delete it. Do not touch past bookings.
+        """
+        now = timezone.now()
+        if self.end <= now:
+            return
+        if self.start < now:
+            self.end = now
+            self.save()
+        else:
+            self.delete()

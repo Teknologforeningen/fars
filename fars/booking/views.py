@@ -6,6 +6,7 @@ from django.views import View
 from booking.models import Booking, Bookable
 from booking.forms import RepeatingBookingForm
 from booking.metadata_forms import get_form_class
+from booking.gcal import create_gcal_url
 import dateutil.parser
 import json
 
@@ -97,6 +98,8 @@ class BookView(View):
         self.context['bookable'] = bookable_obj
         self.context['user'] = request.user
         self.context['is_admin'] = bookable_obj.is_user_admin(request.user)
+        self.context['repeatform'] = None
+        self.context['repeatform_show'] = False
 
         return super().dispatch(request, bookable)
 
@@ -112,8 +115,9 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(instance=booking)
         self.context['form'] = form
 
+        # Add form for repeating bookings for admins of the bookable object
         if self.context['is_admin']:
-            self.context['repeatform'] = RepeatingBookingForm()
+            self.context['repeatform'] = RepeatingBookingForm(booking)
 
         return render(request, self.template, context=self.context)
 
@@ -124,27 +128,26 @@ class BookView(View):
         form = get_form_class(booking.bookable.metadata_form)(request.POST, instance=booking)
         self.context['form'] = form
 
-        if form.is_valid():
-            booking = form.instance
-            booking.metadata = json.dumps(form.get_cleaned_metadata())
-
-            if request.POST.get('repeat') and self.context['is_admin']:
-                repeatdata = {
-                    'frequency': request.POST.get('frequency'),
-                    'repeat_until': request.POST.get('repeat_until')
-                }
-                repeat_form = RepeatingBookingForm(repeatdata)
-                if repeat_form.is_valid():
-                    # Creates repeating bookings as specified, adding all created bookings to group
-                    skipped_bookings = repeat_form.save_repeating_booking_group(booking)
-                    return JsonResponse({'skipped_bookings': skipped_bookings})
-                else:
-                    return render(request, self.template, context=self.context, status=400)
-
-            else:
-                form.save()
-        else:
+        if not form.is_valid():
             return render(request, self.template, context=self.context, status=400)
+
+        booking = form.instance
+        booking.metadata = json.dumps(form.get_cleaned_metadata())
+
+        # Allow only bookable admins to create repeating bookings
+        if request.POST.get('repeat') and self.context['is_admin']:
+            self.context['repeatform_show'] = True
+            repeat_form = self.context['repeatform'] = RepeatingBookingForm(booking, request.POST)
+
+            if not repeat_form.is_valid():
+                return render(request, self.template, context=self.context, status=400)
+
+            # Creates repeating bookings as specified, adding all created bookings to group
+            created, skipped = repeat_form.save_repeating_booking_group(booking)
+            return JsonResponse({'created_bookings': created, 'skipped_bookings': skipped})
+
+        else:
+            form.save()
 
         booking.bookable.notify_external_services()
 
@@ -166,39 +169,38 @@ class BookingView(View):
 
         self.context['url']        = request.path
         self.context['user']       = request.user
+        self.context['is_owner']   = request.user == booking.user
         self.context['is_admin']   = booking.bookable.is_user_admin(request.user)
         self.context['booking']    = booking
         self.context['unbookable'] = is_unbookable
+        self.context['is_ongoing'] = booking.is_ongoing()
         self.context['warning']    = warning
+        self.context['gcal']       = create_gcal_url(booking)
 
         return super().dispatch(request, booking_id)
 
     def delete(self, request, _):
+        if not self.context['unbookable']:
+            return render(request, self.template, self.context)
+
+        # There are 3 different levels of removal of a repeating booking:
+        #  0 : Delete only this booking
+        #  1 : Delete this booking and bookings after this one
+        #  2 : Delete all bookings from this series of booking (past and future)
+        removal_level = int(request.GET.get('repeat') or 0)
         booking = self.context['booking']
-        if self.context['is_admin'] or self.context['unbookable']:
-            now = timezone.now()
-            removal_level = int(request.GET.get('repeat') or 0)
-            if self.context['is_admin'] and booking.repeatgroup and removal_level >= 1:
-                # Removal of a repeating booking. There are 3 different levels of removal
-                # of a repeating booking:
-                # 0 : Delete only this booking
-                # 1 : Delete this booking and bookings after this one
-                # 2 : Delete all bookings from this series of booking (past and future)
-                if removal_level == 1:
-                    booking.repeatgroup.delete_from_date_forward(booking.start)
-                elif removal_level == 2:
-                    booking.repeatgroup.delete()
 
-            elif booking.start < now and booking.end > now:
-                # Booking is ongoing, end it now
-                booking.end = now
-                booking.save()
-            else:
-                booking.delete()
-            self.context['booking'].bookable.notify_external_services()
-            return HttpResponse()
+        # Only admins can unbook multiple repeating bookings at once
+        if removal_level > 0 and booking.repeatgroup and self.context['is_admin']:
+            if removal_level == 1:
+                booking.repeatgroup.delete_from_date_forward(booking.start)
+            elif removal_level == 2:
+                booking.repeatgroup.delete_from_date_forward(timezone.now())
+        else:
+            booking.unbook()
 
-        return render(request, self.template, self.context)
+        booking.bookable.notify_external_services()
+        return HttpResponse()
 
     def get(self, request, _):
         return render(request, self.template, self.context)
