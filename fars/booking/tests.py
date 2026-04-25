@@ -1,6 +1,7 @@
+from django.utils import timezone
 from api.tests import BaseAPITest
 from rest_framework import status
-from booking.models import Bookable, Booking, UNBOOK_WARNING_IN_PAST, UNBOOK_WARNING_NOT_OWNER, UNBOOK_WARNING_REPEATING
+from booking.models import Bookable, Booking, RepeatedBookingGroup, UNBOOK_WARNING_IN_PAST, UNBOOK_WARNING_NOT_OWNER, UNBOOK_WARNING_REPEATING
 
 class HomeViewTest(BaseAPITest):
     def get_bookables(self):
@@ -323,3 +324,77 @@ class BookingViewTest(BaseAPITest):
             self.assertContains(response, UNBOOK_WARNING_IN_PAST, 0)
             self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
             self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
+
+    def test_ongoing_booking(self):
+        t1 = timezone.now() - timezone.timedelta(minutes=30)
+        t2 = t1 + timezone.timedelta(minutes=60)
+        b = Booking.objects.create(bookable=self.bookable, user=self.user1, start=t1, end=t2, booking_group=self.common_group)
+
+        self.login_user()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook', 0)
+        self.assertContains(response, 'End\n', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 0)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
+
+        self.login_superuser()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook', 0)
+        self.assertContains(response, 'End (admin)', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 0)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
+
+    def test_past_booking(self):
+        t1 = timezone.now() - timezone.timedelta(minutes=90)
+        t2 = t1 + timezone.timedelta(minutes=60)
+        b = Booking.objects.create(bookable=self.bookable, user=self.user1, start=t1, end=t2, booking_group=self.common_group)
+
+        self.login_user()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook\n', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 1)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
+
+        self.login_superuser()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook (admin)', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 1)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
+
+    def test_repeating_booking(self):
+        t1 = timezone.now() + timezone.timedelta(minutes=30)
+        t2 = t1 + timezone.timedelta(minutes=60)
+        repeatgroup = RepeatedBookingGroup.objects.create()
+        b = Booking.objects.create(bookable=self.bookable, user=self.user1, start=t1, end=t2, repeatgroup=repeatgroup)
+
+        self.login_user()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook\n', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 0)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 2)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
+
+        self.login_user_part_of_restriction_group()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook\n', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 0)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 2)
+
+        self.login_user_part_of_admin_group()
+        response = self.go_to_booking_view(b)
+        self.assert_response(response)
+        self.assertContains(response, 'Unbook (admin)', 1)
+        self.assertContains(response, UNBOOK_WARNING_IN_PAST, 0)
+        self.assertContains(response, UNBOOK_WARNING_REPEATING, 0)
+        self.assertContains(response, UNBOOK_WARNING_NOT_OWNER, 0)
