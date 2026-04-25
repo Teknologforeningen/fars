@@ -117,7 +117,7 @@ class RepeatingBookingForm(forms.Form):
     def clean_repeat_until(self):
         repeat_until = self.cleaned_data['repeat_until']
         if repeat_until < self.booking.start.date():
-            raise forms.ValidationError(_('Repeat until date cannot be before start date of the booking'))
+            raise forms.ValidationError(_('Repetition end date cannot be before start date of the booking'))
         return repeat_until
 
     def save_repeating_booking_group(self, booking: Booking):
