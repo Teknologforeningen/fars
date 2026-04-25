@@ -12,7 +12,7 @@ def create_gcal_url(booking: Booking):
     if booking.booking_group:
         details += f" [{booking.booking_group.name}]"
     if FARS_BASE_URL:
-        details += f" {_('at')} {FARS_BASE_URL}/booking/{booking.bookable.id_str}/{booking.start.strftime('%Y-%m-%d')}"
+        details += " " + _('at') + f" {FARS_BASE_URL}/booking/{booking.bookable.id_str}/{booking.start.strftime('%Y-%m-%d')}"
 
     # Available parameters: https://github.com/InteractionDesignFoundation/add-event-to-calendar-docs/blob/main/services/google.md
     params = {
