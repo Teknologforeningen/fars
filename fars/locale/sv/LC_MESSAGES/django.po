@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-25 03:10+0300\n"
+"POT-Creation-Date: 2026-04-25 04:13+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,6 +81,10 @@ msgstr "Repetera tills"
 #: booking/forms.py:120
 msgid "Repetition end date cannot be before start date of the booking"
 msgstr "Repetitionens slutdatum kan inte vara före bokningens början"
+
+#: booking/gcal.py:15
+msgid "at"
+msgstr "vid"
 
 #: booking/metadata_forms.py:41
 msgid "Disable sauna heating"
@@ -373,7 +377,7 @@ msgstr "Avsluta"
 
 #: booking/templates/booking.html:121
 msgid "Unbook (admin)"
-msgstr "Avoka (admin)"
+msgstr "Avboka (admin)"
 
 #: booking/templates/booking.html:123
 msgid "Unbook"
