@@ -15,7 +15,7 @@ def redirect_to_login(request):
 
 class HomeView(View):
     def get(self, request):
-        return render(request, 'base.html', {
+        return render(request, 'home.html', {
             'bookables': Bookable.get_readable_bookables_for_user(request.user),
             'user': request.user,
         })

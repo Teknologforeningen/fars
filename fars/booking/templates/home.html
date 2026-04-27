@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block main %}
+<div class="container">
+  <div class="row justify-content-center">
+    {% for bookable in bookables %}
+    <div class="text-center" style="margin:1em 1em;">
+      <a class="btn btn-light btn-outline-secondary" href="/booking/{{bookable.id_str}}">
+        <img src="{% static "img/"|add:bookable.icon %}" alt="Bookable Icon" width="150" height="120" style="margin:1em;"></img>
+        <p>{{bookable.name}}</p>
+      </a>
+    </div>
+    {% empty %}
+      {% if user.is_authenticated %}
+        {% trans "There are no bookables, add some through the admin interface." %}
+      {% else %}
+        {% trans "There are no public bookables, more bookables may be visible after logging in." %}
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
