@@ -14,3 +14,8 @@
 #toolbar-btn {
   vertical-align: inherit;
 }
+
+nav .separator {
+  margin-right:  1rem;
+  font-size: 1.5rem;
+}
