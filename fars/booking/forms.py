@@ -101,8 +101,18 @@ class BookingForm(forms.ModelForm):
 
 
 class CustomLoginForm(AuthenticationForm):
-    username = forms.CharField(widget=TextInput(attrs={'class':'validate offset-2 col-8','placeholder': 'Username'}))
-    password = forms.CharField(widget=PasswordInput(attrs={'class':'offset-2 col-8','placeholder':'Password'}))
+    username = forms.CharField(
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Username',
+        })
+    )
+    password = forms.CharField(
+        widget=PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder':'Password',
+        })
+    )
 
 
 class RepeatingBookingForm(forms.Form):

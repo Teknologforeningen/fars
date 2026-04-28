@@ -14,18 +14,18 @@ body {
 {% endblock %}
 
 {% block main %}
-  <div class="row h-100 w-100">
-    <div class="offset-3 col-6 my-auto py-5 border rounded bg-light">
+  <div class="row h-100">
+    <div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 my-auto py-5 border rounded bg-light">
       <h1 class="d-flex justify-content-center offset-2 col-8 pb-3">FARS</h1>
       {% if form.errors %}
-        <p class="offset-2 col-8 text-danger">{% trans "Your username and password didn't match. Please try again." %}</p>
+        <p class="col-10 offset-1 text-danger">{% trans "Your username and password didn't match. Please try again." %}</p>
       {% endif %}
 
       <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         <div class="form-group">{{ form.username }}</div>
         <div class="form-group">{{ form.password }}</div>
-        <input class="form-group offset-2 col-8 btn btn-success" type="submit" value="Login">
+        <input class="form-group col-8 offset-2 btn btn-success" type="submit" value="Login">
         <input type="hidden" name="next" value="{{ next }}">
       </form>
     </div>
