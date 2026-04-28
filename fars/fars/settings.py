@@ -39,6 +39,8 @@ if env('IS_BEHIND_PROXY', False):
 
 FARS_BASE_URL = env('FARS_BASE_URL')
 
+FARS_FOOTER = env('FARS_FOOTER', 'FARS – Fantastiskt Användbara ReservationsSystemet')
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -78,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'fars.context_processors.fars_settings',
             ],
         },
     },
