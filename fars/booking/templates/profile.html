@@ -14,7 +14,7 @@
 
 {% block main %}
 <div class="row col-10 offset-1">
-  <div class="col-8">
+  <div class="col-lg-7">
     <div class="row text-center">
       <h3 class="col-12">{% trans "Your Bookings" %}</h3>
     </div>
@@ -63,7 +63,7 @@
       <h5 class="col-12">{% trans "Upcoming bookings" %}<hr></h5>
       {% for b in future_bookings %}
       <div class="col-10 offset-1 profile-event text-center">
-        <div class="row">
+        <div class="row align-items-center">
           <div class="col-6 font-weight-bold">
               {% trans "Bookable:" %}
           </div>
@@ -71,7 +71,7 @@
             <a href="/booking/{{b.bookable.id_str}}">{{ b.bookable.name }}</a>
           </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-6 font-weight-bold">
                 {% trans "Start:" %}
             </div>
@@ -79,7 +79,7 @@
                 {{ b.start }}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-6 font-weight-bold">
                 {% trans "End:" %}
             </div>
@@ -87,7 +87,7 @@
                 {{ b.end }}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-6 font-weight-bold">
                 {% trans "Comment:" %}
             </div>
@@ -99,16 +99,16 @@
       {% endfor %}
     </div>
   </div>
-  <div class="col-4">
+  <div class="col-lg-5">
     <div class="row text-center">
       <h3 class="col-12 mb-3">{% trans "Statistics" %}</h3>
       <div class="col-10 offset-1">
         {% for key,value in statistics.items %}
-          <div class="row">
-            <h5 class="col-7 font-weight-bold">
+          <div class="row align-items-center">
+            <dev class="col-7 font-weight-bold text-left">
                 {{ key }}
-            </h5>
-            <div class="col-5">
+            </dev>
+            <div class="col-5 text-left">
                 {{ value }}
             </div>
           </div>
