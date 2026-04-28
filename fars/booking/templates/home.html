@@ -6,9 +6,9 @@
 <div class="container">
   <div class="row justify-content-center">
     {% for bookable in bookables %}
-    <div class="text-center" style="margin:1em 1em;">
+    <div class="text-center m-3">
       <a class="btn btn-light btn-outline-secondary" href="/booking/{{bookable.id_str}}">
-        <img src="{% static "img/"|add:bookable.icon %}" alt="Bookable Icon" width="150" height="120" style="margin:1em;"></img>
+        <img src="{% static "img/"|add:bookable.icon %}" alt="Bookable Icon" width="150" height="120" class="m-3"></img>
         <p>{{bookable.name}}</p>
       </a>
     </div>

@@ -12,7 +12,6 @@
 {% endblock %}
 
 {% block body %}
-  <link rel="stylesheet" href="{% static 'css/book.css' %}">
   <form id="bookform" data-url="{{ url }}">
     {% csrf_token %}
     {% bootstrap_form_errors form %}
@@ -35,19 +34,17 @@
   </form>
 
   {% if repeatform %}
-    <div id="toggle-wrapper">
-      <button
-        id="repeat-toggle"
-        class="btn btn-info"
-        type="button"
-        data-toggle="collapse"
-        data-target="#repeat-form-wrapper"
-        data-on="{% trans 'Event is repeating' %}"
-        data-off="{% trans 'Make event repeating' %}"
-        aria-expanded="{% if repeatform_show %}true{% else %}false{% endif %}"
-        aria-controls="repeat-form-wrapper"
-      ></button>
-    </div>
+    <button
+      id="repeat-toggle"
+      class="btn btn-info mb-3"
+      type="button"
+      data-toggle="collapse"
+      data-target="#repeat-form-wrapper"
+      data-on="{% trans 'Event is repeating' %}"
+      data-off="{% trans 'Make event repeating' %}"
+      aria-expanded="{% if repeatform_show %}true{% else %}false{% endif %}"
+      aria-controls="repeat-form-wrapper"
+    ></button>
     <div id="repeat-form-wrapper" class="collapse {% if repeatform_show %}show{% endif %}">
       <form id="repeatform">
         {% csrf_token %}

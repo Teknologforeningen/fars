@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
+
 {% block css %}
-{% load static %}
-<link rel="stylesheet" href='{% static "css/profile.css" %}' />
+<style>
+.profile-event {
+  border-radius: 10px;
+  border: solid 1px gray;
+  margin-bottom: 20px;
+  padding: 5px;
+}
+</style>
 {% endblock %}
 
 {% block main %}
@@ -94,7 +101,7 @@
   </div>
   <div class="col-4">
     <div class="row text-center">
-      <h3 class="col-12" style="margin-bottom:20px;">{% trans "Statistics" %}</h3>
+      <h3 class="col-12 mb-3">{% trans "Statistics" %}</h3>
       <div class="col-10 offset-1">
         {% for key,value in statistics.items %}
           <div class="row">

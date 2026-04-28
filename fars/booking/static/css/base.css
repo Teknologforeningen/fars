@@ -7,15 +7,15 @@
 	height: calc(100vh - 80px);
 }
 
-#toolbar-user-name {
-  padding-right: .7rem;
-}
-
-#toolbar-btn {
-  vertical-align: inherit;
+nav {
+  background-color: #eee;
 }
 
 nav .separator {
-  margin-right:  1rem;
+  margin-right: 1rem;
   font-size: 1.5rem;
+}
+
+nav .btn {
+  vertical-align: inherit;
 }

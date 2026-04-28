@@ -25,7 +25,7 @@
 <body>
   {% block navbar %}
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
+    <nav class="navbar navbar-expand-md navbar-light justify-content-between mb-3">
       <div>
         <a href="{% url 'home' %}" class="navbar-brand">FARS</a>
 
@@ -38,8 +38,8 @@
       <!-- If logged in, show buttons for profile and logout -->
       {% if user.is_authenticated %}
         <span class="nav-item">
-          <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
-          <a class="btn btn-outline-danger" id="toolbar-btn" href="{% url 'logout' %}">{% trans "Logout" %}</a>
+          <span class="navbar-text mr-1"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
+          <a class="btn btn-outline-danger" href="{% url 'logout' %}">{% trans "Logout" %}</a>
         </span>
 
       <!-- If not logged in, show form for logging in -->
