@@ -59,7 +59,17 @@
     </nav>
   {% endblock %}
 
-  {% block main %}
+  <main>
+    {% block main %}
+    {% endblock %}
+  </main>
+
+  {% block footer %}
+    {% if FARS_FOOTER %}
+      <footer class="text-center">
+        {{ FARS_FOOTER|safe }}
+      </footer>
+    {% endif %}
   {% endblock %}
 
   <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
