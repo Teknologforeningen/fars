@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-25 04:13+0300\n"
+"POT-Creation-Date: 2026-05-04 17:19+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,15 +70,15 @@ msgstr "{} kan inte bokas mer än {} dagar i förväg"
 msgid "{} may not be booked for longer than {} hours"
 msgstr "{} kan inte bokas för längre än {} timmar"
 
-#: booking/forms.py:109
+#: booking/forms.py:119
 msgid "Frequency of repetitions (in days)"
 msgstr "Repetitionsfrekvens (dagar)"
 
-#: booking/forms.py:110
+#: booking/forms.py:120
 msgid "Repeat until"
 msgstr "Repetera tills"
 
-#: booking/forms.py:120
+#: booking/forms.py:130
 msgid "Repetition end date cannot be before start date of the booking"
 msgstr "Repetitionens slutdatum kan inte vara före bokningens början"
 
@@ -258,49 +258,37 @@ msgstr "Gruppbokning är inte tillåten med den angivna användaren och gruppen"
 msgid "Booking overlaps with existing booking(s)"
 msgstr "Bokningen överlappar med existerande bokningar"
 
-#: booking/templates/base.html:40
+#: booking/templates/base.html:42
 msgid "Logout"
 msgstr "Logga ut"
 
-#: booking/templates/base.html:53
-#: booking/templates/modals/forbidden_login.html:10
+#: booking/templates/base.html:55
+#: booking/templates/modals/forbidden_login.html:15
 msgid "Login"
 msgstr "Logga in"
-
-#: booking/templates/base.html:73
-msgid "There are no bookables, add some through the admin interface."
-msgstr "Det finns inga bokningsobjekt, skapa dem via admin interfacen"
-
-#: booking/templates/base.html:75
-msgid ""
-"There are no public bookables, more bookables may be visible after logging "
-"in."
-msgstr ""
-"Det finns inga allmänna bokningsobjekt, fler objekt kan vara synliga efter "
-"inloggning."
 
 #: booking/templates/book.html:8 booking/templates/book.html:10
 #, python-format
 msgid "Booking <strong>%(bookable)s</strong> for "
 msgstr "Bokar <strong>%(bookable)s</strong> för "
 
-#: booking/templates/book.html:24
+#: booking/templates/book.html:23
 msgid "Now"
 msgstr "Nu"
 
-#: booking/templates/book.html:45
+#: booking/templates/book.html:43
 msgid "Event is repeating"
 msgstr "Bokningen repeteras"
 
-#: booking/templates/book.html:46
+#: booking/templates/book.html:44
 msgid "Make event repeating"
 msgstr "Gör bokningen repeterande"
 
-#: booking/templates/book.html:57
+#: booking/templates/book.html:54
 msgid "Frequency of repetition in days"
 msgstr "Repetitionsfrekvens i dagar"
 
-#: booking/templates/book.html:71
+#: booking/templates/book.html:68
 msgid "Submit"
 msgstr "Boka"
 
@@ -316,18 +304,18 @@ msgstr "Bokad av:"
 msgid "(you)"
 msgstr "(du)"
 
-#: booking/templates/booking.html:27 booking/templates/profile.html:29
-#: booking/templates/profile.html:69
+#: booking/templates/booking.html:27 booking/templates/profile.html:36
+#: booking/templates/profile.html:76
 msgid "Start:"
 msgstr "Start:"
 
-#: booking/templates/booking.html:35 booking/templates/profile.html:37
-#: booking/templates/profile.html:77
+#: booking/templates/booking.html:35 booking/templates/profile.html:44
+#: booking/templates/profile.html:84
 msgid "End:"
 msgstr "Slut:"
 
-#: booking/templates/booking.html:43 booking/templates/profile.html:45
-#: booking/templates/profile.html:85
+#: booking/templates/booking.html:43 booking/templates/profile.html:52
+#: booking/templates/profile.html:92
 msgid "Comment:"
 msgstr "Kommentar:"
 
@@ -388,20 +376,32 @@ msgstr "Avboka"
 msgid "Book %(bookable)s for %(date)s "
 msgstr "Boka %(bookable)s för %(date)s "
 
-#: booking/templates/login.html:18
+#: booking/templates/home.html:17
+msgid "There are no bookables, add some through the admin interface."
+msgstr "Det finns inga bokningsobjekt, skapa dem via admin interfacen."
+
+#: booking/templates/home.html:19
+msgid ""
+"There are no public bookables, more bookables may be visible after logging "
+"in."
+msgstr ""
+"Det finns inga allmänna bokningsobjekt, fler objekt kan vara synliga efter "
+"inloggning."
+
+#: booking/templates/login.html:21
 msgid "Your username and password didn't match. Please try again."
 msgstr "Ditt användarnamn eller lösenord är fel. Försök igen."
 
-#: booking/templates/modals/forbidden.html:4
-#: booking/templates/modals/forbidden_login.html:4
+#: booking/templates/modals/forbidden.html:5
+#: booking/templates/modals/forbidden_login.html:5
 msgid "Not logged in"
 msgstr "Ej inloggad"
 
-#: booking/templates/modals/forbidden.html:7
+#: booking/templates/modals/forbidden.html:10
 msgid "You are not allowed to perform this action."
 msgstr "Du har inte tillåtelse att utföra denna handling."
 
-#: booking/templates/modals/forbidden_login.html:7
+#: booking/templates/modals/forbidden_login.html:10
 msgid "You are not allowed to perform this action, try logging in."
 msgstr "Du har inte tillåtelse att utföra denna handling, försök logga in."
 
@@ -410,27 +410,27 @@ msgstr "Du har inte tillåtelse att utföra denna handling, försök logga in."
 msgid "Book %(bookable)s"
 msgstr "Boka %(bookable)s"
 
-#: booking/templates/profile.html:12
+#: booking/templates/profile.html:19
 msgid "Your Bookings"
 msgstr "Dina bokningar"
 
-#: booking/templates/profile.html:16
+#: booking/templates/profile.html:23
 msgid "Ongoing bookings"
 msgstr "Pågående bokningar"
 
-#: booking/templates/profile.html:21 booking/templates/profile.html:61
+#: booking/templates/profile.html:28 booking/templates/profile.html:68
 msgid "Bookable:"
 msgstr "Bokningsobjekt:"
 
-#: booking/templates/profile.html:56
+#: booking/templates/profile.html:63
 msgid "Upcoming bookings"
 msgstr "Kommande bokningar"
 
-#: booking/templates/profile.html:97
+#: booking/templates/profile.html:104
 msgid "Statistics"
 msgstr "Statistik"
 
-#: booking/templates/profile.html:109
+#: booking/templates/profile.html:116
 msgid "No data available"
 msgstr "Ingen data tillgänglig"
 
