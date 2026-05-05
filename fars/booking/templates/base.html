@@ -11,33 +11,35 @@
   <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-  <link href="//use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+  <link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.6/css/all.css">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   {% block css %}
   {% endblock %}
+
   {% block javascript %}
   {% endblock %}
+
 </head>
 <body>
   {% block navbar %}
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-md navbar-light justify-content-between" style="background-color: #eee; margin-bottom: 1em;">
-      <!-- TODO: Make navbar brand a block -->
-      <!-- BRAND -->
-      {% if date %} <!-- Day view -->
-        <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
-      {% elif bookable %}<!-- Month view -->
-        <a href="{% url 'home' %}" class="navbar-brand">{{ bookable.name }}</a>
-      {% else %}<!-- Other -->
+    <nav class="navbar navbar-expand-md navbar-light justify-content-between mb-3">
+      <div>
         <a href="{% url 'home' %}" class="navbar-brand">FARS</a>
-      {% endif %}
+
+        {% if bookable %}
+          <span class="separator">/</span>
+          <a href="{% url 'month' bookable=bookable.id_str %}" class="navbar-brand">{{ bookable.name }}</a>
+        {% endif %}
+      </div>
 
       <!-- If logged in, show buttons for profile and logout -->
       {% if user.is_authenticated %}
         <span class="nav-item">
-          <span class="navbar-text" id="toolbar-user-name"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
-          <a class="btn btn-outline-danger" id="toolbar-btn" href="{% url 'logout' %}">{% trans "Logout" %}</a>
+          <span class="navbar-text mr-1"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
+          <a class="btn btn-outline-danger" href="{% url 'logout' %}">{% trans "Logout" %}</a>
         </span>
 
       <!-- If not logged in, show form for logging in -->
@@ -56,28 +58,20 @@
       {% endif %}
     </nav>
   {% endblock %}
-  {% block calendar %}
 
-    <!-- BOOKABLES -->
-    <div class="container">
-      <div class="row justify-content-center">
-        {% for bookable in bookables %}
-        <div class="text-center" style="margin:1em 1em;">
-          <a class="btn btn-light btn-outline-secondary" href="/booking/{{bookable.id_str}}">
-            <img src="{% static "img/"|add:bookable.icon %}" alt="Bookable Icon" width="150" height="120" style="margin:1em;"></img>
-            <p>{{bookable.name}}</p>
-          </a>
-        </div>
-        {% empty %}
-          {% if user.is_authenticated %}
-            {% trans "There are no bookables, add some through the admin interface." %}
-          {% else %}
-            {% trans "There are no public bookables, more bookables may be visible after logging in." %}
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
+  <main>
+    {% block main %}
+    {% endblock %}
+  </main>
+
+  {% block footer %}
+    {% if FARS_FOOTER %}
+      <footer class="text-center">
+        {{ FARS_FOOTER|safe }}
+      </footer>
+    {% endif %}
   {% endblock %}
+
   <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>

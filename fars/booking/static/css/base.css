@@ -3,14 +3,35 @@
   font-size: 120%;
 }
 
-#calendar {
-	height: calc(100vh - 80px);
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-#toolbar-user-name {
-  padding-right: .7rem;
+nav {
+  background-color: #eee;
 }
 
-#toolbar-btn {
+nav .separator {
+  margin-right: 1rem;
+  font-size: 1.5rem;
+}
+
+nav .btn {
   vertical-align: inherit;
+}
+
+main, .calendar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+footer {
+  width: 100%;
+  padding: 0.25em 0;
+  background-color: #eee;
+  font-size: smaller;
 }

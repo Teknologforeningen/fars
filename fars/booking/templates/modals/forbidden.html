@@ -1,8 +1,12 @@
 {% extends "modalcontent.html" %}
 {% load i18n %}
+
 {% block title %}
 {% trans "Not logged in" %}
 {% endblock %}
+
 {% block body %}
-<div class="alert alert-warning">{% trans "You are not allowed to perform this action." %}</div>
+<div class="alert alert-warning">
+    {% trans "You are not allowed to perform this action." %}
+</div>
 {% endblock %}
