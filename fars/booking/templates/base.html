@@ -65,10 +65,18 @@
   </main>
 
   {% block footer %}
-    {% if FARS_FOOTER %}
-      <footer class="text-center">
-        {{ FARS_FOOTER|safe }}
-      </footer>
+    {% if user.is_authenticated %}
+      {% if FARS_FOOTER_PRIVATE %}
+        <footer class="text-center">
+          {{ FARS_FOOTER_PRIVATE|safe }}
+        </footer>
+      {% endif %}
+    {% else %}
+      {% if FARS_FOOTER_PUBLIC %}
+        <footer class="text-center">
+          {{ FARS_FOOTER_PUBLIC|safe }}
+        </footer>
+      {% endif %}
     {% endif %}
   {% endblock %}
 
