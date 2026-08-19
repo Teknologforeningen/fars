@@ -25,7 +25,7 @@
 <body>
   {% block navbar %}
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-md navbar-light justify-content-between mb-3">
+    <nav class="navbar {% if user.is_authenticated %}navbar-expand-md{% else %}navbar-expand-lg{% endif %} navbar-light justify-content-between mb-3">
       <div>
         <a href="{% url 'home' %}" class="navbar-brand">FARS</a>
 
@@ -35,27 +35,27 @@
         {% endif %}
       </div>
 
-      <!-- If logged in, show buttons for profile and logout -->
-      {% if user.is_authenticated %}
-        <span class="nav-item">
-          <a class="btn btn-success" href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a>
-          <a class="btn btn-outline-danger" href="{% url 'logout' %}">{% trans "Logout" %}</a>
-        </span>
-
-      <!-- If not logged in, show form for logging in -->
-      {% else %}
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapseContent" aria-controls="collapseContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapse-content" aria-controls="collapse-content" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div id="collapseContent" class="collapse navbar-collapse">
-          <form class="form-inline ml-auto my-3 my-md-0" method="post" action="{% url 'login' %}?next={{ request.build_absolute_uri }}">
+        <div id="collapse-content" class="collapse navbar-collapse justify-content-end">
+          <!-- If logged in, show buttons for profile and logout -->
+          {% if user.is_authenticated %}
+            <div class="navbar-nav mt-3 mt-md-0">
+              <a class="btn btn-outline-success mb-2 mb-md-0 mr-md-2" href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a>
+              <a class="btn btn-danger" href="{% url 'logout' %}">{% trans "Logout" %}</a>
+            </div>
+
+          <!-- If not logged in, show form for logging in -->
+          {% else %}
+          <form class="form-inline ml-auto my-3 my-lg-0" method="post" action="{% url 'login' %}?next={{ request.build_absolute_uri }}">
             {% csrf_token %}
             <input class="form-control mr-sm-2" id="id_username" name="username" type="text" required placeholder="Username" maxlength="254"/>
             <input class="form-control mr-sm-2" id="id_password" name="password" type="password" required placeholder="Password"/>
-            <button type="submit" class="btn btn-outline-success my-2 my-sm-0">{% trans "Login" %}</button>
+            <button type="submit" class="btn btn-success my-2 my-sm-0">{% trans "Login" %}</button>
           </form>
+          {% endif %}
         </div>
-      {% endif %}
     </nav>
   {% endblock %}
 
@@ -65,10 +65,18 @@
   </main>
 
   {% block footer %}
-    {% if FARS_FOOTER %}
-      <footer class="text-center">
-        {{ FARS_FOOTER|safe }}
-      </footer>
+    {% if user.is_authenticated %}
+      {% if FARS_FOOTER_PRIVATE %}
+        <footer class="text-center">
+          {{ FARS_FOOTER_PRIVATE|safe }}
+        </footer>
+      {% endif %}
+    {% else %}
+      {% if FARS_FOOTER_PUBLIC %}
+        <footer class="text-center">
+          {{ FARS_FOOTER_PUBLIC|safe }}
+        </footer>
+      {% endif %}
     {% endif %}
   {% endblock %}
 

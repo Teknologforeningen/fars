@@ -39,7 +39,8 @@ if env('IS_BEHIND_PROXY', False):
 
 FARS_BASE_URL = env('FARS_BASE_URL')
 
-FARS_FOOTER = env('FARS_FOOTER', 'FARS – Fantastiskt Användbara ReservationsSystemet')
+FARS_FOOTER_PUBLIC = env('FARS_FOOTER_PUBLIC')
+FARS_FOOTER_PRIVATE = env('FARS_FOOTER_PRIVATE', 'FARS – Fantastiskt Användbara ReservationsSystemet')
 
 # Application definition
 
