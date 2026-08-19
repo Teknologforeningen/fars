@@ -38,7 +38,7 @@
       <!-- If logged in, show buttons for profile and logout -->
       {% if user.is_authenticated %}
         <span class="nav-item">
-          <span class="navbar-text mr-1"><a href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a></span>
+          <a class="btn btn-success" href="{% url 'profile' %}">{% firstof user.get_full_name user.get_username %}</a>
           <a class="btn btn-outline-danger" href="{% url 'logout' %}">{% trans "Logout" %}</a>
         </span>
 
